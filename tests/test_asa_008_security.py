@@ -411,15 +411,13 @@ class ASA008TestCase(unittest.TestCase):
         self.assertIsInstance(self.audit.events[0], AuthorizationEvent)
 
     # Fail-closed error conditions
-    def test_authority_registry_error_is_not_an_allow(self):
+    def test_authority_registry_error_denies(self):
         self.authority.raise_error = True
-        with self.assertRaises(RuntimeError):
-            self.auth()
+        self.assert_deny(self.auth(), rc.UNKNOWN_AUTHORITY)
 
-    def test_audit_exception_is_not_an_allow(self):
+    def test_audit_exception_denies(self):
         self.audit.raise_error = True
-        with self.assertRaises(RuntimeError):
-            self.auth()
+        self.assert_deny(self.auth(), rc.AUDIT_UNAVAILABLE)
 
     def test_i1_decision_contract_allows_side_effect_only_on_allow(self):
         allow = self.auth()
