@@ -6,6 +6,8 @@ Flow:
 
 Invariants I1–I8. No cached ALLOW. No GitHub privilege inputs (I8).
 AuthorizationEvent never grants authority (I7).
+
+ASA-004.1: G-01 policy binding, G-02 closed-enum DENY, G-03 capability self-id.
 """
 
 from __future__ import annotations
@@ -30,7 +32,11 @@ from .types import (
     Capability,
     Decision,
     DecisionOutcome,
+    Operation,
     Policy,
+    ResourceKind,
+    ResourceSelectorExact,
+    ResourceSelectorStructured,
 )
 
 
@@ -147,8 +153,36 @@ def _validate_request_shape(request: AuthorizationRequest) -> Optional[str]:
         return rc.MALFORMED_REQUEST
     if request.operation is None:
         return rc.UNKNOWN_OPERATION
+    # G-02: closed Operation enum
+    if not isinstance(request.operation, Operation):
+        return rc.UNKNOWN_OPERATION
     if request.resource.resource_kind is None:
         return rc.UNKNOWN_RESOURCE_KIND
+    # G-02: closed ResourceKind enum
+    if not isinstance(request.resource.resource_kind, ResourceKind):
+        return rc.UNKNOWN_RESOURCE_KIND
+    return None
+
+
+def _validate_capability_enums(capability: Capability) -> Optional[str]:
+    """G-02: every capability.operations member and selector kinds ∈ closed enums."""
+    if not capability.operations:
+        return rc.INVALID_CAPABILITY
+    for op in capability.operations:
+        if not isinstance(op, Operation):
+            return rc.UNKNOWN_OPERATION
+    selector = capability.resource_selector
+    if isinstance(selector, ResourceSelectorExact):
+        if not selector.resource_ids:
+            return rc.INVALID_CAPABILITY
+    elif isinstance(selector, ResourceSelectorStructured):
+        if not selector.kinds:
+            return rc.INVALID_CAPABILITY
+        for kind in selector.kinds:
+            if not isinstance(kind, ResourceKind):
+                return rc.UNKNOWN_RESOURCE_KIND
+    else:
+        return rc.INVALID_CAPABILITY
     return None
 
 
@@ -175,10 +209,8 @@ def _policy_structurally_valid(policy: Policy, now: datetime) -> Optional[str]:
         return rc.POLICY_NOT_ACTIVE
     if not isinstance(policy.body, dict):
         return rc.INVALID_POLICY
-    # body may contain issuance and/or use; empty dict is invalid for use path
     if len(policy.body) == 0:
         return rc.INVALID_POLICY
-    # unknown keys beyond issuance/use are ignored at ASA-004 (no expansion)
     if policy.not_after is not None:
         na = policy.not_after
         if na.tzinfo is None:
@@ -222,7 +254,7 @@ def authorize(
             return _deny(request, rc.AUDIT_UNAVAILABLE, timestamp=ts)
         return decision
 
-    # 3. Validate Request shape
+    # 3. Validate Request shape (+ G-02 closed enums on request)
     err = _validate_request_shape(request)
     if err:
         decision = _deny(request, err, timestamp=ts)
@@ -255,6 +287,18 @@ def authorize(
             return _deny(request, rc.AUDIT_UNAVAILABLE, timestamp=ts)
         return decision
 
+    # G-03 — Capability self-ID binding
+    if capability.capability_id != request.capability_id:
+        decision = _deny(
+            request,
+            rc.INVALID_CAPABILITY,
+            capability_id=request.capability_id,
+            timestamp=ts,
+        )
+        if not _append_audit(audit_sink, decision):
+            return _deny(request, rc.AUDIT_UNAVAILABLE, timestamp=ts)
+        return decision
+
     if capability.principal_id != request.principal.principal_id:
         decision = _deny(
             request,
@@ -274,6 +318,22 @@ def authorize(
             request,
             rc.INVALID_CAPABILITY,
             capability_id=capability.capability_id,
+            timestamp=ts,
+        )
+        if not _append_audit(audit_sink, decision):
+            return _deny(request, rc.AUDIT_UNAVAILABLE, timestamp=ts)
+        return decision
+
+    # G-02 — capability operations + selector kinds closed enums
+    err = _validate_capability_enums(capability)
+    if err:
+        decision = _deny(
+            request,
+            err,
+            capability_id=capability.capability_id,
+            policy_id=capability.policy_id,
+            policy_version=capability.policy_version,
+            authority_id=capability.issued_under_authority,
             timestamp=ts,
         )
         if not _append_audit(audit_sink, decision):
@@ -385,6 +445,24 @@ def authorize(
             capability_id=capability.capability_id,
             policy_id=capability.policy_id,
             policy_version=capability.policy_version,
+            timestamp=ts,
+        )
+        if not _append_audit(audit_sink, decision):
+            return _deny(request, rc.AUDIT_UNAVAILABLE, timestamp=ts)
+        return decision
+
+    # G-01 — Capability → Policy binding
+    if (
+        policy.policy_id != capability.policy_id
+        or policy.version != capability.policy_version
+    ):
+        decision = _deny(
+            request,
+            rc.POLICY_BINDING_MISMATCH,
+            capability_id=capability.capability_id,
+            policy_id=capability.policy_id,
+            policy_version=capability.policy_version,
+            authority_id=capability.issued_under_authority,
             timestamp=ts,
         )
         if not _append_audit(audit_sink, decision):
