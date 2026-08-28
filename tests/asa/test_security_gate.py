@@ -3,8 +3,8 @@
 Deterministic in-memory port fakes only. No production stores, authenticators,
 policy language (ASA-006), issuance (ASA-005), or DSH.
 
-Run:
-  PYTHONPATH=src python -m unittest discover -s tests/asa -p 'test_*.py' -v
+Run from repository root:
+  PYTHONPATH=src:. python -m unittest discover -s tests/asa -p 'test_*.py' -v
 
 I1: Decision contract is asserted (side effects only when outcome==ALLOW).
 Harness cannot enforce arbitrary external callers.
@@ -35,13 +35,22 @@ from asa.types import (
     RevocationRecord,
 )
 
-from tests.asa.fakes import (
-    InMemoryAuditSink,
-    InMemoryAuthorityRegistry,
-    InMemoryCapabilityStore,
-    InMemoryPolicyStore,
-    InMemoryRevocationStore,
-)
+try:
+    from tests.asa.fakes import (
+        InMemoryAuditSink,
+        InMemoryAuthorityRegistry,
+        InMemoryCapabilityStore,
+        InMemoryPolicyStore,
+        InMemoryRevocationStore,
+    )
+except ImportError:  # pragma: no cover
+    from fakes import (  # type: ignore
+        InMemoryAuditSink,
+        InMemoryAuthorityRegistry,
+        InMemoryCapabilityStore,
+        InMemoryPolicyStore,
+        InMemoryRevocationStore,
+    )
 
 NOW = datetime(2026, 8, 28, 12, 0, 0, tzinfo=timezone.utc)
 AUTH_ID = "aces-authority-1"
@@ -112,7 +121,6 @@ class ASA008SecurityTests(unittest.TestCase):
         if reason is not None:
             self.assertEqual(decision.reason_code, reason)
 
-    # --- I2 Identity / Principal ---
     def test_i2_valid_identity_allows(self):
         self.assertEqual(self._auth().outcome, DecisionOutcome.ALLOW)
 
@@ -131,7 +139,6 @@ class ASA008SecurityTests(unittest.TestCase):
         prin = replace(self.principal, identity_id="other")
         self._deny(self._auth(self._request(principal=prin)), rc.PRINCIPAL_UNRESOLVED)
 
-    # --- I3 Scope ---
     def test_i3_exact_resource_match_allows(self):
         self.assertEqual(self._auth().outcome, DecisionOutcome.ALLOW)
 
@@ -166,12 +173,11 @@ class ASA008SecurityTests(unittest.TestCase):
             SimpleNamespace(regex=r"^res"),
             SimpleNamespace(cel="true"),
         ):
-            with self.subTest(selector=selector):
+            with self.subTest(selector=type(selector).__name__ + str(vars(selector))):
                 cap = replace(self.capability, resource_selector=selector)
                 self.cap_store = InMemoryCapabilityStore({"cap-1": cap})
                 self._deny(self._auth(), rc.INVALID_CAPABILITY)
 
-    # --- Closed enums ---
     def test_enum_invalid_operation_string_denies(self):
         self._deny(self._auth(self._request(operation="READ")), rc.UNKNOWN_OPERATION)
 
@@ -190,7 +196,6 @@ class ASA008SecurityTests(unittest.TestCase):
         self.cap_store = InMemoryCapabilityStore({"cap-1": cap})
         self._deny(self._auth(), rc.UNKNOWN_RESOURCE_KIND)
 
-    # --- Capability ---
     def test_capability_missing_denies(self):
         self.cap_store = InMemoryCapabilityStore({})
         self._deny(self._auth(), rc.INVALID_CAPABILITY)
@@ -205,7 +210,6 @@ class ASA008SecurityTests(unittest.TestCase):
         self._deny(self._auth(), rc.CAPABILITY_PRINCIPAL_MISMATCH)
 
     def test_capability_self_id_mismatch_denies(self):
-        # store returns record under key cap-1 but record id differs
         bad = replace(self.capability, capability_id="cap-OTHER")
         self.cap_store = InMemoryCapabilityStore({"cap-1": bad})
         self._deny(self._auth(), rc.INVALID_CAPABILITY)
@@ -219,7 +223,6 @@ class ASA008SecurityTests(unittest.TestCase):
         self.cap_store = InMemoryCapabilityStore({"cap-1": cap})
         self._deny(self._auth(), rc.INVALID_CAPABILITY)
 
-    # --- Expiration ---
     def test_expiration_before_not_before_denies(self):
         cap = replace(self.capability, not_before=NOW + timedelta(minutes=5))
         self.cap_store = InMemoryCapabilityStore({"cap-1": cap})
@@ -233,7 +236,6 @@ class ASA008SecurityTests(unittest.TestCase):
         self.cap_store = InMemoryCapabilityStore({"cap-1": cap})
         self._deny(self._auth(), rc.EXPIRED_CAPABILITY)
 
-    # --- Revocation ---
     def test_revocation_revoked_denies(self):
         rev = RevocationRecord(
             capability_id="cap-1",
@@ -267,7 +269,6 @@ class ASA008SecurityTests(unittest.TestCase):
         self.assertEqual(second.reason_code, rc.REVOKED_CAPABILITY)
         self.assertGreaterEqual(self.rev_store.get_calls, 1)
 
-    # --- Policy ---
     def test_policy_missing_denies(self):
         self.policy_store = InMemoryPolicyStore({})
         self._deny(self._auth(), rc.MISSING_POLICY)
@@ -294,15 +295,12 @@ class ASA008SecurityTests(unittest.TestCase):
         self._deny(self._auth(), rc.INVALID_POLICY)
 
     def test_policy_authority_unknown_denies(self):
-        self.authority = InMemoryAuthorityRegistry({AUTH_ID})
-        # capability authority known; policy authority different and unknown
         pol = replace(self.policy, authority_id="unknown-pol-auth")
         self.policy_store = InMemoryPolicyStore({("policy-1", "v1"): pol})
         self._deny(self._auth(), rc.UNKNOWN_AUTHORITY)
 
     def test_policy_id_mismatch_denies(self):
         pol = replace(self.policy, policy_id="policy-OTHER")
-        # get still keyed by capability binding keys — inject wrong object
         self.policy_store = InMemoryPolicyStore({("policy-1", "v1"): pol})
         self._deny(self._auth(), rc.POLICY_BINDING_MISMATCH)
 
@@ -314,7 +312,6 @@ class ASA008SecurityTests(unittest.TestCase):
     def test_policy_binding_match_allows(self):
         self.assertEqual(self._auth().outcome, DecisionOutcome.ALLOW)
 
-    # --- Authority / I8 ---
     def test_authority_known_allows(self):
         self.assertEqual(self._auth().outcome, DecisionOutcome.ALLOW)
 
@@ -323,8 +320,6 @@ class ASA008SecurityTests(unittest.TestCase):
         self._deny(self._auth(), rc.UNKNOWN_AUTHORITY)
 
     def test_github_privilege_fields_do_not_affect_decision(self):
-        """GitHub admin/maintain/push/triage MUST NOT participate (I8)."""
-
         class CapShim:
             pass
 
@@ -352,7 +347,6 @@ class ASA008SecurityTests(unittest.TestCase):
         self.assertEqual(first.outcome, DecisionOutcome.ALLOW)
         self.assertEqual(second.outcome, DecisionOutcome.ALLOW)
 
-    # --- Audit / I7 ---
     def test_audit_success_preserves_allow(self):
         d = self._auth()
         self.assertEqual(d.outcome, DecisionOutcome.ALLOW)
@@ -376,12 +370,10 @@ class ASA008SecurityTests(unittest.TestCase):
         self.assertIsInstance(self.audit.events[0], AuthorizationEvent)
         self.assertEqual(self.audit.events[0].decision, DecisionOutcome.DENY)
 
-    # --- I1 Decision contract ---
     def test_i1_side_effect_contract_on_decision(self):
         allow = self._auth()
         self.assertEqual(allow.outcome, DecisionOutcome.ALLOW)
-        may_side_effect = allow.outcome == DecisionOutcome.ALLOW
-        self.assertTrue(may_side_effect)
+        self.assertTrue(allow.outcome == DecisionOutcome.ALLOW)
         rev = RevocationRecord(
             capability_id="cap-1",
             revoked_at=NOW,
