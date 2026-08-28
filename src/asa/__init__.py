@@ -4,7 +4,7 @@ Normative source: spec/asa/v0/data-model.md (ASA-003.2).
 GitHub/Grok administrative privilege is never an input to authorization (I8).
 """
 
-from asa.authorize import authorize
-from asa.types import DecisionOutcome
+from .authorize import authorize
+from .types import DecisionOutcome
 
 __all__ = ["authorize", "DecisionOutcome"]
