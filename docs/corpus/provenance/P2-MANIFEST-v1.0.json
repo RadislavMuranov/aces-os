@@ -1,0 +1,49 @@
+{
+  "pass_id": "P2-CROSS-SOURCE-NORMALIZATION",
+  "version": "1.0-contracted",
+  "status": "OPEN — CONTRACT ACTIVE",
+  "authorized_at": "2026-08-13",
+  "contract": "knowledge/P2-EXECUTION-CONTRACT-v1.0.md",
+  "input": {
+    "upi": "UNIFIED-PROVENANCE-INDEX-v1.0",
+    "upi_sha256": "8d937da3d98e21c28cb23bef8f5d1efa3facca544a3bf7818b4635810e2376e6",
+    "confirmed_eligible": 134,
+    "review_visible_not_extractable": 12,
+    "excluded_negative_only": 9
+  },
+  "output_root": "knowledge/P2-NORMALIZED/",
+  "phase0_complete": true,
+  "phase0_artifacts": {
+    "candidate_ancestry": 25,
+    "cross_title_equivalence_candidates": 0,
+    "negative_provenance": 9
+  },
+  "prohibitions": [
+    "CANDIDATE → CANON",
+    "EQUIVALENCE → IDENTITY",
+    "CONFLICT → RESOLUTION",
+    "REVIEW → CONFIRMED",
+    "EXCLUDED → KNOWLEDGE"
+  ],
+  "allowed_relationship_statuses": [
+    "CANDIDATE",
+    "PROBABLE",
+    "STRONG_CANDIDATE",
+    "CONFLICT",
+    "UNRESOLVED"
+  ],
+  "canonical_objects": 0,
+  "canonical_claims": 0,
+  "next": [
+    "Entity / term / alias bootstrap from CONFIRMED content",
+    "Content-level candidate equivalence & ancestry scoring",
+    "Conflict candidate detection",
+    "Human gate on STRONG_CANDIDATE / CONFLICT"
+  ],
+  "gates_closed": [
+    "P4 Canonicalization",
+    "COM population",
+    "Final Canon"
+  ],
+  "updated": "2026-08-13T05:14:57Z"
+}
