@@ -1,0 +1,31 @@
+{
+  "verification_id": "2026-08-31_OFFLINE_ARCHIVE_VERIFICATION",
+  "date": "2026-08-31",
+  "status": "VERIFIED",
+  "archives": [
+    {
+      "corpus_id": "DEEPSEEK-CORPUS-001",
+      "received_filename": "deepseek_data-2026-08-11.zip",
+      "size_bytes": 17308413,
+      "sha256": "5927590b73f9308b89d57b8b70e68bc204ade1b40da17b516a3a812f3cf90e75",
+      "registry_match": true,
+      "contents_listing": ["user.json", "conversations.json"]
+    },
+    {
+      "corpus_id": "CHATGPT-CORPUS-001",
+      "received_filename": "cadf296cf9d3ac590b0c7aef468ace2225b45a0643a2d37a409fc724195f6ac2-2026-08-11-12-09-26-b5cf6ab12f7f413880f5ad3edb6e6e40.zip",
+      "size_bytes": 15463309,
+      "sha256": "42e8b11daf45934ecacb472ecef364d30e28767d0dc70e4176f7406571a07a79",
+      "registry_match": true,
+      "contents_listing": ["conversations.json", "chat.html", "export_manifest.json", "user.json", "user_settings.json", "*.dat", "other service JSON"]
+    }
+  ],
+  "invariants": [
+    "Originals never merged",
+    "Raw ZIP not committed to git",
+    "SHA-256 verified before content archaeology",
+    "Stage-0 status remains authoritative"
+  ],
+  "consequence": "Primary evidence available; E0.2 content-level archaeology unblocked",
+  "registry_ref": "docs/corpus/CORPUS-REGISTRY-v1.0.json"
+}
