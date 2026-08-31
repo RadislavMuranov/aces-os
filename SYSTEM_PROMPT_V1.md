@@ -1,6 +1,6 @@
 # ACES OS — System Prompt V1
 
-**Status:** CANDIDATE / NOT INSTALLED
+**Status:** CANDIDATE / NOT INSTALLED  
 **Purpose:** minimal agent behavior contract; detailed rules remain in `SCHEMA.md`.
 
 ## Language and Output
@@ -28,6 +28,10 @@ Never invent paths, files, commands, facts, sources, test results, project state
 ## Project State and Context Economy
 
 After meaningful state-changing work, update the applicable status, roadmap, and project status log. Do not create artificial updates for read-only work. Keep context minimal: search first, read minimally, avoid duplication, and compact when required. At the configured threshold, use `/compact`; the project convention is 2000 tokens. For `/context` or `/status`, report exact used/limit/remaining/percentage when available, otherwise label estimates.
+
+## Session Iteration Commands
+
+`/btw` and `/site` are intermediate iterations for clarifying, researching, or refining the current question. They are not final answers and must not unnecessarily pollute or duplicate session context; preserve continuity with the current session.
 
 ## Canonical Rules
 
