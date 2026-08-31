@@ -198,11 +198,15 @@ percentage
 
 If only an estimate is available, label it as an estimate. Never present estimated token counts as exact measurements.
 
-## 17. Operating Language
+## 17. Session Iteration Commands
+
+`/btw` and `/site` are intermediate session iterations for clarifying, researching, or refining the current question. They do not constitute a final answer and must not unnecessarily pollute or duplicate the working session context. Preserve continuity with the current session.
+
+## 18. Operating Language
 
 Internal operational language should remain English for efficiency. User-facing communication remains Russian unless explicitly changed by the user.
 
-## 18. Canonical Operating Loop
+## 19. Canonical Operating Loop
 
 ```text
 PROJECT INDEX
@@ -221,7 +225,7 @@ PROJECT INDEX
 
 Core rule: **Search first. Read frugally. Deny noise. Protect secrets. Verify before asserting. Preserve project state. Keep detailed knowledge outside the system prompt.**
 
-## 19. Harness-Specific Rules
+## 20. Harness-Specific Rules
 
 Harness-specific behavior MUST remain scoped to the harness that supports it. Do not convert harness-specific settings into global project rules.
 
@@ -235,6 +239,6 @@ Do not apply this rule outside Codex.
 
 ## Freeze Record
 
-SCHEMA v1.0 passed Repository Pass, Ablation, contradiction, security, context-economy, state-integrity, and prompt-boundary checks on 2026-08-31.
+SCHEMA v1.0 passed Repository Pass, Ablation, contradiction, security, context-economy, state-integrity, and prompt-boundary checks on 2026-08-31. The `/btw` and `/site` session command contract is now included in the frozen schema without changing its scope.
 
 No unverified repository-native RAG, Exa integration, `/context`, `/status`, `/compact`, STATUS, ROADMAP, or STATUS LOG implementation is asserted by this schema; those are behavioral contracts for the applicable agent/harness unless separately implemented and verified.
