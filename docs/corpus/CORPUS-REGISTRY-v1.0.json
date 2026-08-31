@@ -1,0 +1,68 @@
+{
+  "package": "ACES-CORPUS-REGISTRY-v1.0",
+  "frozen_at": "2026-08-31",
+  "repo": "RadislavMuranov/aces-os",
+  "path": "docs/corpus/",
+  "deepseek": {
+    "corpus_id": "DEEPSEEK-CORPUS-001",
+    "status": "READY_FOR_COMPILATION",
+    "platform": "DeepSeek",
+    "export": "deepseek_data-2026-08-11.zip",
+    "sha256": "5927590b73f9308b89d57b8b70e68bc204ade1b40da17b516a3a812f3cf90e75",
+    "total_conversations": 99,
+    "confirmed": 78,
+    "review": 12,
+    "excluded": 9,
+    "confirmed_aces_ids": ["DS-CHAT-0001", "DS-CHAT-0002", "DS-CHAT-0003", "DS-CHAT-0004", "DS-CHAT-0005", "DS-CHAT-0006", "DS-CHAT-0007", "DS-CHAT-0008", "DS-CHAT-0009", "DS-CHAT-0010", "DS-CHAT-0011", "DS-CHAT-0012", "DS-CHAT-0013", "DS-CHAT-0014", "DS-CHAT-0015", "DS-CHAT-0016", "DS-CHAT-0017", "DS-CHAT-0018", "DS-CHAT-0019", "DS-CHAT-0020", "DS-CHAT-0021", "DS-CHAT-0022", "DS-CHAT-0023", "DS-CHAT-0024", "DS-CHAT-0025", "DS-CHAT-0026", "DS-CHAT-0027", "DS-CHAT-0028", "DS-CHAT-0029", "DS-CHAT-0030", "DS-CHAT-0031", "DS-CHAT-0032", "DS-CHAT-0033", "DS-CHAT-0034", "DS-CHAT-0035", "DS-CHAT-0036", "DS-CHAT-0037", "DS-CHAT-0038", "DS-CHAT-0039", "DS-CHAT-0040", "DS-CHAT-0041", "DS-CHAT-0042", "DS-CHAT-0043", "DS-CHAT-0044", "DS-CHAT-0045", "DS-CHAT-0046", "DS-CHAT-0047", "DS-CHAT-0048", "DS-CHAT-0049", "DS-CHAT-0050", "DS-CHAT-0051", "DS-CHAT-0052", "DS-CHAT-0053", "DS-CHAT-0054", "DS-CHAT-0055", "DS-CHAT-0056", "DS-CHAT-0057", "DS-CHAT-0058", "DS-CHAT-0059", "DS-CHAT-0060", "DS-CHAT-0061", "DS-CHAT-0062", "DS-CHAT-0063", "DS-CHAT-0064", "DS-CHAT-0065", "DS-CHAT-0066", "DS-CHAT-0067", "DS-CHAT-0068", "DS-CHAT-0069", "DS-CHAT-0070", "DS-CHAT-0071", "DS-CHAT-0072", "DS-CHAT-0073", "DS-CHAT-0074", "DS-CHAT-0075", "DS-CHAT-0076", "DS-CHAT-0077", "DS-CHAT-0078"]
+  },
+  "chatgpt": {
+    "corpus_id": "CHATGPT-CORPUS-001",
+    "status": "READY_FOR_COMPILATION",
+    "platform": "OpenAI ChatGPT",
+    "export": "chatgpt-export-2026-08-11.zip",
+    "sha256": "42e8b11daf45934ecacb472ecef364d30e28767d0dc70e4176f7406571a07a79",
+    "total_conversations": 56,
+    "confirmed": 56,
+    "review": 0,
+    "excluded": 0,
+    "confirmed_aces_ids": ["CG-CHAT-0001", "CG-CHAT-0002", "CG-CHAT-0003", "CG-CHAT-0004", "CG-CHAT-0005", "CG-CHAT-0006", "CG-CHAT-0007", "CG-CHAT-0008", "CG-CHAT-0009", "CG-CHAT-0010", "CG-CHAT-0011", "CG-CHAT-0012", "CG-CHAT-0013", "CG-CHAT-0014", "CG-CHAT-0015", "CG-CHAT-0016", "CG-CHAT-0017", "CG-CHAT-0018", "CG-CHAT-0019", "CG-CHAT-0020", "CG-CHAT-0021", "CG-CHAT-0022", "CG-CHAT-0023", "CG-CHAT-0024", "CG-CHAT-0025", "CG-CHAT-0026", "CG-CHAT-0027", "CG-CHAT-0028", "CG-CHAT-0029", "CG-CHAT-0030", "CG-CHAT-0031", "CG-CHAT-0032", "CG-CHAT-0033", "CG-CHAT-0034", "CG-CHAT-0035", "CG-CHAT-0036", "CG-CHAT-0037", "CG-CHAT-0038", "CG-CHAT-0039", "CG-CHAT-0040", "CG-CHAT-0041", "CG-CHAT-0042", "CG-CHAT-0043", "CG-CHAT-0044", "CG-CHAT-0045", "CG-CHAT-0046", "CG-CHAT-0047", "CG-CHAT-0048", "CG-CHAT-0049", "CG-CHAT-0050", "CG-CHAT-0051", "CG-CHAT-0052", "CG-CHAT-0053", "CG-CHAT-0054", "CG-CHAT-0055", "CG-CHAT-0056"]
+  },
+  "upi": {
+    "index_id": "UNIFIED-PROVENANCE-INDEX-v1.0",
+    "version": "1.0",
+    "status": "READY",
+    "totals": {
+      "total_rows": 155,
+      "CONFIRMED": 134,
+      "REVIEW": 12,
+      "EXCLUDED": 9,
+      "DEEPSEEK": 99,
+      "CHATGPT": 56
+    },
+    "invariants": [
+      "UP-001 Dual provenance forever",
+      "UP-002 Originals never merged",
+      "UP-003 Stage0 status is authoritative",
+      "UP-004 Canonical count starts at 0",
+      "UP-005 Cross-source relations are candidates only",
+      "UP-006 No silent promotion of EXCLUDED or REVIEW",
+      "stage0_status cannot be raised/lowered without explicit authorization event"
+    ],
+    "rules": {
+      "CONFIRMED": "eligible for P2 claim/object extraction",
+      "REVIEW": "retained; P2 must not treat as confirmed knowledge",
+      "EXCLUDED": "negative provenance record; forbidden as knowledge source"
+    }
+  },
+  "bastion": {
+    "PROVEN_EDGE": 0,
+    "Evolution_Graph": "NOT_STARTED",
+    "Bastion_to_ACES": "LOCKED",
+    "Evidence": "SUPPORTED"
+  },
+  "notes": [
+    "CONFIRM ≠ Canon",
+    "Original ZIP archives not in git; SHA-256 verified offline",
+    "Full manifests under docs/corpus/manifests/"
+  ]
+}
