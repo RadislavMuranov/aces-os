@@ -1,6 +1,9 @@
 # ACES OS — System Prompt V1
 
-**Status:** CANDIDATE / NOT INSTALLED  
+**Status:** INSTALLED  
+**Installed as:** `AGENTS.md`  
+**Canonical operational contract:** `SCHEMA.md`  
+**Navigation index:** `PROJECT_INDEX.md`  
 **Purpose:** minimal agent behavior contract; detailed rules remain in `SCHEMA.md`.
 
 ## Language and Output
