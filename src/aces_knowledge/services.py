@@ -1,12 +1,20 @@
 """Knowledge promotion and Semantic Reality update services.
 
-AcceptedState → Knowledge is explicit.
+AcceptedState → Knowledge is explicit and must originate from a verified
+ExecutionResult (VerificationService path). A bare status token is insufficient.
 World Model has no path into Semantic Reality here.
 """
 
 from __future__ import annotations
 
 from typing import Dict, Optional
+
+from aces_execution_adapter.models import (
+    AcceptedStateStatus,
+    ExecutionResult,
+    ExecutionStatus,
+    VerificationStatus,
+)
 
 from aces_knowledge.models import (
     EpistemicError,
@@ -18,8 +26,6 @@ from aces_knowledge.models import (
     VerificationState,
     new_id,
 )
-
-ACCEPTED_STATE_ESTABLISHED = "ESTABLISHED"
 
 
 class KnowledgeStore:
@@ -57,43 +63,57 @@ class RealityStore:
 
 
 class KnowledgeUpdateService:
-    """Explicit AcceptedState → Knowledge promotion. No silent Fact creation."""
+    """Explicit verified-result → Knowledge promotion. No silent Fact creation."""
 
     def __init__(self, store: Optional[KnowledgeStore] = None) -> None:
         self.store = store or KnowledgeStore()
 
-    def promote_from_accepted_state(
+    def promote_from_verified_result(
         self,
+        verified_result: ExecutionResult,
         *,
-        accepted_state: str,
-        evidence_id: str,
-        verification_ref: str,
         content: str,
+        task_id: str,
+        operation: str,
+        resource: str,
+        scope: str,
         object_type: KnowledgeObjectType = KnowledgeObjectType.FACT,
         truth_level: TruthLevel = TruthLevel.WORKING,
-        task_id: Optional[str] = None,
-        execution_id: Optional[str] = None,
         actor: str = "knowledge_update_service",
     ) -> KnowledgeObject:
-        if accepted_state != ACCEPTED_STATE_ESTABLISHED:
+        if verified_result is None:
+            raise EpistemicError("verified_result_required")
+
+        if verified_result.status != ExecutionStatus.SUCCEEDED:
+            raise EpistemicError("execution_not_succeeded")
+
+        if verified_result.accepted_state != AcceptedStateStatus.ESTABLISHED:
             raise EpistemicError("accepted_state_required")
+
+        if verified_result.verification_status != VerificationStatus.PASSED:
+            raise EpistemicError("verification_not_passed")
+
+        evidence_id = verified_result.provenance.get("evidence_id")
+        verifier_id = verified_result.provenance.get("verifier_id")
         if not evidence_id or not str(evidence_id).strip():
             raise EpistemicError("evidence_binding_required")
-        if not verification_ref or not str(verification_ref).strip():
+        if not verifier_id or not str(verifier_id).strip():
             raise EpistemicError("verification_ref_required")
         if not content or not str(content).strip():
             raise EpistemicError("content_required")
+        if not task_id or not operation or not resource or not scope:
+            raise EpistemicError("binding_fields_required")
         if truth_level not in TruthLevel:
             raise EpistemicError("invalid_truth_level")
 
         provenance = Provenance(
-            source_ref=f"accepted:{accepted_state}",
+            source_ref=f"accepted:{verified_result.accepted_state.value}",
             task_id=task_id,
-            execution_id=execution_id,
-            evidence_ref=evidence_id,
-            verification_ref=verification_ref,
-            accepted_state_ref=accepted_state,
-            transformation="accepted_state_to_knowledge",
+            execution_id=verified_result.request_id,
+            evidence_ref=str(evidence_id),
+            verification_ref=str(verifier_id),
+            accepted_state_ref=verified_result.accepted_state.value,
+            transformation="verified_result_to_knowledge",
             actor=actor,
         )
         provenance.validate()
@@ -105,10 +125,14 @@ class KnowledgeUpdateService:
             verification_state=VerificationState.VERIFIED,
             content=content,
             provenance=provenance,
-            evidence_refs=(evidence_id,),
+            evidence_refs=(str(evidence_id),),
         )
         self.store.put(obj)
         return obj
+
+    def promote_from_accepted_state(self, *args, **kwargs):
+        """Deprecated token path — status string alone is insufficient."""
+        raise EpistemicError("status_token_insufficient_use_promote_from_verified_result")
 
     def reject_execution_success_alone(self, *, execution_status: str) -> None:
         if execution_status == "SUCCEEDED":
