@@ -1,13 +1,13 @@
 """ExecutionAdapter: ACES control boundary to replaceable runtimes.
 
 Fail-closed on missing/invalid authorization.
-Never manufactures authority, approval, evidence, or AcceptedState.
+Never manufactures authority, approval, evidence, or AcceptedState from caller boolean.
 """
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from .models import (
     AcceptedStateStatus,
@@ -32,7 +32,7 @@ class ExecutionAdapter:
         now = datetime.now(timezone.utc)
         provenance = {
             "adapter": "aces_execution_adapter",
-            "adapter_version": "0.1.0",
+            "adapter_version": "0.1.1",
             "request_id": request.request_id,
             "intent_reference": request.intent_reference,
             "requested_at": request.requested_at.isoformat(),
@@ -106,42 +106,83 @@ class ExecutionAdapter:
         passed: bool,
         verifier_id: str,
         notes: str = "",
+        evidence_id: Optional[str] = None,
+        verification_service: Any = None,
+        task_id: Optional[str] = None,
+        operation: Optional[str] = None,
+        resource: Optional[str] = None,
+        scope: Optional[str] = None,
     ) -> ExecutionResult:
-        """External verification path. Only this can move toward AcceptedState."""
-        if result.status != ExecutionStatus.SUCCEEDED:
+        """Verification entrypoint.
+
+        HARDENING: caller boolean `passed=True` alone MUST NOT establish AcceptedState.
+        Establishing AcceptedState requires VerificationService + evidence_id + binding fields.
+        """
+        if evidence_id is None or verification_service is None:
             return ExecutionResult(
                 request_id=result.request_id,
                 status=result.status,
                 runtime_id=result.runtime_id,
                 observed=result.observed,
-                provenance={**result.provenance, "verifier_id": verifier_id, "verify_notes": notes},
-                verification_status=VerificationStatus.FAILED if not passed else VerificationStatus.NOT_APPLICABLE,
+                provenance={
+                    **result.provenance,
+                    "verifier_id": verifier_id,
+                    "verify_notes": notes,
+                    "verify_reason": "evidence_required",
+                },
+                verification_status=VerificationStatus.FAILED,
                 accepted_state=AcceptedStateStatus.NOT_ESTABLISHED,
                 reject_reason=result.reject_reason,
-                error=result.error or "cannot_verify_non_success",
+                error=result.error or "caller_boolean_insufficient",
                 completed_at=result.completed_at,
             )
+
+        if task_id is None or operation is None or resource is None or scope is None:
+            return ExecutionResult(
+                request_id=result.request_id,
+                status=result.status,
+                runtime_id=result.runtime_id,
+                observed=result.observed,
+                provenance={
+                    **result.provenance,
+                    "verifier_id": verifier_id,
+                    "evidence_id": evidence_id,
+                    "verify_reason": "binding_fields_required",
+                },
+                verification_status=VerificationStatus.FAILED,
+                accepted_state=AcceptedStateStatus.NOT_ESTABLISHED,
+                completed_at=result.completed_at,
+            )
+
         if not passed:
             return ExecutionResult(
                 request_id=result.request_id,
                 status=result.status,
                 runtime_id=result.runtime_id,
                 observed=result.observed,
-                provenance={**result.provenance, "verifier_id": verifier_id, "verify_notes": notes},
+                provenance={
+                    **result.provenance,
+                    "verifier_id": verifier_id,
+                    "evidence_id": evidence_id,
+                    "verify_notes": notes,
+                    "verify_reason": "verifier_reported_fail",
+                },
                 verification_status=VerificationStatus.FAILED,
                 accepted_state=AcceptedStateStatus.NOT_ESTABLISHED,
                 completed_at=result.completed_at,
             )
-        return ExecutionResult(
-            request_id=result.request_id,
-            status=result.status,
-            runtime_id=result.runtime_id,
-            observed=result.observed,
-            provenance={**result.provenance, "verifier_id": verifier_id, "verify_notes": notes},
-            verification_status=VerificationStatus.PASSED,
-            accepted_state=AcceptedStateStatus.ESTABLISHED,
-            completed_at=result.completed_at,
+
+        decision = verification_service.verify(
+            result,
+            evidence_id=evidence_id,
+            verifier_id=verifier_id,
+            task_id=task_id,
+            operation=operation,
+            resource=resource,
+            scope=scope,
+            notes=notes,
         )
+        return decision.result
 
     def _reject(
         self,
