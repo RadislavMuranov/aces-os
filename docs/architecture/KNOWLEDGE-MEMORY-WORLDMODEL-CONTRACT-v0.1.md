@@ -1,13 +1,30 @@
 # Knowledge / Memory / World Model — Contract v0.1
 
-**Version:** v0.1  
-**Status:** FROZEN  
+**Version:** v0.1 + clarification **v0.1a**  
+**Status:** FROZEN (v0.1) + CLARIFICATION (v0.1a)  
 **Gate:** CONTRACT ONLY  
 **Date:** 2026-09-01  
 **Repository:** `RadislavMuranov/aces-os`  
 **Branch:** `feature/knowledge-memory-worldmodel-contract`  
 **Base HEAD:** `e70ce9b59964254f216d2f55619846ba1a7b2cf0`  
 **main (must remain untouched):** `58a5e596d9fc469561b32d457cf80658667055c2`
+
+### Amendment record (v0.1a)
+
+| Field | Value |
+|-------|--------|
+| Original frozen version | v0.1 |
+| Clarification | v0.1a |
+| Reason | Eliminate World Model → Semantic Reality ambiguity |
+| Implementation impact | **None** |
+| Architectural meaning | Clarification only |
+| Original freeze commit | `8dbcfd72af696cc7d7d06a35ac9ad45f333b6863` |
+
+**Normative clarification (v0.1a):**
+
+> World Model is an epistemic belief/projection layer. It may consume legitimate accepted epistemic inputs and update its own belief state, but it MUST NOT directly mutate, redefine, or become the authoritative source of Semantic Reality.
+
+Final conceptual status: **v0.1 FROZEN + v0.1a clarification**.
 
 ---
 
@@ -56,6 +73,8 @@ If a future gate imports the full ACE Knowledge Standard text, it MUST NOT silen
 
 ### A.5 Governing directional chain
 
+**Authoritative path to Updated Semantic Reality (Knowledge path only):**
+
 ```text
 Semantic Reality
   → Intent
@@ -65,9 +84,21 @@ Semantic Reality
   → Evidence
   → Verification
   → AcceptedState
-  → Knowledge / Memory / World Model
+  → Knowledge Update
   → Updated Semantic Reality
 ```
+
+**Independent World Model path (belief/projection only):**
+
+```text
+Accepted epistemic inputs
+  → World Model Update
+  → Belief / Probability / Projection
+```
+
+World Model output MAY inform planning, inference, decision support, context construction, and hypothesis generation.
+
+World Model **MUST NOT** directly establish or mutate Semantic Reality.
 
 No reverse path may grant authority, manufacture evidence, or bypass verification.
 
@@ -84,8 +115,10 @@ Objects below are **semantic definitions**. Implementation is deferred.
 | Meaning | The ACES-maintained claim about the state of Semantic Reality after acceptance |
 | Owns | Coordinated semantic state representation |
 | Does not own | Authorization; execution; raw observations |
-| Source of updates | Only through the epistemic chain ending in AcceptedState → Knowledge/Memory/WM → projection |
+| Source of updates | Only through the epistemic chain ending in AcceptedState → **Knowledge Update** → Updated Semantic Reality |
 | Status | **CONTRACT TARGET** (no dedicated type in `src/` at base HEAD) |
+
+**v0.1a:** World Model is **not** a direct source of RealityState mutation.
 
 ### B.2 EvidenceObject
 
@@ -137,6 +170,13 @@ Objects below are **semantic definitions**. Implementation is deferred.
 
 Promotion between truth levels is a governance concern. Quantitative thresholds are **deferred** unless already frozen elsewhere.
 
+**v0.1a distinction:**
+
+```text
+Knowledge → Semantic Reality update (authorized epistemic path)
+World Model → belief / projection / planning context only
+```
+
 ### B.5 MemoryObject
 
 | Aspect | Definition |
@@ -153,9 +193,9 @@ Promotion between truth levels is a governance concern. Quantitative thresholds 
 |--------|------------|
 | Meaning | Aggregate model of believed/probable state |
 | Runtime at HEAD | **Absent** |
-| Owns | Belief aggregates / estimates |
-| Does not own | Reality; Evidence; Authority; Knowledge self-promotion |
-| Rules | World Model ≠ Reality; World Model ≠ Evidence; World Model ≠ Authority |
+| Owns | Belief aggregates / estimates / projections |
+| Does not own | Reality mutation; Semantic Reality authority; Evidence; Authority; Knowledge self-promotion |
+| Rules | World Model ≠ Reality; World Model ≠ Semantic Reality; World Model ≠ Evidence; World Model ≠ Authority |
 
 ### B.7 BeliefState
 
@@ -167,7 +207,7 @@ Promotion between truth levels is a governance concern. Quantitative thresholds 
 | Does not own | Truth; Evidence; Authority |
 | Rules | Confidence ≠ Truth; Belief ≠ Fact |
 
-ERM, KCE, Epistemic Health, and related advanced metrics are **DEFERRED** (see §14).
+ERM, KCE, Epistemic Health, and related advanced metrics are **DEFERRED** (see §N).
 
 ### B.8 Provenance
 
@@ -200,6 +240,7 @@ Knowledge ≠ Evidence
 Memory ≠ Truth
 Memory ≠ Evidence
 World Model ≠ Reality
+World Model ≠ Semantic Reality
 World Model ≠ Evidence
 Confidence ≠ Truth
 Inference ≠ Evidence
@@ -213,6 +254,7 @@ Runtime ≠ Authority
 Context ≠ Authority
 Capability ≠ Authority
 Self-improvement ≠ Self-authorization
+World Model output ≠ authority to mutate Semantic Reality
 ```
 
 No layer may treat possession of Context, Capability, Memory, Evidence, Confidence, or Inference as authority.
@@ -221,7 +263,7 @@ No layer may treat possession of Context, Capability, Memory, Evidence, Confiden
 
 ## D. Canonical epistemic flow
 
-### D.1 Allowed direction
+### D.1 Allowed direction — Knowledge path (Semantic Reality)
 
 ```text
 DIGITAL WORLD
@@ -236,14 +278,57 @@ AcceptedState
       ↓
 Knowledge Update
       ↓
-Memory / Consolidation
-      ↓
-World Model Update
-      ↓
 Updated Semantic Reality
 ```
 
-### D.2 Forbidden reverse / shortcut transitions
+Memory / Consolidation may accompany Knowledge for durable recall; it does **not** itself establish Semantic Reality.
+
+### D.2 Allowed direction — World Model path (belief only)
+
+```text
+Accepted epistemic inputs
+      ↓
+World Model Update
+      ↓
+Belief / Probability / Projection
+```
+
+World Model output MAY inform:
+
+- planning
+- inference
+- decision support
+- context construction
+- hypothesis generation
+
+World Model output **MUST NOT** directly establish or mutate Semantic Reality.
+
+### D.3 Forbidden circularity (v0.1a)
+
+The following **direct** cycle is forbidden:
+
+```text
+Reality
+  → Evidence
+  → Knowledge
+  → World Model
+  → Reality
+```
+
+The World Model may **represent beliefs about** Reality; it **cannot** close the loop by directly mutating Reality.
+
+If a World Model-derived conclusion is later used to update Knowledge or Reality, it **MUST** first pass through the appropriate epistemic / verification / governance path.
+
+In particular:
+
+```text
+World Model inference ≠ Evidence
+World Model inference ≠ AcceptedState
+World Model inference ≠ Knowledge automatically
+World Model inference ≠ Semantic Reality mutation
+```
+
+### D.4 Forbidden reverse / shortcut transitions
 
 | Forbidden transition | Rationale |
 |----------------------|-----------|
@@ -251,6 +336,7 @@ Updated Semantic Reality
 | Memory → Verification | Recall is not verification |
 | World Model → Evidence | Belief cannot manufacture evidence |
 | World Model → Authorization | Belief is not authority |
+| World Model → Semantic Reality (direct) | Belief/projection cannot mutate Reality (**v0.1a**) |
 | Inference → Evidence | Inference must remain labeled |
 | Confidence → Fact | Confidence is not truth |
 | Recall → Verification | History is not verification |
@@ -348,6 +434,8 @@ World Model is a model of **believed/probable** state, not Reality.
 5. World Model **cannot** promote itself to Knowledge.
 6. World Model **cannot** authorize execution.
 7. World Model **cannot** redefine Semantic Reality by fiat.
+8. **(v0.1a)** World Model is an epistemic belief/projection layer. It may update its own belief state from legitimate accepted epistemic inputs, but it **MUST NOT** directly mutate, redefine, or become the authoritative source of Semantic Reality.
+9. **(v0.1a)** World Model output ≠ authority to mutate Semantic Reality.
 
 ### H.2 BeliefState (spec only)
 
@@ -403,9 +491,9 @@ Missing or invalid provenance → fail-closed (§L).
 | Evidence | Observations | Authority |
 | Verification | Verification gate | Authorization |
 | AcceptedState | Epistemic acceptance gate | Capability issuance |
-| Knowledge | Epistemic claims | Authority |
+| Knowledge | Epistemic claims; path to Semantic Reality update | Authority |
 | Memory | Durable recall | Truth / authority |
-| World Model | Beliefs / estimates | Reality / evidence / authority |
+| World Model | Beliefs, estimates, projections | **Reality mutation**, Evidence, Verification, Authorization |
 | ASA | Authorization | Truth / evidence / AcceptedState |
 | Execution Adapter | Dispatch | Authority / epistemic acceptance |
 | Runtime | Execution | Authority / truth |
@@ -423,6 +511,7 @@ Missing or invalid provenance → fail-closed (§L).
 6. ASA remains the **authorization** boundary for protected operations.
 7. Epistemic acceptance remains **downstream** of Evidence + Verification.
 8. No component may acquire authority merely by possessing Context, Capability, Memory, Evidence, or Confidence.
+9. **(v0.1a)** World Model **MUST NOT** directly mutate Semantic Reality.
 
 Protected resource kinds (`KnowledgeObject`, `MemoryObject`, etc.) remain subject to ASA when those resources are operationalized.
 
@@ -441,6 +530,7 @@ Protected resource kinds (`KnowledgeObject`, `MemoryObject`, etc.) remain subjec
 | Unauthorized Knowledge mutation | DENY |
 | Unauthorized Memory mutation | DENY |
 | Unauthorized World Model mutation | DENY |
+| World Model direct Semantic Reality mutation | **Reject / DENY (v0.1a)** |
 | Ambiguous object identity | Reject |
 | Unknown epistemic state | Reject; no silent “trusted” |
 | Unavailable authority/verification dependency | DENY / fail-closed |
@@ -454,23 +544,25 @@ Protected resource kinds (`KnowledgeObject`, `MemoryObject`, etc.) remain subjec
 1. Evidence ≠ Knowledge  
 2. Memory ≠ Truth  
 3. World Model ≠ Reality  
-4. Confidence ≠ Truth  
-5. AcceptedState ≠ Authorization  
-6. Knowledge ≠ Authority  
-7. Memory ≠ Authority  
-8. World Model ≠ Authority  
-9. Execution success ≠ AcceptedState  
-10. Inference ≠ Evidence  
-11. Recall ≠ Verification  
-12. Agent ≠ Authority  
-13. Runtime ≠ Authority  
-14. Self-improvement ≠ Self-authorization  
+4. **World Model ≠ Semantic Reality** (v0.1a)  
+5. Confidence ≠ Truth  
+6. AcceptedState ≠ Authorization  
+7. Knowledge ≠ Authority  
+8. Memory ≠ Authority  
+9. World Model ≠ Authority  
+10. Execution success ≠ AcceptedState  
+11. Inference ≠ Evidence  
+12. Recall ≠ Verification  
+13. Agent ≠ Authority  
+14. Runtime ≠ Authority  
+15. Self-improvement ≠ Self-authorization  
+16. **World Model output ≠ authority to mutate Semantic Reality** (v0.1a)  
 
 ---
 
 ## N. Deferred items
 
-Explicitly **out of scope** for Contract v0.1 and for any implementation that claims compliance without a further gate:
+Explicitly **out of scope** for Contract v0.1 / v0.1a and for any implementation that claims compliance without a further gate:
 
 - production persistence / databases
 - vector retrieval / embeddings
@@ -527,6 +619,7 @@ This freeze does **not** claim:
 | Critical failures fail-closed | YES |
 | Deferred work explicit | YES |
 | `main` untouched | YES |
+| World Model cannot directly mutate Semantic Reality (v0.1a) | YES |
 
 ---
 
@@ -535,8 +628,8 @@ This freeze does **not** claim:
 | Item | Value |
 |------|--------|
 | Artifact | `docs/architecture/KNOWLEDGE-MEMORY-WORLDMODEL-CONTRACT-v0.1.md` |
-| Status | **FROZEN** |
+| Status | **FROZEN v0.1 + clarification v0.1a** |
 | Implementation authorized by this document alone | **NO** |
 | Next gate | Separate authorization required for minimal implementation / tests |
 
-**END OF CONTRACT v0.1**
+**END OF CONTRACT v0.1 + v0.1a**
