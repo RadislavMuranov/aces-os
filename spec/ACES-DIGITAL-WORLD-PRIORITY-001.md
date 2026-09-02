@@ -67,18 +67,22 @@ No external application becomes an ACES trust anchor merely because it is connec
 
 ACES must represent digital reality through canonical objects rather than application-specific records.
 
-Example:
+A DWOM object is a **canonical representation of an external digital-world entity, representation, event, or observation**. It preserves external identity, source, provenance, freshness, capabilities, and references to source material without automatically becoming an ACES KnowledgeObject.
+
+The boundary is explicit:
 
 ```text
-KnowledgeObject
-  -> source: Obsidian
-  -> source: Notion
-  -> source: GitHub
-  -> source: Gmail
-  -> source: Drive
+External Representation
+  -> DWOM Object
+  -> Observation / Evidence
+  -> Reconciliation / Decision / Verification as applicable
+  -> AcceptedState
+  -> KnowledgeObject (only through the existing epistemic promotion path)
 ```
 
-The connector maps external representations into ACES objects, identities, events, evidence, and references.
+A connector MUST NOT silently promote an external representation, DWOM object, or retrieved observation into a KnowledgeObject merely because it was retrieved or synchronized.
+
+A KnowledgeObject remains an ACES epistemic claim governed by the Knowledge/Memory/WorldModel contract. DWOM is a digital-world representation layer, not an epistemic authority layer.
 
 ## 6. Reference / Cache / Materialization
 
@@ -125,7 +129,9 @@ The Reconciliation Engine is responsible for:
 - reconciliation
 - canonical state projection
 
-When sources disagree, ACES must preserve the conflict and provenance rather than silently selecting an arbitrary value.
+**Reconciliation is not Truth Arbitration.** The engine may discover, compare, correlate, detect conflict, apply explicitly defined precedence/policy, and produce a reconciled or candidate digital-world state. It MUST NOT silently manufacture epistemic truth or treat its own reconciliation result as authoritative merely because it resolved a conflict.
+
+When sources disagree, ACES must preserve the competing observations and provenance. Any precedence between sources must be explicit, scoped to the relevant domain/operation, policy-governed, and distinguishable from ACES security/authorization authority.
 
 ## 9. Authority Model
 
@@ -140,6 +146,12 @@ Human Authority
 ```
 
 GitHub, Slack, Notion, Obsidian, Kaiten, Google Workspace, cloud systems, and other connectors are untrusted external systems from the ACES authority perspective.
+
+**Source Authority != ACES Authorization Authority.**
+
+A source may be authoritative for a narrowly defined external fact or operation (for example, GitHub may be authoritative for the state of a GitHub issue), but that source authority MUST NOT grant the external system authority to authorize ACES actions, issue capabilities, redefine ACES Semantic Reality, or bypass ASA/policy evaluation.
+
+Source precedence is therefore a data/epistemic-policy property; ACES authorization is a security/authority property. They MUST remain separate.
 
 ## 10. MCP Rule
 
@@ -203,6 +215,20 @@ Implement and verify a representative cross-system slice using:
 
 The slice must demonstrate that one logical ACES object can be discovered, referenced, reconciled, evidenced, and acted upon across multiple systems without requiring duplicate manual entry.
 
+The slice MUST distinguish:
+
+```text
+External Representation
+  -> DWOM Object
+  -> Observation / Evidence
+  -> Reconciliation / Candidate State
+  -> explicit Decision / Verification where required
+  -> AcceptedState
+  -> Knowledge promotion only through the existing epistemic path
+```
+
+It MUST also demonstrate that conflicting source observations remain traceable and that any source precedence used by reconciliation is explicit and policy-scoped rather than an implicit claim of truth or security authority.
+
 ### P2 — Research / Discovery Surfaces
 
 - Notion
@@ -228,7 +254,7 @@ It is complete only when the following are demonstrated:
 1. One ACES object can span multiple external representations.
 2. Provenance is preserved for every imported fact/state/event.
 3. Conflicting sources are detected and surfaced.
-4. ACES can determine which source is authoritative for a given operation/domain.
+4. ACES can determine which source is authoritative for a given operation/domain **without confusing source precedence with ACES authorization authority or epistemic truth**.
 5. Full-world mirroring is not required.
 6. Synchronization is demand-driven.
 7. Human does not perform routine cross-system reconciliation.
@@ -237,8 +263,71 @@ It is complete only when the following are demonstrated:
 10. ASA remains the authority boundary.
 11. MCP is used only as an exception path.
 12. The resulting system measurably reduces parasitic human interaction cost.
+13. DWOM retrieval/synchronization does not silently create KnowledgeObjects.
+14. Reconciliation preserves competing observations and provenance when conflicts cannot be legitimately resolved.
+15. Digital World State, World Model State, and Semantic Reality remain distinct layers with explicit boundaries.
 
-## 15. Architectural Position in the Frozen Stack
+## 15. World State Boundary
+
+The term **Digital World State** denotes a reconciled or projected representation of observed external digital-world state. It is not equivalent to ACES Semantic Reality and is not itself epistemic truth.
+
+The layers are distinct:
+
+```text
+Digital World State
+= reconciled/projected representation of observed external state
+
+World Model State
+= ACES epistemic belief/probability about relevant state
+
+Semantic Reality
+= ACES canonical semantic representation maintained through the governed epistemic chain
+```
+
+Accordingly:
+
+- **Digital World State != World Model State**.
+- **World Model State != Semantic Reality**.
+- **Evidence != either state**; evidence is bound observation used by verification and epistemic updates.
+- **World Model != Evidence** and cannot manufacture evidence.
+- **World Model != Authority** and cannot authorize actions or directly mutate/redefine Semantic Reality.
+- A Digital World State projection MUST NOT by itself become Semantic Reality.
+- Knowledge promotion remains governed by the existing `Evidence -> Verification -> AcceptedState -> Knowledge` path.
+
+The canonical epistemic direction is:
+
+```text
+Digital World
+  -> Observation / Evidence
+  -> Verification
+  -> AcceptedState
+  -> Knowledge Update
+  -> Semantic Reality
+```
+
+In parallel, legitimate accepted epistemic inputs may update the World Model:
+
+```text
+Accepted epistemic inputs
+  -> World Model Update
+  -> Belief / Projection
+```
+
+There is no direct:
+
+```text
+World Model
+  -> Semantic Reality mutation
+```
+
+or:
+
+```text
+Digital World State
+  -> Semantic Reality by fiat
+```
+
+## 16. Architectural Position in the Frozen Stack
 
 ```text
 ACES Control / Governance / Epistemic Authority
@@ -263,14 +352,20 @@ Digital World Object Model
        |
 Reconciliation Engine
        |
-Evidence / World State
+Digital World State
+       |
+Evidence / Verification
        |
 AcceptedState
+       |
+Knowledge / Memory / World Model
+       |
+Semantic Reality
 ```
 
 The Digital World layer is not a peripheral integration feature. It is a primary realization layer of the ACES mission.
 
-## 16. Immediate Execution Rule
+## 17. Immediate Execution Rule
 
 Until this P0 initiative reaches its first verified vertical slice, new integrations and secondary features must not displace it in priority unless explicitly justified by an Architecture Decision Record.
 
