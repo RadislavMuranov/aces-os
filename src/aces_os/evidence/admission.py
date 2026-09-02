@@ -61,7 +61,6 @@ class EvidenceAdmissionService:
         reason = "structural_ok"
         status = CandidateStatus.ELIGIBLE
 
-        # Partial / PVR may still be structurally eligible but never verified
         if observation.pvr_flags or dwom.pvr_flags:
             reason = "structural_ok_with_pvr_guard"
 
@@ -69,7 +68,6 @@ class EvidenceAdmissionService:
             ObservationState.UNKNOWN,
             ObservationState.NOT_OBSERVABLE,
         ):
-            # Still may form candidate; eligibility for admission checked at admit()
             status = CandidateStatus.CANDIDATE
             reason = f"state={observation.observed_state.value};admit_may_reject"
 
@@ -103,22 +101,28 @@ class EvidenceAdmissionService:
     def admit(self, candidate: EvidenceCandidate) -> Evidence:
         self._validate_candidate_for_admission(candidate)
 
-        existing = self.store.get_by_candidate(candidate.candidate_id)
-        if existing is not None:
-            return existing
-
         od = self.store.observation_digest(candidate.observation_id)
         if od is not None and od != candidate.payload_digest:
             raise AdmissionConflictError(
                 f"observation_id={candidate.observation_id} digest conflict"
             )
+
+        existing = self.store.get_by_candidate(candidate.candidate_id)
+        if existing is not None:
+            if existing.payload_digest != candidate.payload_digest:
+                raise AdmissionConflictError(
+                    f"candidate_id={candidate.candidate_id} payload_digest mismatch"
+                )
+            return existing
+
         existing_obs = self.store.get_by_observation(candidate.observation_id)
         if existing_obs is not None:
             if existing_obs.payload_digest != candidate.payload_digest:
-                raise AdmissionConflictError("observation already admitted with different digest")
+                raise AdmissionConflictError(
+                    "observation already admitted with different digest"
+                )
             return existing_obs
 
-        # States that cannot form admitted evidence without more data
         if candidate.observed_state in (
             ObservationState.UNKNOWN,
             ObservationState.NOT_OBSERVABLE,
@@ -191,7 +195,6 @@ class EvidenceAdmissionService:
         if c.provider != c.resource_ref.provider:
             raise AdmissionError("provider/resource_ref mismatch")
 
-    # Explicit non-capabilities
     def verify(self, *a, **k):
         raise AdmissionError("Phase IV does not implement Verification")
 
