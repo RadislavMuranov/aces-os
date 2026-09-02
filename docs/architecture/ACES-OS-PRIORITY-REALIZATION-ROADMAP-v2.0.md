@@ -90,6 +90,58 @@ Execution observation + Digital-world observation
   → Semantic Reality
 ```
 
+### Canonical ACES architecture flow
+
+The following flow is the **canonical human-readable architecture summary** and is binding as a top-level realization view:
+
+```text
+ACES CONSTITUTION
+        │
+        ▼
+AUTHORITY / POLICY
+        │
+   ┌────┴────┐
+   │         │
+   ▼         ▼
+EXECUTION   DIGITAL WORLD
+PLANE       PLANE
+   │         │
+Execution   DWOM
+Contract    │
+   │       Connector Fabric
+Orca        │
+   │       Reconciliation
+DSH         │
+   │       Observations
+Inference   │
+   └────┬────┘
+        ▼
+     EVIDENCE
+        │
+   VERIFICATION
+        │
+   ACCEPTEDSTATE
+        │
+ Knowledge / Memory / World Model
+        │
+   SEMANTIC REALITY
+        │
+   REALITY LAYER
+        │
+      HUMAN
+```
+
+Interpretation rules for this summary:
+
+- The two planes are parallel foundational planes under ACES Constitution and Authority/Policy.
+- The convergence point is **Evidence → Verification → AcceptedState**.
+- `Knowledge / Memory / World Model` are downstream epistemic layers; they are not authorities.
+- `World Model` may update its own beliefs from legitimate accepted epistemic inputs but **MUST NOT** directly mutate Semantic Reality.
+- `Digital World State` is not Semantic Reality and may not become it by fiat.
+- `Execution success` is not AcceptedState.
+- `Reality Layer` is an architectural human-facing control principle from P0; UI realization may occur later.
+- The human is the ultimate Architectural Authority, but is **not** required to act as routine middleware between digital systems.
+
 ### Convergence boundary
 
 ```text
