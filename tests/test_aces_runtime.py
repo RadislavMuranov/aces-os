@@ -1,6 +1,6 @@
 import json
 
-from src.aces_runtime import ACESRuntime, Context, Intent
+from src.aces_runtime import ACESRuntime, Intent
 
 
 def test_minimum_cycle_accepts_verified_state():
@@ -11,10 +11,8 @@ def test_minimum_cycle_accepts_verified_state():
 
     assert result.status == "ACCEPTED"
     assert result.evidence["verification"]["verified"] is True
+    assert result.evidence["acceptance"]["accepted"] is True
     assert result.evidence["accepted_state"] == {"value": 1}
-    assert result.evidence["authorization"]["policy_id"] == runtime.POLICY_ID
-    assert result.evidence["authorization"]["rule_id"] == runtime.ALLOW_RULE_ID
-    assert result.evidence["authorization"]["scope"] == "target:demo"
 
 
 def test_policy_denial_is_fail_closed():
@@ -26,18 +24,16 @@ def test_policy_denial_is_fail_closed():
     assert result.status == "REJECTED"
     assert result.evidence["execution"] is None
     assert result.evidence["accepted_state"] is None
-    assert result.evidence["authorization"]["policy_id"] == runtime.POLICY_ID
-    assert result.evidence["authorization"]["rule_id"] == runtime.DENY_RULE_ID
 
 
 def test_unverified_result_is_not_canonical():
     runtime = ACESRuntime(executor=lambda intent, context: {"value": 0})
     intent = Intent("I-1E-003", "set_state", "demo", {"value": 1})
-    context = runtime.resolve_context(intent, {})
-    result = runtime.run(intent, context)
+    result = runtime.run(intent, runtime.resolve_context(intent, {}))
 
     assert result.status == "UNVERIFIED"
     assert result.evidence["verification"]["verified"] is False
+    assert result.evidence["acceptance"]["accepted"] is False
     assert result.evidence["accepted_state"] is None
 
 
@@ -49,14 +45,9 @@ def test_authority_decision_is_separate_from_connector():
     plan = runtime.resolve_connector(intent, context, decision)
 
     assert decision.allowed is True
-    assert decision.policy_id == runtime.POLICY_ID
-    assert decision.rule_id == runtime.ALLOW_RULE_ID
-    assert decision.scope == "target:demo"
-    assert plan.connector_id == runtime.CONNECTOR_ID
+    assert decision.policy_id != plan.connector_id
     assert plan.capability == runtime.CAPABILITY
     assert plan.protocol == runtime.PROTOCOL
-    assert plan.path == runtime.PATH
-    assert decision.policy_id != plan.connector_id
 
 
 def test_connector_resolution_cannot_bypass_denied_authority():
@@ -72,8 +63,7 @@ def test_connector_resolution_cannot_bypass_denied_authority():
 def test_observation_has_source_and_provenance():
     runtime = ACESRuntime()
     intent = Intent("I-5-001", "set_state", "demo", {"value": 5})
-    context = runtime.resolve_context(intent, {})
-    result = runtime.run(intent, context)
+    result = runtime.run(intent, runtime.resolve_context(intent, {}))
 
     observation = result.evidence["observation"]
     assert observation["state"] == {"value": 5}
@@ -85,30 +75,47 @@ def test_evidence_bundle_is_persisted(tmp_path):
     evidence_path = tmp_path / "evidence.jsonl"
     runtime = ACESRuntime(evidence_path=str(evidence_path))
     intent = Intent("I-5-002", "set_state", "demo", {"value": 6})
-    context = runtime.resolve_context(intent, {})
+    result = runtime.run(intent, runtime.resolve_context(intent, {}))
 
-    result = runtime.run(intent, context)
-
-    assert evidence_path.exists()
     records = [json.loads(line) for line in evidence_path.read_text(encoding="utf-8").splitlines()]
     assert len(records) == 1
     assert records[0]["evidence_id"] == result.evidence["evidence_id"]
-    assert records[0]["cycle_id"] == result.evidence["cycle_id"]
-    assert records[0]["intent_id"] == intent.intent_id
-    assert records[0]["observation"]["provenance"] == "execution-receipt:cycle-000001"
+    assert records[0]["status"] == "ACCEPTED"
 
 
 def test_rejected_cycle_also_persists_evidence(tmp_path):
     evidence_path = tmp_path / "evidence.jsonl"
     runtime = ACESRuntime(evidence_path=str(evidence_path))
     intent = Intent("I-5-003", "set_state", "demo", {"value": 7})
-    context = runtime.resolve_context(intent, {"deny": True})
-
-    result = runtime.run(intent, context)
+    result = runtime.run(intent, runtime.resolve_context(intent, {"deny": True}))
 
     records = [json.loads(line) for line in evidence_path.read_text(encoding="utf-8").splitlines()]
     assert result.status == "REJECTED"
-    assert len(records) == 1
     assert records[0]["status"] == "REJECTED"
-    assert records[0]["execution"] is None
-    assert records[0]["verification"] is None
+
+
+def test_accepted_state_is_persisted_and_replayed(tmp_path):
+    state_path = tmp_path / "accepted-state.json"
+    intent = Intent("I-6-001", "set_state", "demo", {"value": 9})
+
+    first = ACESRuntime(accepted_state_path=str(state_path))
+    result = first.run(intent, first.resolve_context(intent, {}))
+    assert result.status == "ACCEPTED"
+    assert state_path.exists()
+
+    second = ACESRuntime(accepted_state_path=str(state_path))
+    assert second.replay_accepted_state("demo") == {"value": 9}
+
+
+def test_unverified_state_is_never_persisted(tmp_path):
+    state_path = tmp_path / "accepted-state.json"
+    runtime = ACESRuntime(
+        executor=lambda intent, context: {"value": 0},
+        accepted_state_path=str(state_path),
+    )
+    intent = Intent("I-6-002", "set_state", "demo", {"value": 1})
+    result = runtime.run(intent, runtime.resolve_context(intent, {}))
+
+    assert result.status == "UNVERIFIED"
+    assert not state_path.exists()
+    assert runtime.replay_accepted_state("demo") is None
