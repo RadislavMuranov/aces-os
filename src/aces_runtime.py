@@ -1,6 +1,6 @@
 """Minimal ACES runtime skeleton.
 
-I-2 implementation target: explicit Intent IR and deterministic Context Resolution.
+I-3 implementation target: explicit Authority / Policy decision.
 No external connector, model, harness, or BASTION dependency is introduced here.
 """
 
@@ -26,6 +26,9 @@ class Context:
 class AuthorizationDecision:
     allowed: bool
     reason: str
+    policy_id: str
+    rule_id: str
+    scope: str
 
 
 @dataclass(frozen=True)
@@ -47,6 +50,11 @@ class CycleResult:
 
 class ACESRuntime:
     """Smallest executable Intent→Accepted State control loop."""
+
+    POLICY_ID = "minimum-policy-v1"
+    ALLOW_RULE_ID = "allow-valid-intent"
+    DENY_RULE_ID = "deny-context-flag"
+    DEFAULT_SCOPE = "controlled-local-executor"
 
     def __init__(self, executor: Optional[Callable[[Intent, Context], Dict[str, Any]]] = None):
         self._executor = executor or self._default_executor
@@ -72,16 +80,15 @@ class ACESRuntime:
         if verification.verified:
             self._state[intent.target] = dict(observation.state)
 
-        return self._result(
-            intent, context, decision, execution, verification, status
-        )
+        return self._result(intent, context, decision, execution, verification, status)
 
     def authorize(self, intent: Intent, context: Context) -> AuthorizationDecision:
+        scope = f"target:{intent.target}" if intent.target else "target:unknown"
         if not intent.intent_id or not intent.action or not intent.target:
-            return AuthorizationDecision(False, "missing required intent fields")
+            return AuthorizationDecision(False, "missing required intent fields", self.POLICY_ID, self.DENY_RULE_ID, scope)
         if context.values.get("deny") is True:
-            return AuthorizationDecision(False, "policy denied")
-        return AuthorizationDecision(True, "policy allowed")
+            return AuthorizationDecision(False, "policy denied", self.POLICY_ID, self.DENY_RULE_ID, scope)
+        return AuthorizationDecision(True, "policy allowed", self.POLICY_ID, self.ALLOW_RULE_ID, scope)
 
     @staticmethod
     def verify(intent: Intent, observation: Observation) -> VerificationResult:
@@ -91,38 +98,26 @@ class ACESRuntime:
             return VerificationResult(True, "desired state observed")
         return VerificationResult(False, "desired state not observed")
 
-    def _result(
-        self,
-        intent: Intent,
-        context: Context,
-        decision: AuthorizationDecision,
-        execution: Optional[Dict[str, Any]],
-        verification: Optional[VerificationResult],
-        status: str,
-    ) -> CycleResult:
+    def _result(self, intent: Intent, context: Context, decision: AuthorizationDecision,
+                execution: Optional[Dict[str, Any]], verification: Optional[VerificationResult],
+                status: str) -> CycleResult:
         evidence = {
             "intent_id": intent.intent_id,
-            "normalized_intent": {
-                "action": intent.action,
-                "target": intent.target,
-                "desired_state": intent.desired_state,
-            },
+            "normalized_intent": {"action": intent.action, "target": intent.target, "desired_state": intent.desired_state},
             "context": context.values,
             "context_provenance": context.provenance,
             "authorization": {
                 "allowed": decision.allowed,
                 "reason": decision.reason,
+                "policy_id": decision.policy_id,
+                "rule_id": decision.rule_id,
+                "scope": decision.scope,
             },
             "connector": "controlled-local-executor",
             "action": intent.action,
             "execution": execution,
             "observation": execution,
-            "verification": None
-            if verification is None
-            else {
-                "verified": verification.verified,
-                "reason": verification.reason,
-            },
+            "verification": None if verification is None else {"verified": verification.verified, "reason": verification.reason},
             "acceptance": status == "ACCEPTED",
             "accepted_state": self._state.get(intent.target),
             "status": status,
@@ -131,5 +126,4 @@ class ACESRuntime:
 
     @staticmethod
     def _default_executor(intent: Intent, context: Context) -> Dict[str, Any]:
-        # Controlled local execution is deliberately deterministic for I-2.
         return dict(intent.desired_state)
