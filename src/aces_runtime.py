@@ -1,10 +1,12 @@
 """Minimal ACES runtime skeleton.
 
-I-4 implementation target: explicit Connector Resolution separated from Execution.
+I-5 implementation target: explicit Observation provenance and persisted Evidence Bundle.
 No external connector, model, harness, or BASTION dependency is introduced here.
 """
 
 from dataclasses import dataclass
+import json
+from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
 
@@ -49,6 +51,8 @@ class ExecutionReceipt:
 @dataclass(frozen=True)
 class Observation:
     state: Dict[str, Any]
+    source: str
+    provenance: str
 
 
 @dataclass(frozen=True)
@@ -73,10 +77,14 @@ class ACESRuntime:
     CAPABILITY = "state-write"
     PROTOCOL = "native-local"
     PATH = "local-executor"
+    OBSERVATION_SOURCE = "controlled-local-execution-receipt"
 
-    def __init__(self, executor: Optional[Callable[[Intent, Context], Dict[str, Any]]] = None):
+    def __init__(self, executor: Optional[Callable[[Intent, Context], Dict[str, Any]]] = None,
+                 evidence_path: Optional[str] = None):
         self._executor = executor or self._default_executor
         self._state: Dict[str, Dict[str, Any]] = {}
+        self._evidence_path = Path(evidence_path) if evidence_path else None
+        self._cycle_sequence = 0
 
     @staticmethod
     def resolve_context(intent: Intent, values: Optional[Dict[str, Any]] = None) -> Context:
@@ -85,23 +93,29 @@ class ACESRuntime:
         return Context(resolved, provenance)
 
     def run(self, intent: Intent, context: Context) -> CycleResult:
+        self._cycle_sequence += 1
+        cycle_id = f"cycle-{self._cycle_sequence:06d}"
         decision = self.authorize(intent, context)
         if not decision.allowed:
-            return self._result(intent, context, decision, None, None, None, "REJECTED")
+            return self._result(intent, context, decision, None, None, None, "REJECTED", cycle_id)
 
         plan = self.resolve_connector(intent, context, decision)
         if plan is None:
-            return self._result(intent, context, decision, None, None, None, "REJECTED")
+            return self._result(intent, context, decision, None, None, None, "REJECTED", cycle_id)
 
         receipt = self.execute(intent, context, plan)
-        observation = Observation(state=dict(receipt.result))
+        observation = Observation(
+            state=dict(receipt.result),
+            source=self.OBSERVATION_SOURCE,
+            provenance=f"execution-receipt:{cycle_id}",
+        )
         verification = self.verify(intent, observation)
         status = "ACCEPTED" if verification.verified else "UNVERIFIED"
 
         if verification.verified:
             self._state[intent.target] = dict(observation.state)
 
-        return self._result(intent, context, decision, plan, receipt, verification, status)
+        return self._result(intent, context, decision, plan, receipt, verification, status, cycle_id, observation)
 
     def authorize(self, intent: Intent, context: Context) -> AuthorizationDecision:
         scope = f"target:{intent.target}" if intent.target else "target:unknown"
@@ -135,8 +149,12 @@ class ACESRuntime:
 
     def _result(self, intent: Intent, context: Context, decision: AuthorizationDecision,
                 plan: Optional[ConnectorPlan], receipt: Optional[ExecutionReceipt],
-                verification: Optional[VerificationResult], status: str) -> CycleResult:
+                verification: Optional[VerificationResult], status: str, cycle_id: str,
+                observation: Optional[Observation] = None) -> CycleResult:
+        evidence_id = f"evidence-{cycle_id}"
         evidence = {
+            "evidence_id": evidence_id,
+            "cycle_id": cycle_id,
             "intent_id": intent.intent_id,
             "normalized_intent": {"action": intent.action, "target": intent.target, "desired_state": intent.desired_state},
             "context": context.values,
@@ -152,13 +170,23 @@ class ACESRuntime:
             "execution": None if receipt is None else {
                 "connector_id": receipt.connector_id, "action": receipt.action, "result": receipt.result,
             },
-            "observation": None if receipt is None else receipt.result,
+            "observation": None if observation is None else {
+                "state": observation.state, "source": observation.source, "provenance": observation.provenance,
+            },
             "verification": None if verification is None else {"verified": verification.verified, "reason": verification.reason},
             "acceptance": status == "ACCEPTED",
             "accepted_state": self._state.get(intent.target),
             "status": status,
         }
+        self._persist_evidence(evidence)
         return CycleResult(status, evidence)
+
+    def _persist_evidence(self, evidence: Dict[str, Any]) -> None:
+        if self._evidence_path is None:
+            return
+        self._evidence_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._evidence_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(evidence, sort_keys=True) + "\n")
 
     @staticmethod
     def _default_executor(intent: Intent, context: Context) -> Dict[str, Any]:
