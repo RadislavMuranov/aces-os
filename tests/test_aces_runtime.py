@@ -1,3 +1,5 @@
+import json
+
 from src.aces_runtime import ACESRuntime, Context, Intent
 
 
@@ -65,3 +67,48 @@ def test_connector_resolution_cannot_bypass_denied_authority():
 
     assert decision.allowed is False
     assert runtime.resolve_connector(intent, context, decision) is None
+
+
+def test_observation_has_source_and_provenance():
+    runtime = ACESRuntime()
+    intent = Intent("I-5-001", "set_state", "demo", {"value": 5})
+    context = runtime.resolve_context(intent, {})
+    result = runtime.run(intent, context)
+
+    observation = result.evidence["observation"]
+    assert observation["state"] == {"value": 5}
+    assert observation["source"] == runtime.OBSERVATION_SOURCE
+    assert observation["provenance"] == "execution-receipt:cycle-000001"
+
+
+def test_evidence_bundle_is_persisted(tmp_path):
+    evidence_path = tmp_path / "evidence.jsonl"
+    runtime = ACESRuntime(evidence_path=str(evidence_path))
+    intent = Intent("I-5-002", "set_state", "demo", {"value": 6})
+    context = runtime.resolve_context(intent, {})
+
+    result = runtime.run(intent, context)
+
+    assert evidence_path.exists()
+    records = [json.loads(line) for line in evidence_path.read_text(encoding="utf-8").splitlines()]
+    assert len(records) == 1
+    assert records[0]["evidence_id"] == result.evidence["evidence_id"]
+    assert records[0]["cycle_id"] == result.evidence["cycle_id"]
+    assert records[0]["intent_id"] == intent.intent_id
+    assert records[0]["observation"]["provenance"] == "execution-receipt:cycle-000001"
+
+
+def test_rejected_cycle_also_persists_evidence(tmp_path):
+    evidence_path = tmp_path / "evidence.jsonl"
+    runtime = ACESRuntime(evidence_path=str(evidence_path))
+    intent = Intent("I-5-003", "set_state", "demo", {"value": 7})
+    context = runtime.resolve_context(intent, {"deny": True})
+
+    result = runtime.run(intent, context)
+
+    records = [json.loads(line) for line in evidence_path.read_text(encoding="utf-8").splitlines()]
+    assert result.status == "REJECTED"
+    assert len(records) == 1
+    assert records[0]["status"] == "REJECTED"
+    assert records[0]["execution"] is None
+    assert records[0]["verification"] is None
