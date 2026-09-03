@@ -138,45 +138,124 @@ Examples:
 - external runtime reports completion without sufficient proof → non-canonical result;
 - canonical state cannot be updated consistently → preserve prior canonical state and record failure.
 
-## 12. MCP / connector rule
+## 12. MCP / connector rule — UPDATED
 
 The ACES boundary does not require MCP as a universal mechanism.
 
-Existing ACES rule remains binding:
+The governing integration principle is now:
 
-> Use MCP only when a Connector / Local / Native alternative (CLA) cannot satisfy the requirement.
+> **ACES SHALL prefer the most direct, local, native, first-party or otherwise controlled integration mechanism that adequately satisfies its capability, security, provenance, observability and governance requirements.**
 
-MCP is therefore a capability transport option, not an authority mechanism.
+The preferred ordering is:
 
-## 13. Minimal ownership model
+`LOCAL → NATIVE / FIRST-PARTY → DIRECT CONNECTOR → MCP → OTHER PROTOCOL / BRIDGE`
+
+This is **CLA-first, not CLA-only**. The ordering is a security and architectural optimization, not an absolute prohibition against MCP.
+
+MCP MAY be used when it provides material interoperability, capability availability, ecosystem leverage, deployment practicality, portability, operational economics, standardized integration, or materially lower implementation complexity that is not adequately provided by the available CLA path.
+
+MCP remains a capability transport and interoperability mechanism, not an ACES Authority mechanism. MCP authorization does not establish ACES Epistemic Authority, Decision Authority, Execution Authority, Acceptance Authority or Canonicality.
+
+ACES SHALL avoid introducing MCP merely where an equivalent or superior controlled CLA path already exists, particularly where doing so would add unnecessary trust boundaries, credential/token propagation, confused-deputy opportunities, attack surface, protocol hops, provenance ambiguity or operational complexity.
+
+The decision to use MCP remains subordinate to ACES Policy, Authorization, Security, Provenance, Verification and Acceptance requirements.
+
+## 13. Connector Plane
+
+ACES SHALL maintain a protocol-independent Connector Plane:
 
 ```text
-                    ACES AUTHORITY–EVIDENCE–REALITY PLANE
-
-        ┌────────────────────────────────────────────────────┐
-        │ Epistemic Authority                                │
-        │ Decision Authority                                 │
-        │ Execution Authority                                │
-        │ Policy / Governance                                │
-        │ Evidence / Provenance                              │
-        │ Independent Verification                           │
-        │ Acceptance                                         │
-        │ Canonical State / Reality                          │
-        └───────────────────────┬────────────────────────────┘
-                                │
-                         TRUST / ACCEPTANCE
-                              BOUNDARY
-                                │
-              MODEL → AGENT → HARNESS → TOOLS → EXECUTION
-                                                    │
-                                                 EFFECT
-                                                    │
-                                               OBSERVATION
-                                                    │
-                                              VERIFICATION
+                 ACES AUTHORITY
+                       │
+             ┌─────────▼─────────┐
+             │ Capability Router │
+             │ / Connector Plane │
+             └─────────┬─────────┘
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+       LOCAL        NATIVE        MCP
+          │            │            │
+          └────────────┼────────────┘
+                       │
+                 DIGITAL WORLD
 ```
 
-## 14. Architectural consequence
+The Connector Plane determines **how ACES reaches the digital world**.
+
+It does not determine **whether ACES is authorized to accept what happens there as canonical reality**.
+
+## 14. Authority Boundary
+
+The canonical ACES control flow is:
+
+```text
+             ACES AUTHORITY
+                    │
+        ┌───────────┴───────────┐
+        │                       │
+    AUTHORIZATION           POLICY
+        │                       │
+        └───────────┬───────────┘
+                    │
+              CONNECTOR PLANE
+                    │
+       ┌────────────┼────────────┐
+       │            │            │
+     Local        Native        MCP
+       │            │            │
+       └────────────┼────────────┘
+                    │
+                EXECUTION
+                    │
+               OBSERVATION
+                    │
+                 EVIDENCE
+                    │
+              VERIFICATION
+                    │
+               ACCEPTANCE
+                    │
+             CANONICAL REALITY
+```
+
+The canonical transition is therefore:
+
+**INTENT → AUTHORIZATION → CONNECTOR → EXECUTION → OBSERVATION → EVIDENCE → VERIFICATION → ACCEPTANCE → CANONICAL REALITY**
+
+No connector or protocol may bypass the Authority, Evidence, Verification or Acceptance boundaries.
+
+## 15. Authority / Connector invariants
+
+The following are mandatory architectural distinctions:
+
+`AUTHORITY ≠ CONNECTOR`
+
+`AUTHORITY ≠ PROTOCOL`
+
+`AUTHORITY ≠ CAPABILITY`
+
+`AUTHORITY ≠ EXECUTION`
+
+`MCP ≠ AUTHORITY`
+
+`CLA-FIRST ≠ CLA-ONLY`
+
+**Authority remains transport-independent and ACES-owned.**
+
+No integration mechanism receives ACES Authority merely by being native, local, standardized, trusted by a vendor, or technically capable.
+
+## 16. Security invariant
+
+ACES SHALL treat additional integration layers as additional security and epistemic boundaries.
+
+Therefore:
+
+> **The existence of a standardized protocol is not sufficient justification for introducing it into the execution path.**
+
+Where a direct and adequately governed CLA path exists, introducing MCP solely for convenience SHALL be considered an unnecessary architectural and security dependency.
+
+## 17. Architectural consequence
 
 ACES should remain model-, vendor-, harness- and connector-independent at the authority boundary.
 
@@ -184,18 +263,28 @@ DSH may serve as an Execution Kernel. Orca may serve as fleet/execution orchestr
 
 None receives ACES canonical authority merely by integration.
 
-## 15. Step 7 gate
+## 18. Step 7 gate
 
-**PASS CONDITION:** a minimal, implementation-neutral ACES boundary is defined such that external execution can be delegated while authority over acceptance and canonical state remains explicit, independently verifiable and fail-closed.
+**PASS CONDITION:** a minimal, implementation-neutral ACES boundary is defined such that external execution can be delegated while authority over acceptance and canonical state remains explicit, independently verifiable and fail-closed; connector/protocol selection remains subordinate to this authority boundary.
 
 **RESULT: PASS.**
 
-## 16. Step 7 conclusion
+## 19. Step 7 conclusion
 
 The minimum defensible ACES architectural boundary is not another agent runtime.
 
 It is the **Authority–Evidence–Reality boundary** that governs the transition:
 
 `EXTERNAL EFFECT → EVIDENCE → VERIFICATION → ACES ACCEPTANCE → CANONICAL REALITY`
+
+The integration mechanism is selected independently through a CLA-first Connector Policy:
+
+`LOCAL → NATIVE / FIRST-PARTY → DIRECT CONNECTOR → MCP → OTHER PROTOCOL / BRIDGE`
+
+with MCP permitted where its material value justifies the additional boundary.
+
+**Final Step 7 invariant:**
+
+> **ACES does not delegate Authority to the integration protocol. ACES chooses the transport according to architectural optimality, security, capability and interoperability requirements, while Authority always remains above the transport layer.**
 
 This is the boundary to carry into HDE-002 Step 8 — FINAL VERDICT.
