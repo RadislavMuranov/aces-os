@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 class KnowledgeObjectType(str, Enum):
@@ -50,15 +50,22 @@ class KnowledgeProvenance:
 
 @dataclass(frozen=True)
 class KnowledgeUpdateRequest:
+    """Mandatory promotion boundary object — not optional DTO.
+
+    request_id identifies the promotion *request* (replay of the same request).
+    It is NOT part of Knowledge object identity and is NOT authority by itself.
+    Authority remains: ESTABLISHED AcceptedState + PASSED VerificationResult + Evidence.
+    """
+
     request_id: str
     accepted_state_id: str
     evidence_id: str
     evidence_digest: str
-    knowledge_object_id: str
+    knowledge_object_id: str  # caller-proposed id; service may recompute canonical id
     object_type: KnowledgeObjectType
     truth_level: TruthLevel
     semantic_payload: Dict[str, Any]
-    semantic_identity: str  # stable identity within object_type for idempotency
+    semantic_identity: str
 
 
 @dataclass(frozen=True)
@@ -75,6 +82,7 @@ class KnowledgeObject:
     provenance: KnowledgeProvenance
     status: KnowledgeStatus
     created_at: str
+    originating_request_id: str = ""  # audit trail only; not identity
 
     def is_truth(self) -> bool:
         return False
@@ -98,7 +106,6 @@ class KnowledgeObject:
         return False
 
     def is_canonical_truth(self) -> bool:
-        # Explicit field may be Canonical level; does not imply Canon promotion authority
         return False
 
 
@@ -108,5 +115,5 @@ def knowledge_identity_key(
     object_type: str,
     semantic_identity: str,
 ) -> str:
-    """Deterministic Knowledge identity — not evidence_id alone."""
+    """Canonical Knowledge identity — NOT evidence_id alone, NOT request_id."""
     return "|".join([accepted_state_id, evidence_digest, object_type, semantic_identity])

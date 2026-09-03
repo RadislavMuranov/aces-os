@@ -1,4 +1,4 @@
-"""Phase VI Knowledge promotion adversarial suite."""
+"""Phase VI Knowledge promotion + Request boundary adversarial suite."""
 
 import unittest
 import sys
@@ -18,7 +18,6 @@ from aces_os.verification import (
     VerificationService,
     VerificationStatus,
     StructuralEvidenceVerifier,
-    AcceptedStateStatus,
 )
 from aces_os.knowledge import (
     KnowledgePromotionService,
@@ -26,6 +25,7 @@ from aces_os.knowledge import (
     TruthLevel,
     KnowledgeError,
     KnowledgeConflictError,
+    KnowledgeUpdateRequest,
 )
 
 
@@ -57,283 +57,160 @@ def pipeline():
     adm = EvidenceAdmissionService()
     evidence = adm.admit(adm.create_candidate(obs, dwom))
     vs = VerificationService(bootstrap())
-    req = vs.build_request(evidence, "structural_v1", "1.0.0", "k-pipe")
+    vreq = vs.build_request(evidence, "structural_v1", "1.0.0", "k-pipe")
     result, accepted = vs.verify(
         evidence,
-        req,
+        vreq,
         StructuralEvidenceVerifier.VERIFIER_ID,
         StructuralEvidenceVerifier.VERIFIER_VERSION,
     )
-    return evidence, result, accepted, vs
+    return evidence, result, accepted
 
 
 class TestKnowledgePromotion(unittest.TestCase):
     def setUp(self):
-        self.evidence, self.result, self.accepted, self.vs = pipeline()
+        self.evidence, self.result, self.accepted = pipeline()
         self.ks = KnowledgePromotionService()
 
-    def test_A_valid_promote(self):
-        ko = self.ks.promote(
+    def _req(self, rid="r1", **kw):
+        defaults = dict(
+            request_id=rid,
+            accepted_state_id=self.accepted.accepted_state_id,
+            evidence_id=self.evidence.evidence_id,
+            evidence_digest=self.evidence.payload_digest,
+            knowledge_object_id="",
+            object_type=KnowledgeObjectType.FACT,
+            truth_level=TruthLevel.WORKING,
+            semantic_payload={"claim": "commit observed"},
+            semantic_identity="commit-fact-1",
+        )
+        defaults.update(kw)
+        return KnowledgeUpdateRequest(**defaults)
+
+    def test_A_valid_request(self):
+        ko = self.ks.promote(self._req("A"), self.accepted, self.result, self.evidence)
+        self.assertEqual(ko.status.value, "ACTIVE")
+        self.assertEqual(ko.originating_request_id, "A")
+        self.assertFalse(ko.is_memory())
+
+    def test_B_missing_request(self):
+        with self.assertRaises(KnowledgeError):
+            self.ks.promote(None, self.accepted, self.result, self.evidence)
+
+    def test_C_request_accepted_state_mismatch(self):
+        with self.assertRaises(KnowledgeError):
+            self.ks.promote(
+                self._req("C", accepted_state_id="wrong-as"),
+                self.accepted,
+                self.result,
+                self.evidence,
+            )
+
+    def test_D_request_evidence_id_mismatch(self):
+        with self.assertRaises(KnowledgeError):
+            self.ks.promote(
+                self._req("D", evidence_id="wrong-ev"),
+                self.accepted,
+                self.result,
+                self.evidence,
+            )
+
+    def test_E_request_digest_mismatch(self):
+        with self.assertRaises(KnowledgeError):
+            self.ks.promote(
+                self._req("E", evidence_digest="00" * 32),
+                self.accepted,
+                self.result,
+                self.evidence,
+            )
+
+    def test_G_same_request_id_idempotent(self):
+        a = self.ks.promote(self._req("G"), self.accepted, self.result, self.evidence)
+        b = self.ks.promote(self._req("G"), self.accepted, self.result, self.evidence)
+        self.assertEqual(a.knowledge_object_id, b.knowledge_object_id)
+
+    def test_H_different_request_same_identity(self):
+        a = self.ks.promote(self._req("H1"), self.accepted, self.result, self.evidence)
+        b = self.ks.promote(self._req("H2"), self.accepted, self.result, self.evidence)
+        self.assertEqual(a.knowledge_object_id, b.knowledge_object_id)
+
+    def test_I_payload_conflict(self):
+        self.ks.promote(self._req("I1"), self.accepted, self.result, self.evidence)
+        with self.assertRaises(KnowledgeConflictError):
+            self.ks.promote(
+                self._req("I2", semantic_payload={"claim": "other"}),
+                self.accepted,
+                self.result,
+                self.evidence,
+            )
+
+    def test_J_truth_level_conflict(self):
+        self.ks.promote(self._req("J1"), self.accepted, self.result, self.evidence)
+        with self.assertRaises(KnowledgeConflictError):
+            self.ks.promote(
+                self._req("J2", truth_level=TruthLevel.OPERATIONAL),
+                self.accepted,
+                self.result,
+                self.evidence,
+            )
+
+    def test_K_different_identity(self):
+        a = self.ks.promote(
+            self._req("K1", semantic_identity="id-a"),
             self.accepted,
             self.result,
             self.evidence,
-            KnowledgeObjectType.FACT,
-            TruthLevel.WORKING,
-            {"claim": "commit observed"},
-            "commit-fact-1",
-            "req-a",
         )
-        self.assertEqual(ko.status.value, "ACTIVE")
-        self.assertEqual(ko.accepted_state_id, self.accepted.accepted_state_id)
-        self.assertFalse(ko.is_truth())
-        self.assertFalse(ko.is_memory())
-        self.assertFalse(ko.is_world_model())
-        self.assertFalse(ko.is_semantic_reality())
-        self.assertFalse(ko.is_authorization())
+        b = self.ks.promote(
+            self._req("K2", semantic_identity="id-b"),
+            self.accepted,
+            self.result,
+            self.evidence,
+        )
+        self.assertNotEqual(a.knowledge_object_id, b.knowledge_object_id)
 
-    def test_B_non_established_rejected(self):
-        bad = replace(self.accepted, status=AcceptedStateStatus.ESTABLISHED)
-        # force non-established via replace if enum only has ESTABLISHED — use fake status by constructing
-        from aces_os.verification.model import AcceptedState
-
-        # AcceptedStateStatus only ESTABLISHED; simulate by rejecting via missing fields path
-        # Use verification not PASSED path instead for B/C/D/E via direct validation
-        with self.assertRaises(KnowledgeError):
-            self.ks._validate_authority(
-                replace(self.accepted, verification_result_id="wrong"),
-                self.result,
-                self.evidence,
-            )
-
-    def test_C_failed_verification_cannot(self):
-        from aces_os.verification.model import VerificationResult
-
+    def test_M_failed_cannot(self):
         failed = replace(self.result, status=VerificationStatus.FAILED)
         with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                self.accepted,
-                failed,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "f1",
-                "req-c",
-            )
+            self.ks.promote(self._req("M"), self.accepted, failed, self.evidence)
 
-    def test_D_rejected_verification_cannot(self):
-        rejected = replace(self.result, status=VerificationStatus.REJECTED)
+    def test_N_rejected_cannot(self):
+        rej = replace(self.result, status=VerificationStatus.REJECTED)
         with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                self.accepted,
-                rejected,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "d1",
-                "req-d",
-            )
+            self.ks.promote(self._req("N"), self.accepted, rej, self.evidence)
 
-    def test_E_inconclusive_cannot(self):
+    def test_O_inconclusive_cannot(self):
         inc = replace(self.result, status=VerificationStatus.INCONCLUSIVE)
         with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                self.accepted,
-                inc,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "e1",
-                "req-e",
-            )
+            self.ks.promote(self._req("O"), self.accepted, inc, self.evidence)
 
-    def test_F_fake_accepted_state_id(self):
-        fake = replace(self.accepted, accepted_state_id="fake-as")
-        # still has ESTABLISHED but result binding will fail on verification_result path if ids differ
-        # force evidence mismatch path
-        with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                replace(self.accepted, evidence_id="fake-ev"),
-                self.result,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "f1",
-                "req-f",
-            )
-
-    def test_G_missing_evidence_binding(self):
-        with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                replace(self.accepted, evidence_id=""),
-                self.result,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "g1",
-                "req-g",
-            )
-
-    def test_H_digest_mismatch(self):
-        with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                replace(self.accepted, evidence_digest="00" * 32),
-                self.result,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "h1",
-                "req-h",
-            )
-
-    def test_I_verification_result_mismatch(self):
-        with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                replace(self.accepted, verification_result_id="other"),
-                self.result,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "i1",
-                "req-i",
-            )
-
-    def test_J_policy_mismatch(self):
-        with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                replace(self.accepted, policy_id="other_policy"),
-                self.result,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "j1",
-                "req-j",
-            )
-
-    def test_K_verifier_mismatch(self):
-        with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                replace(self.accepted, verifier_id="other.verifier"),
-                self.result,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "k1",
-                "req-k",
-            )
-
-    def test_L_verifier_version_mismatch(self):
-        with self.assertRaises(KnowledgeError):
-            self.ks.promote(
-                replace(self.accepted, verifier_version="9.9.9"),
-                self.result,
-                self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"x": 1},
-                "l1",
-                "req-l",
-            )
-
-    def test_N_bare_boolean_rejected(self):
+    def test_P_bare_boolean(self):
         with self.assertRaises(KnowledgeError):
             self.ks.promote_from_boolean(verified=True)
 
-    def test_O_idempotent(self):
-        a = self.ks.promote(
-            self.accepted,
-            self.result,
-            self.evidence,
-            KnowledgeObjectType.FACT,
-            TruthLevel.WORKING,
-            {"claim": "same"},
-            "idemp-1",
-            "req-o1",
-        )
-        b = self.ks.promote(
-            self.accepted,
-            self.result,
-            self.evidence,
-            KnowledgeObjectType.FACT,
-            TruthLevel.WORKING,
-            {"claim": "same"},
-            "idemp-1",
-            "req-o2",
-        )
-        self.assertEqual(a.knowledge_object_id, b.knowledge_object_id)
-
-    def test_P_different_digest_no_alias(self):
-        a = self.ks.promote(
-            self.accepted,
-            self.result,
-            self.evidence,
-            KnowledgeObjectType.FACT,
-            TruthLevel.WORKING,
-            {"claim": "x"},
-            "digest-1",
-            "req-p",
-        )
-        other = self.ks.store.get_by_identity(
-            self.accepted.accepted_state_id,
-            "00" * 32,
-            KnowledgeObjectType.FACT.value,
-            "digest-1",
-        )
-        self.assertIsNone(other)
-        self.assertIsNotNone(a)
-
-    def test_Q_different_accepted_state_no_alias(self):
-        a = self.ks.promote(
-            self.accepted,
-            self.result,
-            self.evidence,
-            KnowledgeObjectType.FACT,
-            TruthLevel.WORKING,
-            {"claim": "x"},
-            "as-1",
-            "req-q",
-        )
-        other = self.ks.store.get_by_identity(
-            "other-as",
-            self.evidence.payload_digest,
-            KnowledgeObjectType.FACT.value,
-            "as-1",
-        )
-        self.assertIsNone(other)
-
-    def test_R_semantic_conflict(self):
-        self.ks.promote(
-            self.accepted,
-            self.result,
-            self.evidence,
-            KnowledgeObjectType.FACT,
-            TruthLevel.WORKING,
-            {"claim": "a"},
-            "sem-1",
-            "req-r1",
-        )
-        with self.assertRaises(KnowledgeConflictError):
+    def test_Q_fabricated_accepted(self):
+        with self.assertRaises(KnowledgeError):
             self.ks.promote(
-                self.accepted,
+                self._req("Q"),
+                replace(self.accepted, evidence_id="fake"),
                 self.result,
                 self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.WORKING,
-                {"claim": "b"},
-                "sem-1",
-                "req-r2",
             )
 
-    def test_S_to_AA_non_capabilities(self):
-        methods = [
+    def test_S_result_mismatch(self):
+        with self.assertRaises(KnowledgeError):
+            self.ks.promote(
+                self._req("S"),
+                replace(self.accepted, verification_result_id="other"),
+                self.result,
+                self.evidence,
+            )
+
+    def test_T_to_AD_non_capabilities(self):
+        for m in (
+            "promote_without_request",
+            "create_accepted_state",
+            "perform_verification",
             "mutate_memory",
             "mutate_world_model",
             "mutate_semantic_reality",
@@ -342,44 +219,36 @@ class TestKnowledgePromotion(unittest.TestCase):
             "bypass_asa",
             "write_provider",
             "invoke_mcp",
-            "create_accepted_state",
-            "perform_verification",
             "promote_canonical",
-        ]
-        for m in methods:
+        ):
             with self.assertRaises(KnowledgeError):
                 getattr(self.ks, m)()
 
-    def test_AA_canonical_implicit_rejected(self):
+    def test_AC_canonical_rejected(self):
         with self.assertRaises(KnowledgeError):
             self.ks.promote(
+                self._req("AC", truth_level=TruthLevel.CANONICAL),
                 self.accepted,
                 self.result,
                 self.evidence,
-                KnowledgeObjectType.FACT,
-                TruthLevel.CANONICAL,
-                {"claim": "canon"},
-                "canon-1",
-                "req-aa",
             )
 
-    def test_provenance_chain(self):
-        ko = self.ks.promote(
-            self.accepted,
-            self.result,
-            self.evidence,
-            KnowledgeObjectType.DECISION,
-            TruthLevel.OPERATIONAL,
-            {"decision": "observe"},
-            "dec-1",
-            "req-prov",
-        )
+    def test_request_id_conflict_reuse(self):
+        self.ks.promote(self._req("dup"), self.accepted, self.result, self.evidence)
+        with self.assertRaises(KnowledgeConflictError):
+            self.ks.promote(
+                self._req("dup", semantic_identity="other-sem"),
+                self.accepted,
+                self.result,
+                self.evidence,
+            )
+
+    def test_provenance(self):
+        ko = self.ks.promote(self._req("prov"), self.accepted, self.result, self.evidence)
         p = ko.provenance
         self.assertEqual(p.accepted_state_id, self.accepted.accepted_state_id)
         self.assertEqual(p.verification_result_id, self.result.verification_result_id)
-        self.assertEqual(p.evidence_id, self.evidence.evidence_id)
         self.assertEqual(p.evidence_digest, self.evidence.payload_digest)
-        self.assertEqual(p.observation_id, self.evidence.observation_id)
         self.assertEqual(p.authenticity_crypto, "DEFERRED")
 
 

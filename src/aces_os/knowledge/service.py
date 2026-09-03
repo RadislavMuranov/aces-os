@@ -1,10 +1,10 @@
-"""KnowledgePromotionService — only ESTABLISHED AcceptedState promotes Knowledge."""
+"""KnowledgePromotionService — KnowledgeUpdateRequest is mandatory boundary."""
 
 from __future__ import annotations
 
 import hashlib
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from aces_os.evidence.model import Evidence
 from aces_os.verification.model import (
@@ -16,12 +16,10 @@ from aces_os.verification.model import (
 
 from .model import (
     KnowledgeObject,
-    KnowledgeObjectType,
     KnowledgeProvenance,
     KnowledgeStatus,
     KnowledgeUpdateRequest,
     TruthLevel,
-    knowledge_identity_key,
 )
 from .store import InMemoryKnowledgeStore
 
@@ -44,51 +42,89 @@ def _id(prefix: str, *parts: str) -> str:
 
 
 class KnowledgePromotionService:
-    """Promote Knowledge only from validated ESTABLISHED AcceptedState."""
+    """Promote only via KnowledgeUpdateRequest + ESTABLISHED AcceptedState."""
 
     def __init__(self, store: Optional[InMemoryKnowledgeStore] = None) -> None:
         self.store = store or InMemoryKnowledgeStore()
 
+    def build_request(
+        self,
+        accepted_state: AcceptedState,
+        evidence: Evidence,
+        object_type,
+        truth_level: TruthLevel,
+        semantic_payload: dict,
+        semantic_identity: str,
+        request_id: str,
+        knowledge_object_id: str = "",
+    ) -> KnowledgeUpdateRequest:
+        """Factory for a consistent KnowledgeUpdateRequest."""
+        if not request_id:
+            raise KnowledgeError("missing request_id")
+        return KnowledgeUpdateRequest(
+            request_id=request_id,
+            accepted_state_id=accepted_state.accepted_state_id,
+            evidence_id=evidence.evidence_id,
+            evidence_digest=evidence.payload_digest,
+            knowledge_object_id=knowledge_object_id or "",
+            object_type=object_type,
+            truth_level=truth_level,
+            semantic_payload=dict(semantic_payload),
+            semantic_identity=semantic_identity,
+        )
+
     def promote(
         self,
+        request: KnowledgeUpdateRequest,
         accepted_state: AcceptedState,
         verification_result: VerificationResult,
         evidence: Evidence,
-        object_type: KnowledgeObjectType,
-        truth_level: TruthLevel,
-        semantic_payload: Dict[str, Any],
-        semantic_identity: str,
-        request_id: str,
     ) -> KnowledgeObject:
-        self._validate_authority(accepted_state, verification_result, evidence)
+        if request is None:
+            raise KnowledgeError("missing KnowledgeUpdateRequest")
+        if not request.request_id:
+            raise KnowledgeError("missing request_id")
 
-        if truth_level == TruthLevel.CANONICAL:
+        self._validate_authority(accepted_state, verification_result, evidence)
+        self._validate_request(request, accepted_state, evidence)
+
+        if request.truth_level == TruthLevel.CANONICAL:
             raise KnowledgeError(
                 "Canonical truth cannot be established implicitly; requires separate authority"
             )
-
-        if not semantic_identity:
+        if not request.semantic_identity:
             raise KnowledgeError("missing semantic_identity")
+
+        # Same request_id replay: deterministic same object if fingerprint matches
+        prior_req = self.store.get_by_request_id(request.request_id)
+        if prior_req is not None:
+            obj, prior_fp = prior_req
+            fp = InMemoryKnowledgeStore.request_fingerprint(request)
+            if fp != prior_fp:
+                raise KnowledgeConflictError("request_id reused with conflicting content")
+            return obj
 
         kid = _id(
             "ko",
             accepted_state.accepted_state_id,
             evidence.payload_digest,
-            object_type.value,
-            semantic_identity,
+            request.object_type.value,
+            request.semantic_identity,
         )
 
         existing = self.store.get_by_identity(
             accepted_state.accepted_state_id,
             evidence.payload_digest,
-            object_type.value,
-            semantic_identity,
+            request.object_type.value,
+            request.semantic_identity,
         )
         if existing is not None:
-            if existing.semantic_payload != semantic_payload:
+            if existing.semantic_payload != request.semantic_payload:
                 raise KnowledgeConflictError("semantic_payload conflict for same identity")
-            if existing.truth_level != truth_level:
+            if existing.truth_level != request.truth_level:
                 raise KnowledgeConflictError("truth_level conflict for same identity")
+            # Different request_id, same Knowledge identity + same payload → same object
+            self.store.put(existing, request)
             return existing
 
         prov = KnowledgeProvenance(
@@ -111,10 +147,10 @@ class KnowledgePromotionService:
 
         obj = KnowledgeObject(
             knowledge_object_id=kid,
-            object_type=object_type,
-            truth_level=truth_level,
-            semantic_payload=dict(semantic_payload),
-            semantic_identity=semantic_identity,
+            object_type=request.object_type,
+            truth_level=request.truth_level,
+            semantic_payload=dict(request.semantic_payload),
+            semantic_identity=request.semantic_identity,
             source_evidence_id=evidence.evidence_id,
             evidence_digest=evidence.payload_digest,
             accepted_state_id=accepted_state.accepted_state_id,
@@ -122,9 +158,27 @@ class KnowledgePromotionService:
             provenance=prov,
             status=KnowledgeStatus.ACTIVE,
             created_at=_utc_now(),
+            originating_request_id=request.request_id,
         )
-        self.store.put(obj)
+        self.store.put(obj, request)
         return obj
+
+    def _validate_request(
+        self,
+        request: KnowledgeUpdateRequest,
+        accepted_state: AcceptedState,
+        evidence: Evidence,
+    ) -> None:
+        if request.accepted_state_id != accepted_state.accepted_state_id:
+            raise KnowledgeError("request accepted_state_id mismatch")
+        if request.evidence_id != evidence.evidence_id:
+            raise KnowledgeError("request evidence_id mismatch")
+        if request.evidence_digest != evidence.payload_digest:
+            raise KnowledgeError("request evidence_digest mismatch")
+        if request.evidence_id != accepted_state.evidence_id:
+            raise KnowledgeError("request evidence_id vs AcceptedState mismatch")
+        if request.evidence_digest != accepted_state.evidence_digest:
+            raise KnowledgeError("request evidence_digest vs AcceptedState mismatch")
 
     def _validate_authority(
         self,
@@ -143,7 +197,6 @@ class KnowledgePromotionService:
         if evidence is None:
             raise KnowledgeError("missing Evidence")
 
-        # Exact AcceptedState ↔ VerificationResult binding
         if accepted_state.verification_result_id != verification_result.verification_result_id:
             raise KnowledgeError("verification_result_id mismatch")
         if accepted_state.evidence_id != verification_result.evidence_id:
@@ -159,13 +212,11 @@ class KnowledgePromotionService:
         if accepted_state.verifier_version != verification_result.verifier_version:
             raise KnowledgeError("verifier_version mismatch")
 
-        # Exact AcceptedState ↔ Evidence binding
         if accepted_state.evidence_id != evidence.evidence_id:
             raise KnowledgeError("evidence_id mismatch")
         if accepted_state.evidence_digest != evidence.payload_digest:
             raise KnowledgeError("evidence_digest mismatch")
 
-        # No bare-token path: require concrete IDs
         for label, val in (
             ("accepted_state_id", accepted_state.accepted_state_id),
             ("verification_result_id", accepted_state.verification_result_id),
@@ -175,9 +226,11 @@ class KnowledgePromotionService:
             if not val:
                 raise KnowledgeError(f"missing {label}")
 
-    # Explicit non-capabilities
     def promote_from_boolean(self, *a, **k):
         raise KnowledgeError("bare verified/passed boolean cannot promote Knowledge")
+
+    def promote_without_request(self, *a, **k):
+        raise KnowledgeError("KnowledgeUpdateRequest is mandatory")
 
     def create_accepted_state(self, *a, **k):
         raise KnowledgeError("Knowledge cannot establish AcceptedState")

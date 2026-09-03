@@ -1,9 +1,4 @@
-"""Phase VI — Knowledge promotion from AcceptedState.
-
-Knowledge ≠ Truth ≠ Authority ≠ Memory ≠ World Model ≠ Semantic Reality.
-Only ESTABLISHED AcceptedState may promote Knowledge.
-Canonical truth is NOT implicit.
-"""
+"""Phase VI — Knowledge promotion from AcceptedState via KnowledgeUpdateRequest."""
 
 from .model import (
     KnowledgeObjectType,
