@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Tuple
+from typing import Tuple
 
 from aces_os.connector.resource import ResourceRef
 
@@ -77,12 +77,17 @@ class VerificationResult:
 
 @dataclass(frozen=True)
 class AcceptedState:
-    """Evidence passed authorized verification — not universal truth."""
+    """Evidence passed authorized verification under exact verification identity.
+
+    Bound to evidence_id + evidence_digest + policy + verifier — not evidence_id alone.
+    Not universal truth.
+    """
 
     accepted_state_id: str
     evidence_id: str
     verification_result_id: str
     verifier_id: str
+    verifier_version: str
     policy_id: str
     policy_version: str
     status: AcceptedStateStatus
@@ -104,3 +109,24 @@ class AcceptedState:
 
     def is_truth(self) -> bool:
         return False
+
+
+def accepted_identity_key(
+    evidence_id: str,
+    evidence_digest: str,
+    policy_id: str,
+    policy_version: str,
+    verifier_id: str,
+    verifier_version: str,
+) -> str:
+    """Canonical verification identity for AcceptedState lookup (deterministic)."""
+    return "|".join(
+        [
+            evidence_id,
+            evidence_digest,
+            policy_id,
+            policy_version,
+            verifier_id,
+            verifier_version,
+        ]
+    )

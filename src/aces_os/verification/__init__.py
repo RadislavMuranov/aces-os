@@ -3,6 +3,7 @@
 Evidence ≠ Verification ≠ Authorization.
 AcceptedState ≠ Knowledge ≠ Semantic Reality ≠ Authority.
 Only trusted PASSED verification establishes AcceptedState.
+AcceptedState identity = full verification identity (not evidence_id alone).
 """
 
 from .model import (
@@ -13,6 +14,7 @@ from .model import (
     AcceptedStateStatus,
     VerificationPolicy,
     VerifierDescriptor,
+    accepted_identity_key,
 )
 from .registry import TrustedVerifierRegistry, RegistryError
 from .service import VerificationService, VerificationError, VerificationConflictError
@@ -27,6 +29,7 @@ __all__ = [
     "AcceptedStateStatus",
     "VerificationPolicy",
     "VerifierDescriptor",
+    "accepted_identity_key",
     "TrustedVerifierRegistry",
     "RegistryError",
     "VerificationService",

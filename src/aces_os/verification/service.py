@@ -14,6 +14,7 @@ from .model import (
     VerificationRequest,
     VerificationResult,
     VerificationStatus,
+    accepted_identity_key,
 )
 from .registry import TrustedVerifierRegistry, RegistryError
 from .store import InMemoryVerificationStore
@@ -103,7 +104,9 @@ class VerificationService:
                 str(e),
             )
             self.store.put_request(request)
-            self.store.put_result(result, self._replay_key(request, evidence, verifier_id, verifier_version))
+            self.store.put_result(
+                result, self._replay_key(request, evidence, verifier_id, verifier_version)
+            )
             return result, None
 
         replay_key = self._replay_key(request, evidence, verifier_id, verifier_version)
@@ -111,37 +114,79 @@ class VerificationService:
         if prior is not None:
             if prior.evidence_digest != evidence.payload_digest:
                 raise VerificationConflictError("replay digest conflict")
-            accepted = self.store.get_accepted_by_evidence(evidence.evidence_id)
+            accepted = self.store.get_accepted_by_identity(
+                evidence.evidence_id,
+                evidence.payload_digest,
+                request.verification_policy_id,
+                request.verification_policy_version,
+                verifier_id,
+                verifier_version,
+            )
+            # Only return AcceptedState if prior was PASSED and binding matches result
+            if accepted is not None and prior.status != VerificationStatus.PASSED:
+                accepted = None
+            if accepted is not None and accepted.verification_result_id != prior.verification_result_id:
+                raise VerificationConflictError("AcceptedState/Result binding mismatch")
             return prior, accepted
 
-        # Only known structural verifier implementation in Phase V
         if (
             verifier_id != StructuralEvidenceVerifier.VERIFIER_ID
             or verifier_version != StructuralEvidenceVerifier.VERIFIER_VERSION
         ):
-            status, reason = VerificationStatus.REJECTED, "verifier_implementation_not_bound"
+            # Alternate trusted verifiers without bound implementation: REJECTED
+            # (structural is the only executable method in Phase V)
+            if verifier_id == StructuralEvidenceVerifier.VERIFIER_ID:
+                status, reason = VerificationStatus.REJECTED, "verifier_version_not_bound"
+            else:
+                status, reason = VerificationStatus.REJECTED, "verifier_implementation_not_bound"
         else:
             status, reason = self._structural.verify(evidence)
 
         result = self._make_result(
-            request, evidence, verifier_desc.verifier_id, verifier_desc.verifier_version, status, reason
+            request,
+            evidence,
+            verifier_desc.verifier_id,
+            verifier_desc.verifier_version,
+            status,
+            reason,
         )
         self.store.put_request(request)
         self.store.put_result(result, replay_key)
 
         accepted: Optional[AcceptedState] = None
         if result.status == VerificationStatus.PASSED:
-            existing = self.store.get_accepted_by_evidence(evidence.evidence_id)
+            existing = self.store.get_accepted_by_identity(
+                evidence.evidence_id,
+                evidence.payload_digest,
+                result.policy_id,
+                result.policy_version,
+                result.verifier_id,
+                result.verifier_version,
+            )
             if existing is not None:
-                accepted = existing
+                if existing.verification_result_id != result.verification_result_id:
+                    # Same identity should have been caught by replay; treat as conflict
+                    if existing.evidence_digest != evidence.payload_digest:
+                        raise VerificationConflictError("identity digest conflict")
+                    accepted = existing
+                else:
+                    accepted = existing
             else:
                 accepted = AcceptedState(
                     accepted_state_id=_id(
-                        "as", evidence.evidence_id, result.verification_result_id
+                        "as",
+                        evidence.evidence_id,
+                        evidence.payload_digest,
+                        result.policy_id,
+                        result.policy_version,
+                        result.verifier_id,
+                        result.verifier_version,
+                        result.verification_result_id,
                     ),
                     evidence_id=evidence.evidence_id,
                     verification_result_id=result.verification_result_id,
                     verifier_id=result.verifier_id,
+                    verifier_version=result.verifier_version,
                     policy_id=result.policy_id,
                     policy_version=result.policy_version,
                     status=AcceptedStateStatus.ESTABLISHED,
@@ -162,15 +207,13 @@ class VerificationService:
         verifier_id: str,
         verifier_version: str,
     ) -> str:
-        return "|".join(
-            [
-                evidence.evidence_id,
-                evidence.payload_digest,
-                request.verification_policy_id,
-                request.verification_policy_version,
-                verifier_id,
-                verifier_version,
-            ]
+        return accepted_identity_key(
+            evidence.evidence_id,
+            evidence.payload_digest,
+            request.verification_policy_id,
+            request.verification_policy_version,
+            verifier_id,
+            verifier_version,
         )
 
     def _validate_binding(self, evidence: Evidence, request: VerificationRequest) -> None:
@@ -217,7 +260,6 @@ class VerificationService:
             authenticity_crypto="DEFERRED",
         )
 
-    # Explicit non-capabilities
     def establish_passed(self, *a, **k):
         raise VerificationError("caller cannot set PASSED")
 

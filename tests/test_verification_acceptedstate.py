@@ -17,7 +17,6 @@ from aces_os.verification import (
     VerificationStatus,
     AcceptedStateStatus,
     VerificationError,
-    VerificationConflictError,
     StructuralEvidenceVerifier,
     RegistryError,
 )
@@ -75,6 +74,7 @@ class TestVerificationAcceptedState(unittest.TestCase):
         self.assertEqual(result.status, VerificationStatus.PASSED)
         self.assertIsNotNone(accepted)
         self.assertEqual(accepted.status, AcceptedStateStatus.ESTABLISHED)
+        self.assertEqual(accepted.verifier_version, StructuralEvidenceVerifier.VERIFIER_VERSION)
         self.assertFalse(accepted.is_knowledge())
         self.assertFalse(accepted.is_truth())
         self.assertFalse(accepted.is_authorization())
@@ -169,12 +169,13 @@ class TestVerificationAcceptedState(unittest.TestCase):
 
     def test_digest_binding_on_result(self):
         req = self.vs.build_request(self.evidence, "structural_v1", "1.0.0", "k7")
-        result, _ = self.vs.verify(
+        result, accepted = self.vs.verify(
             self.evidence, req,
             StructuralEvidenceVerifier.VERIFIER_ID,
             StructuralEvidenceVerifier.VERIFIER_VERSION,
         )
         self.assertEqual(result.evidence_digest, self.evidence.payload_digest)
+        self.assertEqual(accepted.evidence_digest, self.evidence.payload_digest)
 
 
 if __name__ == "__main__":

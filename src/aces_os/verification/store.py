@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 
-from .model import AcceptedState, VerificationRequest, VerificationResult
+from .model import AcceptedState, VerificationRequest, VerificationResult, accepted_identity_key
 
 
 class InMemoryVerificationStore:
@@ -12,9 +12,10 @@ class InMemoryVerificationStore:
         self._requests: Dict[str, VerificationRequest] = {}
         self._results: Dict[str, VerificationResult] = {}
         self._accepted: Dict[str, AcceptedState] = {}
-        # key: evidence_id|policy|verifier|digest -> result_id
+        # key: full verification identity -> result_id
         self._replay: Dict[str, str] = {}
-        self._accepted_by_evidence: Dict[str, str] = {}
+        # key: full verification identity -> accepted_state_id (NOT evidence_id alone)
+        self._accepted_by_identity: Dict[str, str] = {}
 
     def put_request(self, req: VerificationRequest) -> None:
         self._requests[req.verification_request_id] = req
@@ -32,11 +33,35 @@ class InMemoryVerificationStore:
 
     def put_accepted(self, state: AcceptedState) -> None:
         self._accepted[state.accepted_state_id] = state
-        self._accepted_by_evidence[state.evidence_id] = state.accepted_state_id
+        key = accepted_identity_key(
+            state.evidence_id,
+            state.evidence_digest,
+            state.policy_id,
+            state.policy_version,
+            state.verifier_id,
+            state.verifier_version,
+        )
+        self._accepted_by_identity[key] = state.accepted_state_id
 
     def get_accepted(self, accepted_state_id: str) -> Optional[AcceptedState]:
         return self._accepted.get(accepted_state_id)
 
-    def get_accepted_by_evidence(self, evidence_id: str) -> Optional[AcceptedState]:
-        aid = self._accepted_by_evidence.get(evidence_id)
+    def get_accepted_by_identity(
+        self,
+        evidence_id: str,
+        evidence_digest: str,
+        policy_id: str,
+        policy_version: str,
+        verifier_id: str,
+        verifier_version: str,
+    ) -> Optional[AcceptedState]:
+        key = accepted_identity_key(
+            evidence_id,
+            evidence_digest,
+            policy_id,
+            policy_version,
+            verifier_id,
+            verifier_version,
+        )
+        aid = self._accepted_by_identity.get(key)
         return self._accepted.get(aid) if aid else None
