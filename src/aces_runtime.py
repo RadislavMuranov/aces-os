@@ -1,6 +1,6 @@
 """Minimal ACES runtime skeleton.
 
-I-3 implementation target: explicit Authority / Policy decision.
+I-4 implementation target: explicit Connector Resolution separated from Execution.
 No external connector, model, harness, or BASTION dependency is introduced here.
 """
 
@@ -32,6 +32,21 @@ class AuthorizationDecision:
 
 
 @dataclass(frozen=True)
+class ConnectorPlan:
+    connector_id: str
+    capability: str
+    protocol: str
+    path: str
+
+
+@dataclass(frozen=True)
+class ExecutionReceipt:
+    connector_id: str
+    action: str
+    result: Dict[str, Any]
+
+
+@dataclass(frozen=True)
 class Observation:
     state: Dict[str, Any]
 
@@ -54,7 +69,10 @@ class ACESRuntime:
     POLICY_ID = "minimum-policy-v1"
     ALLOW_RULE_ID = "allow-valid-intent"
     DENY_RULE_ID = "deny-context-flag"
-    DEFAULT_SCOPE = "controlled-local-executor"
+    CONNECTOR_ID = "controlled-local"
+    CAPABILITY = "state-write"
+    PROTOCOL = "native-local"
+    PATH = "local-executor"
 
     def __init__(self, executor: Optional[Callable[[Intent, Context], Dict[str, Any]]] = None):
         self._executor = executor or self._default_executor
@@ -62,7 +80,6 @@ class ACESRuntime:
 
     @staticmethod
     def resolve_context(intent: Intent, values: Optional[Dict[str, Any]] = None) -> Context:
-        """Resolve deterministic context and record its provenance."""
         resolved = dict(values or {})
         provenance = {key: "deterministic-input" for key in resolved}
         return Context(resolved, provenance)
@@ -70,17 +87,21 @@ class ACESRuntime:
     def run(self, intent: Intent, context: Context) -> CycleResult:
         decision = self.authorize(intent, context)
         if not decision.allowed:
-            return self._result(intent, context, decision, None, None, "REJECTED")
+            return self._result(intent, context, decision, None, None, None, "REJECTED")
 
-        execution = self._executor(intent, context)
-        observation = Observation(state=dict(execution))
+        plan = self.resolve_connector(intent, context, decision)
+        if plan is None:
+            return self._result(intent, context, decision, None, None, None, "REJECTED")
+
+        receipt = self.execute(intent, context, plan)
+        observation = Observation(state=dict(receipt.result))
         verification = self.verify(intent, observation)
         status = "ACCEPTED" if verification.verified else "UNVERIFIED"
 
         if verification.verified:
             self._state[intent.target] = dict(observation.state)
 
-        return self._result(intent, context, decision, execution, verification, status)
+        return self._result(intent, context, decision, plan, receipt, verification, status)
 
     def authorize(self, intent: Intent, context: Context) -> AuthorizationDecision:
         scope = f"target:{intent.target}" if intent.target else "target:unknown"
@@ -89,6 +110,20 @@ class ACESRuntime:
         if context.values.get("deny") is True:
             return AuthorizationDecision(False, "policy denied", self.POLICY_ID, self.DENY_RULE_ID, scope)
         return AuthorizationDecision(True, "policy allowed", self.POLICY_ID, self.ALLOW_RULE_ID, scope)
+
+    def resolve_connector(self, intent: Intent, context: Context,
+                          decision: AuthorizationDecision) -> Optional[ConnectorPlan]:
+        """Resolve an allowed connector/capability only after authorization."""
+        if not decision.allowed:
+            return None
+        if decision.scope != f"target:{intent.target}":
+            return None
+        return ConnectorPlan(self.CONNECTOR_ID, self.CAPABILITY, self.PROTOCOL, self.PATH)
+
+    def execute(self, intent: Intent, context: Context, plan: ConnectorPlan) -> ExecutionReceipt:
+        """Execution consumes a resolved plan; it does not perform authorization."""
+        result = self._executor(intent, context)
+        return ExecutionReceipt(plan.connector_id, intent.action, dict(result))
 
     @staticmethod
     def verify(intent: Intent, observation: Observation) -> VerificationResult:
@@ -99,24 +134,25 @@ class ACESRuntime:
         return VerificationResult(False, "desired state not observed")
 
     def _result(self, intent: Intent, context: Context, decision: AuthorizationDecision,
-                execution: Optional[Dict[str, Any]], verification: Optional[VerificationResult],
-                status: str) -> CycleResult:
+                plan: Optional[ConnectorPlan], receipt: Optional[ExecutionReceipt],
+                verification: Optional[VerificationResult], status: str) -> CycleResult:
         evidence = {
             "intent_id": intent.intent_id,
             "normalized_intent": {"action": intent.action, "target": intent.target, "desired_state": intent.desired_state},
             "context": context.values,
             "context_provenance": context.provenance,
             "authorization": {
-                "allowed": decision.allowed,
-                "reason": decision.reason,
-                "policy_id": decision.policy_id,
-                "rule_id": decision.rule_id,
-                "scope": decision.scope,
+                "allowed": decision.allowed, "reason": decision.reason,
+                "policy_id": decision.policy_id, "rule_id": decision.rule_id, "scope": decision.scope,
             },
-            "connector": "controlled-local-executor",
-            "action": intent.action,
-            "execution": execution,
-            "observation": execution,
+            "connector_plan": None if plan is None else {
+                "connector_id": plan.connector_id, "capability": plan.capability,
+                "protocol": plan.protocol, "path": plan.path,
+            },
+            "execution": None if receipt is None else {
+                "connector_id": receipt.connector_id, "action": receipt.action, "result": receipt.result,
+            },
+            "observation": None if receipt is None else receipt.result,
             "verification": None if verification is None else {"verified": verification.verified, "reason": verification.reason},
             "acceptance": status == "ACCEPTED",
             "accepted_state": self._state.get(intent.target),
