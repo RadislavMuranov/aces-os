@@ -1,0 +1,22 @@
+name: ACES I-1F Runtime Tests
+
+on:
+  push:
+    branches:
+      - architecture/priority-realization-roadmap-v2
+  pull_request:
+
+jobs:
+  i-1f:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test runner
+        run: python -m pip install pytest
+      - name: Execute I-1F tests
+        run: python -m pytest -q tests/test_aces_runtime.py
