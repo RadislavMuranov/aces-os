@@ -1,6 +1,6 @@
 """Minimal ACES runtime skeleton.
 
-I-1E implementation target: deterministic control flow only.
+I-2 implementation target: explicit Intent IR and deterministic Context Resolution.
 No external connector, model, harness, or BASTION dependency is introduced here.
 """
 
@@ -19,6 +19,7 @@ class Intent:
 @dataclass(frozen=True)
 class Context:
     values: Dict[str, Any]
+    provenance: Dict[str, str]
 
 
 @dataclass(frozen=True)
@@ -50,6 +51,13 @@ class ACESRuntime:
     def __init__(self, executor: Optional[Callable[[Intent, Context], Dict[str, Any]]] = None):
         self._executor = executor or self._default_executor
         self._state: Dict[str, Dict[str, Any]] = {}
+
+    @staticmethod
+    def resolve_context(intent: Intent, values: Optional[Dict[str, Any]] = None) -> Context:
+        """Resolve deterministic context and record its provenance."""
+        resolved = dict(values or {})
+        provenance = {key: "deterministic-input" for key in resolved}
+        return Context(resolved, provenance)
 
     def run(self, intent: Intent, context: Context) -> CycleResult:
         decision = self.authorize(intent, context)
@@ -100,6 +108,7 @@ class ACESRuntime:
                 "desired_state": intent.desired_state,
             },
             "context": context.values,
+            "context_provenance": context.provenance,
             "authorization": {
                 "allowed": decision.allowed,
                 "reason": decision.reason,
@@ -122,5 +131,5 @@ class ACESRuntime:
 
     @staticmethod
     def _default_executor(intent: Intent, context: Context) -> Dict[str, Any]:
-        # Controlled local execution is deliberately deterministic for I-1E.
+        # Controlled local execution is deliberately deterministic for I-2.
         return dict(intent.desired_state)
