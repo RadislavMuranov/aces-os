@@ -1,0 +1,14 @@
+{
+  "acceptance_decision": "ACCEPTED",
+  "acceptance_id": "acc_07155a8f08b848ea",
+  "accepted_state_id": "ads_783374fd6ee64e9d",
+  "accepted_state_status": "ACTIVE",
+  "admissibility_id": "adm_7931a9ec38134e6c",
+  "admissibility_result": "ADMISSIBLE",
+  "evidence_id": "ev_5095c842fb004a41",
+  "executed_at": "2026-09-04T23:39:31.544910Z",
+  "observation_payload_hash": "fcd98083d73770a7110a445e5e8c0c0516e9475d6299553a730e0c2c217bc3af",
+  "trajectory": "POSITIVE",
+  "verification_id": "ver_78c9e2e9b6c142f0",
+  "verification_result": "VERIFIED"
+}

@@ -1,0 +1,8 @@
+{
+  "N1_missing_evidence": {"result": "NOT_VERIFIED", "expected": "NOT_VERIFIED"},
+  "N2_missing_admissibility": {"result": "NOT_VERIFIED", "expected": "NOT_VERIFIED"},
+  "N3_revoked_authority": {"result": "NOT_VERIFIED", "residuals": ["STATUS_REVOKED"], "expected": "NOT_VERIFIED"},
+  "N4_policy_integrity": {"marker_present": true},
+  "N5_target_mismatch": {"result": "NOT_VERIFIED", "residuals": ["TARGET_MISMATCH"], "expected": "NOT_VERIFIED"},
+  "N6_shortcut_blocked": {"acceptance_decision": "REJECTED", "accepted_state_created": false, "expected": "accepted_state_created=False"}
+}

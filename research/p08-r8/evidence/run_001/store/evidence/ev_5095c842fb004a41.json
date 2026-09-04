@@ -1,0 +1,13 @@
+{
+  "actor_workload_ref": "workload_r8_runner",
+  "connector_instance_id": "connector_test_01",
+  "content_hash": "fcd98083d73770a7110a445e5e8c0c0516e9475d6299553a730e0c2c217bc3af",
+  "evidence_id": "ev_5095c842fb004a41",
+  "integrity_marker": "fcd98083d73770a7110a445e5e8c0c0516e9475d6299553a730e0c2c217bc3af",
+  "observation_payload_ref": "obs_af95207bcb144557",
+  "observed_at": "2026-09-04T23:39:31.543196Z",
+  "received_at": "2026-09-04T23:39:31.543344Z",
+  "source_system": "controlled_test_harness",
+  "status": "CAPTURED",
+  "target_ref": "target:demo-001"
+}
