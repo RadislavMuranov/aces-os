@@ -78,7 +78,7 @@ The research baseline incorporates existing standards rather than inventing repl
 - Event sourcing / append-only evidence patterns for reconstruction.
 - Distributed-systems techniques such as causal ordering, conflict detection and convergence where useful.
 
-These components solve important subproblems but do not, individually, establish ACES AcceptedState or epistemic authority. W3C PROV explicitly models entities, activities and agents and their provenance; SPIFFE provides portable cryptographic workload identity; MCP provides transport-level authorization mechanisms; A2A provides interoperability between independent agents. citeturn0search8turn0search1turn0search9turn0search3
+These components solve important subproblems but do not, individually, establish ACES AcceptedState or epistemic authority.
 
 ## 4. Canonical research pipeline
 
@@ -120,7 +120,7 @@ No stage may silently substitute for another stage.
 
 **Output:** this roadmap + protocol pack.
 
-**Gate:** no implementation until the protocol pack is reviewed and accepted as the active research execution plan.
+**Gate:** `G-RDR-0` — Baseline integrity. No implementation until the protocol pack is reviewed and accepted as the active research execution plan.
 
 ### RDR-01 — Connector Reality Inventory
 
@@ -132,6 +132,8 @@ No stage may silently substitute for another stage.
 
 **Pass:** every claimed connector property has direct evidence or is explicitly UNKNOWN.
 
+**Gate:** `G-RDR-1` — Connector reality integrity.
+
 ### RDR-02 — Actor / Workload Identity Binding
 
 **Goal:** establish who/what performed or supplied an observation.
@@ -139,6 +141,8 @@ No stage may silently substitute for another stage.
 **Output:** identity-bound observation envelope.
 
 **Pass:** actor identity, workload/agent identity, connector instance and identity scope are distinguishable.
+
+**Gate:** `G-RDR-2` — Identity integrity.
 
 ### RDR-03 — External Object / Target Binding
 
@@ -148,6 +152,8 @@ No stage may silently substitute for another stage.
 
 **Pass:** same-object claims are evidence-backed; unresolved identity remains UNKNOWN/AMBIGUOUS.
 
+**Gate:** `G-RDR-3` — Target integrity.
+
 ### RDR-04 — Provenance Chain
 
 **Goal:** bind each observation/action to source, actor, connector, time, operation and derivation.
@@ -155,6 +161,8 @@ No stage may silently substitute for another stage.
 **Output:** immutable Evidence/Provenance record.
 
 **Pass:** an independent reviewer can reconstruct how the observation entered ACES.
+
+**Gate:** `G-RDR-4` — Provenance integrity.
 
 ### RDR-05 — Temporal / Causal Ordering
 
@@ -164,6 +172,8 @@ No stage may silently substitute for another stage.
 
 **Pass:** state precedence is never inferred from arrival order alone.
 
+**Gate:** `G-RDR-5` — Temporal integrity.
+
 ### RDR-06 — Cross-Connector Reconciliation
 
 **Goal:** compare observations referring to the same target across independent connectors.
@@ -171,6 +181,8 @@ No stage may silently substitute for another stage.
 **Output:** Reconciliation Record preserving every conflicting observation.
 
 **Pass:** conflicts are explicit; reconciliation does not silently become truth arbitration.
+
+**Gate:** `G-RDR-6` — Reconciliation integrity.
 
 ### RDR-07 — Authority / Policy Separation
 
@@ -180,6 +192,8 @@ No stage may silently substitute for another stage.
 
 **Pass:** a source's ability to report or mutate its own system never grants it ACES authority.
 
+**Gate:** `G-RDR-7` — Authority integrity.
+
 ### RDR-08 — Evidence → Verification → Acceptance
 
 **Goal:** establish the only promotion path into AcceptedState.
@@ -187,6 +201,8 @@ No stage may silently substitute for another stage.
 **Output:** verification and acceptance records.
 
 **Pass:** no observation, model output, connector success or agent completion can mint AcceptedState directly.
+
+**Gate:** `G-RDR-8` — Verification integrity.
 
 ### RDR-09 — Accepted Digital World State
 
@@ -196,6 +212,8 @@ No stage may silently substitute for another stage.
 
 **Pass:** every accepted state element points to evidence, verification and target identity.
 
+**Gate:** `G-RDR-9` — AcceptedState integrity.
+
 ### RDR-10 — Mutation Gate
 
 **Goal:** prevent writes when identity, target, authority, lineage, current state or verification is unresolved.
@@ -203,6 +221,8 @@ No stage may silently substitute for another stage.
 **Output:** deterministic pre-mutation decision.
 
 **Pass:** unresolved reality causes BLOCK / ESCALATE, not best-effort mutation.
+
+**Gate:** `G-RDR-10` — Mutation safety.
 
 ### RDR-11 — Adversarial / Chaos Verification
 
@@ -212,11 +232,15 @@ No stage may silently substitute for another stage.
 
 **Pass:** all unresolved cases fail closed and remain traceable.
 
+**Gate:** `G-RDR-11` — Adversarial integrity.
+
 ### RDR-12 — Minimality / Necessity Test
 
 **Goal:** determine whether existing combinations of standards and infrastructure can satisfy the complete contract without a new ACES-specific layer.
 
 **Pass:** only after an explicit comparative implementation and failure analysis.
+
+**Gate:** `G-RDR-12` — Minimality / necessity integrity.
 
 ### RDR-13 — Architecture Decision
 
@@ -231,27 +255,35 @@ D. Research inconclusive
 
 No outcome is predetermined.
 
+**Gate:** Architecture decision gate is subordinate to the implementation contract of the active research baseline and is not a duplicate global gate.
+
 ### RDR-14 — Implementation Contract
 
 Only if RDR-12/RDR-13 justify it, freeze executable contracts for the minimum required reconciliation kernel and integrate with the existing ACES P0 roadmap.
 
+**Gate:** Implementation authorization requires explicit approval; it is not a research integrity gate.
+
 ## 6. Global gates
 
+The gate namespace is now explicitly one-to-one with the first thirteen research control stages, eliminating the previous phase/gate off-by-one ambiguity:
+
 ```text
-G-RDR-0  Baseline integrity
-G-RDR-1  Identity integrity
-G-RDR-2  Target integrity
-G-RDR-3  Provenance integrity
-G-RDR-4  Temporal integrity
-G-RDR-5  Reconciliation integrity
-G-RDR-6  Authority integrity
-G-RDR-7  Verification integrity
-G-RDR-8  AcceptedState integrity
-G-RDR-9  Mutation safety
-G-RDR-10 Adversarial integrity
-G-RDR-11 Minimality / necessity
-G-RDR-12 Architecture decision
+G-RDR-0  Baseline integrity                 → RDR-00
+G-RDR-1  Connector reality integrity       → RDR-01
+G-RDR-2  Identity integrity                 → RDR-02
+G-RDR-3  Target integrity                   → RDR-03
+G-RDR-4  Provenance integrity               → RDR-04
+G-RDR-5  Temporal integrity                 → RDR-05
+G-RDR-6  Reconciliation integrity          → RDR-06
+G-RDR-7  Authority integrity               → RDR-07
+G-RDR-8  Verification integrity            → RDR-08
+G-RDR-9  AcceptedState integrity            → RDR-09
+G-RDR-10 Mutation safety                    → RDR-10
+G-RDR-11 Adversarial integrity              → RDR-11
+G-RDR-12 Minimality / necessity integrity   → RDR-12
 ```
+
+RDR-13 and RDR-14 are decision/authorization stages and therefore do not consume additional `G-RDR-*` integrity numbers. Their acceptance is controlled by their own explicit decision/authorization records.
 
 A failed gate blocks dependent work.
 
