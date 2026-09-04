@@ -126,10 +126,10 @@ validity interval
 5. Mark unverifiable identity as `UNKNOWN`.
 
 ### External alignment
-SPIFFE is a candidate identity substrate because its Workload API provides cryptographically verifiable workload identities; its references are explicitly scoped to an applicable execution/control-plane boundary. citeturn0search1turn0search6
+SPIFFE is a candidate identity substrate because its Workload API provides cryptographically verifiable workload identities; its references are explicitly scoped to an applicable execution/control-plane boundary.
 
 ### Gate
-`G-RDR-1` cannot PASS for an observation class if the claimed actor cannot be independently identified.
+`G-RDR-2 PASS` iff actor identity, workload/agent identity, connector instance and identity scope are distinguishable for the tested observation class. If a claimed identity cannot be independently identified, that identity remains `UNKNOWN`; this does not by itself invalidate the connector inventory gate.
 
 ---
 
@@ -163,7 +163,7 @@ identity confidence
 Name similarity, URL similarity or semantic similarity alone cannot mint `SAME_OBJECT`.
 
 ### Gate
-`G-RDR-2 PASS` iff same-object mappings are independently reproducible.
+`G-RDR-3 PASS` iff same-object mappings are independently reproducible.
 
 ---
 
@@ -198,10 +198,10 @@ content hash or equivalent integrity marker
 5. Store raw evidence where policy permits.
 
 ### External alignment
-W3C PROV provides a standard vocabulary for entities, activities, agents and derivation/provenance relationships and is therefore a candidate interchange layer, not an ACES authority layer. citeturn0search8
+W3C PROV provides a standard vocabulary for entities, activities, agents and derivation/provenance relationships and is therefore a candidate interchange layer, not an ACES authority layer.
 
 ### Gate
-`G-RDR-3 PASS` iff an independent reviewer can reconstruct the observation path without trusting an agent's narrative.
+`G-RDR-4 PASS` iff an independent reviewer can reconstruct the observation path without trusting an agent's narrative.
 
 ---
 
@@ -231,7 +231,7 @@ freshness / expiry policy
 5. Never choose the latest-arriving observation solely because it arrived last.
 
 ### Gate
-`G-RDR-4 PASS` iff stale/concurrent/superseding observations are distinguishable.
+`G-RDR-5 PASS` iff stale/concurrent/superseding observations are distinguishable.
 
 ---
 
@@ -278,7 +278,7 @@ unresolved fields
 ```
 
 ### Gate
-`G-RDR-5 PASS` iff reconciliation preserves source evidence and makes conflict explicit.
+`G-RDR-6 PASS` iff reconciliation preserves source evidence and makes conflict explicit.
 
 ---
 
@@ -318,7 +318,7 @@ Permission != Approval
 ```
 
 ### Gate
-`G-RDR-6 PASS` iff authorization remains ACES-governed and source permissions are treated as external constraints, not ACES policy.
+`G-RDR-7 PASS` iff authorization remains ACES-governed and source permissions are treated as external constraints, not ACES policy.
 
 ---
 
@@ -353,7 +353,7 @@ AcceptedState
 Acceptance is prohibited when verification is missing, contradictory or out of scope.
 
 ### Gate
-`G-RDR-7 PASS` iff no direct connector/agent/model path can mint AcceptedState.
+`G-RDR-8 PASS` iff no direct connector/agent/model path can mint AcceptedState.
 
 ---
 
@@ -386,7 +386,7 @@ status
 5. AcceptedState is not a claim of omniscient external truth.
 
 ### Gate
-`G-RDR-8 PASS` iff accepted state is reconstructible from evidence and verification.
+`G-RDR-9 PASS` iff accepted state is reconstructible from evidence and verification.
 
 ---
 
@@ -427,7 +427,7 @@ Mutation Intent
 - evidence persistence unavailable where evidence is mandatory.
 
 ### Gate
-`G-RDR-9 PASS` iff every unresolved mandatory condition fails closed.
+`G-RDR-10 PASS` iff every unresolved mandatory condition fails closed.
 
 ---
 
@@ -458,7 +458,7 @@ Reproduce the multi-agent/multi-connector failure class before implementation cl
 Each scenario must yield a deterministic status and preserved evidence.
 
 ### Gate
-`G-RDR-10 PASS` iff the system fails closed on unresolved reality and does not silently collapse contexts.
+`G-RDR-11 PASS` iff the system fails closed on unresolved reality and does not silently collapse contexts.
 
 ---
 
@@ -481,7 +481,7 @@ Distributed convergence: CRDT/causal mechanisms where applicable
 Policy: existing policy/IAM engine
 ```
 
-MCP itself defines transport-level authorization mechanisms, while A2A defines interoperability between independent agents; neither should be treated as the reconciliation or acceptance authority. citeturn0search9turn0search3
+MCP itself defines transport-level authorization mechanisms, while A2A defines interoperability between independent agents; neither should be treated as the reconciliation or acceptance authority.
 
 ### Procedure
 1. Implement the smallest complete experimental composition.
@@ -500,7 +500,7 @@ INCONCLUSIVE
 ```
 
 ### Gate
-`G-RDR-11 PASS` only when the comparison is executable and evidence-backed.
+`G-RDR-12 PASS` only when the comparison is executable and evidence-backed.
 
 ---
 
@@ -527,7 +527,7 @@ reversal conditions
 ```
 
 ### Gate
-`G-RDR-12 PASS` iff the decision is traceable to experimental evidence and includes explicit reversal conditions.
+Architecture decision acceptance is controlled by an explicit decision record referencing the completed research gates. It does not consume another `G-RDR-*` integrity number.
 
 ---
 
@@ -556,76 +556,28 @@ Implementation is `AUTHORIZED NEXT` only after explicit approval of the resultin
 
 ---
 
-## 15. Global evidence bundle
+# Gate Mapping Integrity Rule
 
-Every RDR experiment must produce, at minimum:
-
-```text
-experiment_id
-protocol_version
-roadmap_version
-repo
-branch
-commit
-executor/agent identity
-connector instance(s)
-execution context(s)
-input references
-observations
-raw outputs where permitted
-provenance
-timestamps
-target bindings
-reconciliation records
-policy decisions
-verification records
-acceptance records
-failures
-unknowns
-final gate status
-```
-
-## 16. Evidence integrity rules
-
-- No manually reconstructed result may be represented as observed execution.
-- No successful tool call proves the whole chain.
-- No failed local environment proves remote repository non-existence.
-- No connector's tool availability proves authentication.
-- No agent narrative substitutes for source evidence.
-- No missing evidence may be silently inferred.
-- Every blocked execution remains `BLOCKED / NOT EXECUTED`, not `FAIL` or `PASS`.
-
-## 17. Relationship to existing ACES runtime
-
-The current ACES minimum runtime already uses the conceptual sequence:
+The protocol phase number and integrity-gate number are intentionally aligned by the research stage:
 
 ```text
-Intent → Context → Authority/Policy → Connector Resolution → Execution
-→ Observation → Evidence → Verification → Acceptance → Accepted State
+RDR-P00 → G-RDR-0
+RDR-P01 → G-RDR-1
+RDR-P02 → G-RDR-2
+RDR-P03 → G-RDR-3
+RDR-P04 → G-RDR-4
+RDR-P05 → G-RDR-5
+RDR-P06 → G-RDR-6
+RDR-P07 → G-RDR-7
+RDR-P08 → G-RDR-8
+RDR-P09 → G-RDR-9
+RDR-P10 → G-RDR-10
+RDR-P11 → G-RDR-11
+RDR-P12 → G-RDR-12
 ```
 
-The RDR protocol pack extends the research surface across **multiple independent connector instances and execution contexts**. It does not replace the existing runtime contract and does not authorize BASTION integration.
+`RDR-P13` and `RDR-P14` are decision/authorization stages and do not receive additional integrity-gate numbers.
 
-## 18. Final research invariant
+This mapping supersedes the previous ambiguous mapping in which P02 reused G-RDR-1 and P03/P04 were shifted by one. Existing historical execution reports retain their original text; they must not be rewritten retroactively. Their gate labels are interpreted against this corrected mapping when determining current research state.
 
-```text
-Many observations
-    ↓
-not automatically one reality
-
-Many identities
-    ↓
-not automatically one actor
-
-Many representations
-    ↓
-not automatically one object
-
-Many successful actions
-    ↓
-not automatically one accepted state
-
-ACES AcceptedState
-    ↓
-only through explicit evidence + verification + acceptance
-```
+No subsequent protocol may be accepted if it uses a gate label inconsistent with this mapping.
