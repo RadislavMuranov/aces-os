@@ -1,13 +1,11 @@
 {
-  "trajectory": "POSITIVE_R10_R1",
-  "evidence_id": "ev_62214c4486b24229",
-  "admissibility_id": "adm_6f3803fe92bb416c",
-  "admissibility_result": "ADMISSIBLE",
-  "verification_id": "ver_f3c94bdd9e9342ae",
-  "verification_result": "VERIFIED",
-  "acceptance_id": "acc_b40b032335df4f77",
   "acceptance_decision": "ACCEPTED",
-  "accepted_state_id": "ads_22d16c73dc9d4fac",
-  "obs_hash": "bfc21bd5fbc0fabf27dbd56592a9fc0a5294545cd3fb346bfd5511cf6f38c578",
-  "executed_at": "2026-09-05T18:46:56.266439Z"
+  "acceptance_id": "acc_1b1db80255e840c5",
+  "accepted_state_id": "ads_61011cfe8eb4424d",
+  "admissibility_id": "adm_869d76657a3f4227",
+  "evidence_id": "ev_452eb799ada54615",
+  "executed_at": "2026-09-05T19:01:52.913273Z",
+  "trajectory": "POSITIVE_R10_R1",
+  "verification_id": "ver_a76099ba7b254ac8",
+  "verification_result": "VERIFIED"
 }
