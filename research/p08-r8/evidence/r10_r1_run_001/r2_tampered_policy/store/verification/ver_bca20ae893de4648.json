@@ -2,7 +2,7 @@
   "evidence_ids": [
     "ev_b9343c32252e42bb"
   ],
-  "integrity_marker": "c0ffee0000000000000000000000000000000000000000000000000000000000",
+  "integrity_marker": "ade4f698c6688da4c6de4b17197cde54293810ecd1927ae8c92ae655717ea78d",
   "policy_id": "pol_verify_v1",
   "policy_integrity_marker": "INVALID",
   "policy_version": "1.0.0",
@@ -15,6 +15,6 @@
   "target_ref": "target:demo-001",
   "verification_authority_id": "auth_verifier_01",
   "verification_id": "ver_bca20ae893de4648",
-  "verified_at": "2026-09-05T19:01:52.919000Z",
+  "verified_at": "2026-09-05T19:01:52.919022Z",
   "verifier_ref": "verifier_01"
 }
