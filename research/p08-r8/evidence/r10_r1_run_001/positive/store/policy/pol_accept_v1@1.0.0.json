@@ -1,0 +1,11 @@
+{
+  "body": {
+    "rule": "require VERIFIED; acceptance authority distinct"
+  },
+  "effective_from": "2026-01-01T00:00:00Z",
+  "effective_until": null,
+  "policy_id": "pol_accept_v1",
+  "policy_integrity_marker": "1782828b12289a57a6b9212db441311b64a9c54e8297ef6509277e1c789ded59",
+  "policy_version": "1.0.0",
+  "scope": "*"
+}

@@ -1,0 +1,17 @@
+{
+  "authority_id": "auth_root_architectural",
+  "current_status": "ACTIVE",
+  "integrity_marker": "f6a9468c95ac3ca842120ec19b4a8a976f67ab792ea3d331b0ed75bdea438d33",
+  "policy_id": "pol_root",
+  "role": "ROOT",
+  "scope": "*",
+  "status_as_of": "2026-09-05T19:01:52.910307Z",
+  "status_history": [
+    {
+      "at": "2026-09-05T19:01:52.910411Z",
+      "by": "bootstrap",
+      "status": "ACTIVE"
+    }
+  ],
+  "trust_root_ref": "architectural_authority_root"
+}

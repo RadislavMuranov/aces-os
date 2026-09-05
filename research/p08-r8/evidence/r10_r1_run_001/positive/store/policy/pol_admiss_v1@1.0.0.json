@@ -1,0 +1,11 @@
+{
+  "body": {
+    "rule": "require target_ref, source, observed_at, integrity or UNKNOWN"
+  },
+  "effective_from": "2026-01-01T00:00:00Z",
+  "effective_until": null,
+  "policy_id": "pol_admiss_v1",
+  "policy_integrity_marker": "241cee3dac7dda0f38b3291eeb593aebfde2d35a2e6ea939e433f711680b8ded",
+  "policy_version": "1.0.0",
+  "scope": "*"
+}

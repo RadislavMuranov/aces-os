@@ -1,0 +1,17 @@
+{
+  "authority_id": "auth_admissibility_01",
+  "current_status": "ACTIVE",
+  "integrity_marker": "b274e7aecd4e25526ab8f77e3bc28578b0e898b76dfa85de0e781a9f707bf306",
+  "policy_id": "pol_admiss_v1",
+  "role": "ADMISSIBILITY",
+  "scope": "target:*",
+  "status_as_of": "2026-09-05T19:01:52.910892Z",
+  "status_history": [
+    {
+      "at": "2026-09-05T19:01:52.910896Z",
+      "by": "auth_root_architectural",
+      "status": "ACTIVE"
+    }
+  ],
+  "trust_root_ref": "auth_root_architectural"
+}
