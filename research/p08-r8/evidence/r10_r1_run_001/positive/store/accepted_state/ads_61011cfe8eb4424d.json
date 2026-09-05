@@ -1,0 +1,20 @@
+{
+  "acceptance_id": "acc_1b1db80255e840c5",
+  "accepted_at": "2026-09-05T19:01:52.913136Z",
+  "accepted_state_id": "ads_61011cfe8eb4424d",
+  "evidence_ids": [
+    "ev_452eb799ada54615"
+  ],
+  "integrity_marker": "PLACEHOLDER_WILL_FIX",
+  "scope": "target:*",
+  "state_payload": {
+    "status": "X"
+  },
+  "status": "ACTIVE",
+  "supersedes": null,
+  "target_ref": "target:demo-001",
+  "verification_ids": [
+    "ver_a76099ba7b254ac8"
+  ],
+  "version": "1"
+}
