@@ -1,0 +1,20 @@
+{
+  "acceptance_id": "acc_1b5ac6f130924a30",
+  "accepted_at": "2026-09-05T19:22:17.144750Z",
+  "accepted_state_id": "ads_3c96e0ce89814863",
+  "evidence_ids": [
+    "ev_0d79843c605d4626"
+  ],
+  "integrity_marker": "7ac1beb89f7d38f3e5d54db102aab64bfa16ea76fa77b6531ef5953dcd0c06ec",
+  "scope": "target:*",
+  "state_payload": {
+    "status": "X"
+  },
+  "status": "ACTIVE",
+  "supersedes": null,
+  "target_ref": "target:demo-001",
+  "verification_ids": [
+    "ver_bf49e28316904461"
+  ],
+  "version": "1"
+}

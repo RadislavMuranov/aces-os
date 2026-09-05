@@ -1,0 +1,14 @@
+{
+  "admissibility_id": "adm_7a619c2f173543dc",
+  "evaluated_at": "2026-09-05T19:22:17.143142Z",
+  "evaluator_authority_id": "auth_admissibility_01",
+  "evaluator_ref": "evaluator_01",
+  "evidence_id": "ev_0d79843c605d4626",
+  "integrity_marker": "8c0b754c7c8acb8babdb7ba903367dc76075393c47585102f8be268f37498cd5",
+  "policy_id": "pol_admiss_v1",
+  "policy_integrity_marker": "241cee3dac7dda0f38b3291eeb593aebfde2d35a2e6ea939e433f711680b8ded",
+  "policy_version": "1.0.0",
+  "residual_unknowns": [],
+  "result": "ADMISSIBLE",
+  "target_ref": "target:demo-001"
+}
