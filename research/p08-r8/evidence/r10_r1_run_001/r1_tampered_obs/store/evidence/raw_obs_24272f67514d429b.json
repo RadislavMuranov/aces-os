@@ -1,0 +1,10 @@
+{
+  "hash": "3555ccab99713c21c752f667288cbdc61dc90b1f21e831749412d9c78777847b",
+  "payload": {
+    "kind": "r10r1_obs",
+    "t": "2026-09-05T19:01:52.916362Z",
+    "value": {
+      "status": "TAMPERED"
+    }
+  }
+}

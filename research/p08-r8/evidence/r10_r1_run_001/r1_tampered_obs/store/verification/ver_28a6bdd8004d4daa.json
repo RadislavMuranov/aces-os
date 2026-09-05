@@ -1,0 +1,20 @@
+{
+  "evidence_ids": [
+    "ev_0b73703f89214a7b"
+  ],
+  "integrity_marker": "dd07c5675b5c1be8c4eb9a7fb8e7f2b1ad635b1d467ff793a007a86e08de7478",
+  "policy_id": "pol_verify_v1",
+  "policy_integrity_marker": "ae742a147f6224ea869ef6d63a1c617861071cbca9680116527627b00c49cce7",
+  "policy_version": "1.0.0",
+  "procedure_ref": "procedure_content_match_v1",
+  "residual_unknowns": [
+    "CONTENT_HASH_MISMATCH recomputed=6ff3ade682d82f5791573610b382200d43c08c2eba946faf179918a6dfcb70d4 stored=3555ccab99713c21c752f667288cbdc61dc90b1f21e831749412d9c78777847b"
+  ],
+  "result": "NOT_VERIFIED",
+  "scope": "target:*",
+  "target_ref": "target:demo-001",
+  "verification_authority_id": "auth_verifier_01",
+  "verification_id": "ver_28a6bdd8004d4daa",
+  "verified_at": "2026-09-05T19:01:52.916530Z",
+  "verifier_ref": "verifier_01"
+}

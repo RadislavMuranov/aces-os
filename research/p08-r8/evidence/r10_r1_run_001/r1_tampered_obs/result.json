@@ -1,12 +1,10 @@
 {
-  "test": "R1_TAMPERED_OBSERVATION",
-  "evidence_id": "ev_9c2701c26d764c61",
-  "original_content_hash": "397d827eff7216a5b79c7e35b48c96af88379eb9e4a21e1cf81cadc6a9c443c8",
-  "recomputed_after_tamper": "765f91943f233a537bb892b41a7671c12e883cd9f0e99a8389afa2a88f08c3e6",
-  "hashes_differ": true,
-  "verification_id": "ver_c20176e335114a59",
-  "verification_result": "NOT_VERIFIED",
-  "residuals": ["CONTENT_HASH_MISMATCH recomputed=765f91943f233a537bb892b41a7671c12e883cd9f0e99a8389afa2a88f08c3e6 stored=397d827eff7216a5b79c7e35b48c96af88379eb9e4a21e1cf81cadc6a9c443c8"],
+  "original_content_hash": "3555ccab99713c21c752f667288cbdc61dc90b1f21e831749412d9c78777847b",
   "pass": true,
-  "executed_at": "2026-09-05T18:46:56.270167Z"
+  "recomputed_after_tamper": "6ff3ade682d82f5791573610b382200d43c08c2eba946faf179918a6dfcb70d4",
+  "residuals": [
+    "CONTENT_HASH_MISMATCH recomputed=6ff3ade682d82f5791573610b382200d43c08c2eba946faf179918a6dfcb70d4 stored=3555ccab99713c21c752f667288cbdc61dc90b1f21e831749412d9c78777847b"
+  ],
+  "test": "R1_TAMPERED_OBSERVATION",
+  "verification_result": "NOT_VERIFIED"
 }
