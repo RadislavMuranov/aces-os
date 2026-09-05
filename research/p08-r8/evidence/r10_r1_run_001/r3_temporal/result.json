@@ -1,16 +1,10 @@
 {
-  "test": "R3_TEMPORAL_AUTHORITY",
-  "t2_verification_id": "ver_7845406e14e14eb8",
-  "t2_result": "VERIFIED",
-  "t2_verified_at": "2026-09-05T18:46:56.274746Z",
-  "current_status_after_revoke": "REVOKED",
-  "t4_verification_id": "ver_bcc6dea74cf8442a",
-  "t4_result": "NOT_VERIFIED",
-  "t4_residuals": ["STATUS_AT_DECISION_REVOKED"],
-  "t2_record_unchanged": true,
-  "t2_still_VERIFIED": true,
-  "t4_NOT_VERIFIED": true,
-  "t4_has_status_at_decision": true,
   "pass": true,
-  "executed_at": "2026-09-05T18:46:56.275792Z"
+  "t2_record_unchanged": true,
+  "t2_result": "VERIFIED",
+  "t4_residuals": [
+    "STATUS_AT_DECISION_REVOKED"
+  ],
+  "t4_result": "NOT_VERIFIED",
+  "test": "R3_TEMPORAL_AUTHORITY"
 }

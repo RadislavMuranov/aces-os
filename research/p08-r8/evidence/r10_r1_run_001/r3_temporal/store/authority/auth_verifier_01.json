@@ -1,0 +1,22 @@
+{
+  "authority_id": "auth_verifier_01",
+  "current_status": "REVOKED",
+  "integrity_marker": "86ff81afa626647b671e7a8ec5167d8f3019f9788acde0858a203e059d557be6",
+  "policy_id": "pol_verify_v1",
+  "role": "VERIFICATION",
+  "scope": "target:*",
+  "status_as_of": "2026-09-05T19:01:52.922754Z",
+  "status_history": [
+    {
+      "at": "2026-09-05T19:01:52.920002Z",
+      "by": "auth_root_architectural",
+      "status": "ACTIVE"
+    },
+    {
+      "at": "2026-09-05T19:01:52.922754Z",
+      "by": "auth_root_architectural",
+      "status": "REVOKED"
+    }
+  ],
+  "trust_root_ref": "auth_root_architectural"
+}

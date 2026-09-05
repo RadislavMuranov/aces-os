@@ -1,0 +1,18 @@
+{
+  "evidence_ids": [
+    "ev_ad1015d55df548d4"
+  ],
+  "integrity_marker": "289bcfa697299d22f5683bcc64d5c026e2c0feb18209cedbbe00921db9c17a34",
+  "policy_id": "pol_verify_v1",
+  "policy_integrity_marker": "ae742a147f6224ea869ef6d63a1c617861071cbca9680116527627b00c49cce7",
+  "policy_version": "1.0.0",
+  "procedure_ref": "procedure_content_match_v1",
+  "residual_unknowns": [],
+  "result": "VERIFIED",
+  "scope": "target:*",
+  "target_ref": "target:demo-001",
+  "verification_authority_id": "auth_verifier_01",
+  "verification_id": "ver_5b84861eb106417a",
+  "verified_at": "2026-09-05T19:01:52.922242Z",
+  "verifier_ref": "verifier_01"
+}
