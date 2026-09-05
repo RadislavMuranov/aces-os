@@ -1,0 +1,10 @@
+{
+  "acceptance_authority_id": "auth_acceptor_01",
+  "acceptance_id": "acc_1b5ac6f130924a30",
+  "decided_at": "2026-09-05T19:22:17.145318Z",
+  "decision": "ACCEPTED",
+  "evidence_ids": [
+    "ev_0d79843c605d4626"
+  ],
+  "integrity_marker": "PLACEHOLDER_BAD"
+}
