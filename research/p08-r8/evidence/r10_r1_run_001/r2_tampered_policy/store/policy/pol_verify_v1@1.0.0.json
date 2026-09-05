@@ -1,0 +1,11 @@
+{
+  "body": {
+    "rule": "require admissible evidence; procedure=content_match"
+  },
+  "effective_from": "2026-01-01T00:00:00Z",
+  "effective_until": null,
+  "policy_id": "pol_verify_v1",
+  "policy_integrity_marker": "0000000000000000000000000000000000000000000000000000000000000000",
+  "policy_version": "1.0.0",
+  "scope": "*"
+}
