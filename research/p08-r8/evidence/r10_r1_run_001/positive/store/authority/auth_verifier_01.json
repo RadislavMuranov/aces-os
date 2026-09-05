@@ -1,0 +1,17 @@
+{
+  "authority_id": "auth_verifier_01",
+  "current_status": "ACTIVE",
+  "integrity_marker": "b58d27681b476a036aa085a00daa2436005bac1fcb299701a9e810550126b7b5",
+  "policy_id": "pol_verify_v1",
+  "role": "VERIFICATION",
+  "scope": "target:*",
+  "status_as_of": "2026-09-05T19:01:52.910663Z",
+  "status_history": [
+    {
+      "at": "2026-09-05T19:01:52.910672Z",
+      "by": "auth_root_architectural",
+      "status": "ACTIVE"
+    }
+  ],
+  "trust_root_ref": "auth_root_architectural"
+}

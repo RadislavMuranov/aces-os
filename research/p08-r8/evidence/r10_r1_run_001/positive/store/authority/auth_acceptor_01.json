@@ -1,0 +1,17 @@
+{
+  "authority_id": "auth_acceptor_01",
+  "current_status": "ACTIVE",
+  "integrity_marker": "ff0ced75c83bc16e9b077c9e7509d2abe783fb1b8c6d76515aa0d4c1a2956540",
+  "policy_id": "pol_accept_v1",
+  "role": "ACCEPTANCE",
+  "scope": "target:*",
+  "status_as_of": "2026-09-05T19:01:52.910793Z",
+  "status_history": [
+    {
+      "at": "2026-09-05T19:01:52.910799Z",
+      "by": "auth_root_architectural",
+      "status": "ACTIVE"
+    }
+  ],
+  "trust_root_ref": "auth_root_architectural"
+}

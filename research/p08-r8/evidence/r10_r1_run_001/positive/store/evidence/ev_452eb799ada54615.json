@@ -1,0 +1,14 @@
+{
+  "actor_workload_ref": "w_r10r1",
+  "connector_instance_id": "c1",
+  "content_hash": "950636a238e091a78d4875ee20801c14e39f0af81dcf7293d7e2ec8255a1ac08",
+  "evidence_id": "ev_452eb799ada54615",
+  "integrity_marker": "950636a238e091a78d4875ee20801c14e39f0af81dcf7293d7e2ec8255a1ac08",
+  "observation_payload_ref": "obs_aa77f70a855e49e8",
+  "observed_at": "2026-09-05T19:01:52.911488Z",
+  "provenance_parent_ids": [],
+  "received_at": "2026-09-05T19:01:52.911684Z",
+  "source_system": "harness",
+  "status": "CAPTURED",
+  "target_ref": "target:demo-001"
+}
