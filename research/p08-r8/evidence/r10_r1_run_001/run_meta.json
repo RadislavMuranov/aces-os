@@ -1,10 +1,50 @@
 {
+  "experiment_id": "RDR-P08-R10-R2-2026-09-05",
   "runner": "run_r10_r1.py",
-  "version": "0.1.1-r10r1",
+  "runner_version": "0.1.1-r10r1",
+  "source_commit": "97a54ba7dbf362aab3bbb3baf4ccdd00e6ef3b94",
+  "execution_command": "python3 run_r10_r1.py",
+  "exit_code": 0,
+  "executed_at": "2026-09-05T19:01:52.923382Z",
+  "evidence_bundle_root": "research/p08-r8/evidence/r10_r1_run_001",
+  "source_files": [
+    "src/aces_p08_minimal/__init__.py",
+    "src/aces_p08_minimal/models.py",
+    "src/aces_p08_minimal/store.py",
+    "src/aces_p08_minimal/engine.py",
+    "src/aces_p08_minimal/integrity.py",
+    "run_r10_r1.py"
+  ],
   "r1_pass": true,
   "r2_pass": true,
   "r3_pass": true,
   "positive_verification": "VERIFIED",
-  "positive_acceptance": "ACCEPTED",
-  "executed_at": "2026-09-05T18:46:56.275922Z"
+  "trajectories": {
+    "positive": {
+      "store_path": "research/p08-r8/evidence/r10_r1_run_001/positive/store",
+      "evidence_id": "ev_452eb799ada54615",
+      "admissibility_id": "adm_869d76657a3f4227",
+      "verification_id": "ver_a76099ba7b254ac8",
+      "verification_result": "VERIFIED",
+      "acceptance_id": "acc_1b1db80255e840c5",
+      "acceptance_decision": "ACCEPTED",
+      "accepted_state_id": "ads_61011cfe8eb4424d"
+    },
+    "r1_tampered_obs": {
+      "store_path": "research/p08-r8/evidence/r10_r1_run_001/r1_tampered_obs/store",
+      "verification_result": "NOT_VERIFIED",
+      "pass": true
+    },
+    "r2_tampered_policy": {
+      "store_path": "research/p08-r8/evidence/r10_r1_run_001/r2_tampered_policy/store",
+      "verification_result": "NOT_VERIFIED",
+      "pass": true
+    },
+    "r3_temporal": {
+      "store_path": "research/p08-r8/evidence/r10_r1_run_001/r3_temporal/store",
+      "t2_result": "VERIFIED",
+      "t4_result": "NOT_VERIFIED",
+      "pass": true
+    }
+  }
 }
