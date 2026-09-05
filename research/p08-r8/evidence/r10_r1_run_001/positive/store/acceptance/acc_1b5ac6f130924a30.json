@@ -1,10 +1,20 @@
 {
   "acceptance_authority_id": "auth_acceptor_01",
   "acceptance_id": "acc_1b5ac6f130924a30",
-  "decided_at": "2026-09-05T19:22:17.145318Z",
+  "decided_at": "2026-09-05T19:22:17.144237Z",
   "decision": "ACCEPTED",
   "evidence_ids": [
     "ev_0d79843c605d4626"
   ],
-  "integrity_marker": "PLACEHOLDER_BAD"
+  "integrity_marker": "8fcab5c00aa10af0cfe758a85d3b66ba079b330f74c3771665e7ca075b2b9ff3",
+  "policy_id": "pol_accept_v1",
+  "policy_integrity_marker": "1782828b12289a57a6b9212db441311b64a9c54e8297ef6509277e1c789ded59",
+  "policy_version": "1.0.0",
+  "proposed_state": "{'status': 'X'}",
+  "reason_code": "OK",
+  "scope": "target:*",
+  "target_ref": "target:demo-001",
+  "verification_ids": [
+    "ver_bf49e28316904461"
+  ]
 }
