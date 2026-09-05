@@ -1,0 +1,10 @@
+{
+  "N1": {"result": "NOT_VERIFIED", "residuals": ["MISSING_ADMISSIBILITY_EVALUATION"]},
+  "N2": {"result": "NOT_VERIFIED", "residuals": ["MISSING_ADMISSIBILITY_EVALUATION"]},
+  "N3": {"result": "NOT_VERIFIED", "residuals": ["STATUS_REVOKED"]},
+  "N4": {"mismatch_detected": true, "note": "tampered policy marker differs from authentic bootstrap marker"},
+  "N5": {"result": "NOT_VERIFIED", "residuals": ["TARGET_MISMATCH"]},
+  "N6": {"decision": "REJECTED", "accepted_state_created": false},
+  "N7": {"result": "NOT_VERIFIED", "residuals": ["EMPTY_EVIDENCE_IDS"]},
+  "N8": {"covered_by": "N3", "semantics": "authority status checked at decision_time"}
+}

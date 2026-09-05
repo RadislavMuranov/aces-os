@@ -1,0 +1,16 @@
+{
+  "trajectory": "POSITIVE_R10",
+  "evidence_id": "ev_e8fc789ce26e485b",
+  "admissibility_id": "adm_c2bb512739a343d2",
+  "admissibility_result": "ADMISSIBLE",
+  "verification_id": "ver_b25513022c7ba252",
+  "verification_result": "VERIFIED",
+  "acceptance_id": "acc_bd4566cdb5dd4524",
+  "acceptance_decision": "ACCEPTED",
+  "accepted_state_id": "ads_b322c08abcf840ce",
+  "accepted_state_status": "ACTIVE",
+  "observation_payload_hash": "fe3774b58bdccd7aec869fbefc947e7ef447b82762595b715ae5924e823e2b19",
+  "integrity_checks_ok": true,
+  "tamper_detected": true,
+  "executed_at": "2026-09-05T18:27:47.743569Z"
+}
