@@ -1,4 +1,8 @@
-"""Minimal pipeline engine — R10-R1 integrity repairs applied."""
+"""Minimal pipeline engine — R10-R3-R1 evidence boundary closure.
+R1: original observation preserved separately from tampered.
+R2: policy integrity + effective interval + scope enforced at decision_time.
+R3: temporal authority status_at(decision_time).
+"""
 from __future__ import annotations
 from typing import Dict, Any, Optional, List, Tuple
 from .models import (
@@ -71,20 +75,43 @@ class PipelineEngine:
             return False, f"STATUS_AT_DECISION_{status_at}"
         return True, "OK"
 
-    def _get_policy(self, policy_id: str, version: str):
+    def _policy_applicable(self, pol: Dict[str, Any], decision_time: str, target_ref: str) -> Tuple[bool, str]:
+        """Enforce integrity (caller), effective interval, and scope at decision_time."""
+        eff_from = pol.get("effective_from") or ""
+        eff_until = pol.get("effective_until")
+        if eff_from and decision_time < eff_from:
+            return False, f"POLICY_NOT_YET_EFFECTIVE effective_from={eff_from} decision_time={decision_time}"
+        if eff_until and decision_time > eff_until:
+            return False, f"POLICY_EXPIRED effective_until={eff_until} decision_time={decision_time}"
+        scope = pol.get("scope") or "*"
+        if scope != "*":
+            if scope.endswith("*"):
+                prefix = scope[:-1]
+                if not target_ref.startswith(prefix):
+                    return False, f"POLICY_SCOPE_MISMATCH scope={scope} target={target_ref}"
+            elif scope != target_ref:
+                return False, f"POLICY_SCOPE_MISMATCH scope={scope} target={target_ref}"
+        return True, "OK"
+
+    def _get_policy(self, policy_id: str, version: str, decision_time: str = None, target_ref: str = None):
         pol = self.store.get(f"{policy_id}@{version}")
         if not pol:
             return None, "POLICY_NOT_FOUND"
         ok, expected, stored = verify_policy(pol)
         if not ok:
             return None, f"POLICY_INTEGRITY_MISMATCH expected={expected} stored={stored}"
+        if decision_time is not None and target_ref is not None:
+            appl_ok, appl_reason = self._policy_applicable(pol, decision_time, target_ref)
+            if not appl_ok:
+                return None, appl_reason
         return pol, None
 
     def capture_evidence(self, target_ref, source_system, connector_instance_id, actor_workload_ref, observation_payload, observed_at=None):
         obs_at = observed_at or now_iso()
         payload_ref = new_id("obs")
         ch = content_hash(observation_payload)
-        self.store.put("evidence", f"raw_{payload_ref}", {"payload": observation_payload, "hash": ch})
+        self.store.put("evidence", f"raw_original_{payload_ref}", {"payload": observation_payload, "hash": ch, "kind": "original"})
+        self.store.put("evidence", f"raw_{payload_ref}", {"payload": observation_payload, "hash": ch, "kind": "canonical"})
         ev = Evidence(
             evidence_id=new_id("ev"), target_ref=target_ref, source_system=source_system,
             connector_instance_id=connector_instance_id, actor_workload_ref=actor_workload_ref or "UNKNOWN",
@@ -94,13 +121,22 @@ class PipelineEngine:
         self.store.put("evidence", ev.evidence_id, ev.to_dict())
         return ev
 
+    def put_tampered_observation(self, payload_ref: str, tampered_payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Write a SEPARATE tampered artifact. Does NOT overwrite raw_original_*."""
+        th = content_hash(tampered_payload)
+        rec = {"payload": tampered_payload, "hash": th, "kind": "tampered", "original_ref": f"raw_original_{payload_ref}"}
+        self.store.put("evidence", f"raw_tampered_{payload_ref}", rec)
+        self.store.put("evidence", f"raw_{payload_ref}", {"payload": tampered_payload, "hash": th, "kind": "canonical_overridden", "original_ref": f"raw_original_{payload_ref}"})
+        return rec
+
     def evaluate_admissibility(self, evidence_id: str, evaluator_ref: str = "evaluator_01"):
         ev = self.store.get(evidence_id)
         if not ev:
             raise ValueError("EVIDENCE_NOT_FOUND")
         decision_time = now_iso()
+        target_ref = ev.get("target_ref", "")
         ok, reason = self._authority_active_at("auth_admissibility_01", decision_time, "ADMISSIBILITY")
-        pol, pol_err = self._get_policy("pol_admiss_v1", "1.0.0")
+        pol, pol_err = self._get_policy("pol_admiss_v1", "1.0.0", decision_time, target_ref)
         if pol_err:
             raise ValueError(pol_err)
         result = "ADMISSIBLE"
@@ -122,7 +158,7 @@ class PipelineEngine:
             admissibility_id=new_id("adm"), evidence_id=evidence_id, evaluator_ref=evaluator_ref,
             evaluator_authority_id="auth_admissibility_01", policy_id="pol_admiss_v1",
             policy_version="1.0.0", policy_integrity_marker=pol["policy_integrity_marker"],
-            target_ref=ev.get("target_ref", ""), evaluated_at=decision_time, result=result,
+            target_ref=target_ref, evaluated_at=decision_time, result=result,
             residual_unknowns=unknowns,
         )
         self.store.put("admissibility", adm.admissibility_id, adm.to_dict())
@@ -136,7 +172,7 @@ class PipelineEngine:
     def verify(self, evidence_ids, target_ref, verifier_ref="verifier_01", procedure_ref="procedure_content_match_v1"):
         decision_time = now_iso()
         ok, reason = self._authority_active_at("auth_verifier_01", decision_time, "VERIFICATION")
-        pol, pol_err = self._get_policy("pol_verify_v1", "1.0.0")
+        pol, pol_err = self._get_policy("pol_verify_v1", "1.0.0", decision_time, target_ref)
         if pol_err:
             rec = VerificationRecord(
                 verification_id=new_id("ver"), evidence_ids=evidence_ids, target_ref=target_ref,
@@ -214,7 +250,7 @@ class PipelineEngine:
     def accept(self, verification_ids, target_ref, proposed_state, acceptor_ref="acceptor_01"):
         decision_time = now_iso()
         ok, reason = self._authority_active_at("auth_acceptor_01", decision_time, "ACCEPTANCE")
-        pol, pol_err = self._get_policy("pol_accept_v1", "1.0.0")
+        pol, pol_err = self._get_policy("pol_accept_v1", "1.0.0", decision_time, target_ref)
         decision = "ACCEPTED"
         reason_code = "OK"
         evidence_ids = []
