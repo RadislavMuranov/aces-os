@@ -1,4 +1,4 @@
-"""Minimal pipeline engine implementing R6 contract semantics (R8/R10)."""
+"""Minimal pipeline engine — R10-R1 integrity repairs applied."""
 from __future__ import annotations
 from typing import Dict, Any, Optional, List, Tuple
 from .models import (
@@ -7,6 +7,7 @@ from .models import (
     new_id, now_iso, content_hash
 )
 from .store import RecordStore
+from .integrity import verify_policy
 
 class PipelineEngine:
     def __init__(self, store: RecordStore):
@@ -16,33 +17,24 @@ class PipelineEngine:
     def _bootstrap_authorities_and_policy(self):
         root = AuthorityEntry(
             authority_id="auth_root_architectural",
-            role="ROOT",
-            scope="*",
-            policy_id="pol_root",
-            current_status="ACTIVE",
-            status_as_of=now_iso(),
+            role="ROOT", scope="*", policy_id="pol_root",
+            current_status="ACTIVE", status_as_of=now_iso(),
             status_history=[{"status": "ACTIVE", "at": now_iso(), "by": "bootstrap"}],
             trust_root_ref="architectural_authority_root",
         )
         self.store.put("authority", root.authority_id, root.to_dict())
-
         for aid, role, pol in [
             ("auth_verifier_01", "VERIFICATION", "pol_verify_v1"),
             ("auth_acceptor_01", "ACCEPTANCE", "pol_accept_v1"),
             ("auth_admissibility_01", "ADMISSIBILITY", "pol_admiss_v1"),
         ]:
             a = AuthorityEntry(
-                authority_id=aid,
-                role=role,
-                scope="target:*",
-                policy_id=pol,
-                current_status="ACTIVE",
-                status_as_of=now_iso(),
+                authority_id=aid, role=role, scope="target:*", policy_id=pol,
+                current_status="ACTIVE", status_as_of=now_iso(),
                 status_history=[{"status": "ACTIVE", "at": now_iso(), "by": "auth_root_architectural"}],
                 trust_root_ref="auth_root_architectural",
             )
             self.store.put("authority", a.authority_id, a.to_dict())
-
         for pid, ver, body in [
             ("pol_admiss_v1", "1.0.0", {"rule": "require target_ref, source, observed_at, integrity or UNKNOWN"}),
             ("pol_verify_v1", "1.0.0", {"rule": "require admissible evidence; procedure=content_match"}),
@@ -50,12 +42,8 @@ class PipelineEngine:
             ("pol_root", "1.0.0", {"rule": "root issuance only"}),
         ]:
             pol = {
-                "policy_id": pid,
-                "policy_version": ver,
-                "body": body,
-                "effective_from": "2026-01-01T00:00:00Z",
-                "effective_until": None,
-                "scope": "*",
+                "policy_id": pid, "policy_version": ver, "body": body,
+                "effective_from": "2026-01-01T00:00:00Z", "effective_until": None, "scope": "*",
             }
             pol["policy_integrity_marker"] = content_hash(pol)
             self.store.put("policy", f"{pid}@{ver}", pol)
@@ -63,18 +51,34 @@ class PipelineEngine:
     def _get_authority(self, authority_id: str) -> Optional[Dict[str, Any]]:
         return self.store.get(authority_id)
 
+    def _status_at(self, auth: Dict[str, Any], decision_time: str) -> str:
+        history = auth.get("status_history") or []
+        if not history:
+            return auth.get("current_status") or "UNKNOWN"
+        applicable = [h for h in history if h.get("at", "") <= decision_time]
+        if applicable:
+            return applicable[-1].get("status", "UNKNOWN")
+        return history[0].get("status", "UNKNOWN")
+
     def _authority_active_at(self, authority_id: str, decision_time: str, required_role: str) -> Tuple[bool, str]:
         auth = self._get_authority(authority_id)
         if not auth:
             return False, "AUTHORITY_NOT_FOUND"
         if auth.get("role") != required_role and auth.get("role") != "ROOT":
             return False, "ROLE_MISMATCH"
-        if auth.get("current_status") != "ACTIVE":
-            return False, f"STATUS_{auth.get('current_status')}"
+        status_at = self._status_at(auth, decision_time)
+        if status_at != "ACTIVE":
+            return False, f"STATUS_AT_DECISION_{status_at}"
         return True, "OK"
 
-    def _get_policy(self, policy_id: str, version: str) -> Optional[Dict[str, Any]]:
-        return self.store.get(f"{policy_id}@{version}")
+    def _get_policy(self, policy_id: str, version: str):
+        pol = self.store.get(f"{policy_id}@{version}")
+        if not pol:
+            return None, "POLICY_NOT_FOUND"
+        ok, expected, stored = verify_policy(pol)
+        if not ok:
+            return None, f"POLICY_INTEGRITY_MISMATCH expected={expected} stored={stored}"
+        return pol, None
 
     def capture_evidence(self, target_ref, source_system, connector_instance_id, actor_workload_ref, observation_payload, observed_at=None):
         obs_at = observed_at or now_iso()
@@ -82,17 +86,10 @@ class PipelineEngine:
         ch = content_hash(observation_payload)
         self.store.put("evidence", f"raw_{payload_ref}", {"payload": observation_payload, "hash": ch})
         ev = Evidence(
-            evidence_id=new_id("ev"),
-            target_ref=target_ref,
-            source_system=source_system,
-            connector_instance_id=connector_instance_id,
-            actor_workload_ref=actor_workload_ref or "UNKNOWN",
-            observation_payload_ref=payload_ref,
-            content_hash=ch,
-            observed_at=obs_at,
-            received_at=now_iso(),
-            status="CAPTURED",
-            integrity_marker=ch,
+            evidence_id=new_id("ev"), target_ref=target_ref, source_system=source_system,
+            connector_instance_id=connector_instance_id, actor_workload_ref=actor_workload_ref or "UNKNOWN",
+            observation_payload_ref=payload_ref, content_hash=ch, observed_at=obs_at,
+            received_at=now_iso(), status="CAPTURED", integrity_marker=ch,
         )
         self.store.put("evidence", ev.evidence_id, ev.to_dict())
         return ev
@@ -103,9 +100,9 @@ class PipelineEngine:
             raise ValueError("EVIDENCE_NOT_FOUND")
         decision_time = now_iso()
         ok, reason = self._authority_active_at("auth_admissibility_01", decision_time, "ADMISSIBILITY")
-        pol = self._get_policy("pol_admiss_v1", "1.0.0")
-        if not pol:
-            raise ValueError("POLICY_NOT_FOUND")
+        pol, pol_err = self._get_policy("pol_admiss_v1", "1.0.0")
+        if pol_err:
+            raise ValueError(pol_err)
         result = "ADMISSIBLE"
         unknowns = []
         if not ev.get("target_ref"):
@@ -122,20 +119,13 @@ class PipelineEngine:
             result = "INADMISSIBLE"
             unknowns.append(reason)
         adm = AdmissibilityEvaluation(
-            admissibility_id=new_id("adm"),
-            evidence_id=evidence_id,
-            evaluator_ref=evaluator_ref,
-            evaluator_authority_id="auth_admissibility_01",
-            policy_id="pol_admiss_v1",
-            policy_version="1.0.0",
-            policy_integrity_marker=pol["policy_integrity_marker"],
-            target_ref=ev.get("target_ref", ""),
-            evaluated_at=decision_time,
-            result=result,
+            admissibility_id=new_id("adm"), evidence_id=evidence_id, evaluator_ref=evaluator_ref,
+            evaluator_authority_id="auth_admissibility_01", policy_id="pol_admiss_v1",
+            policy_version="1.0.0", policy_integrity_marker=pol["policy_integrity_marker"],
+            target_ref=ev.get("target_ref", ""), evaluated_at=decision_time, result=result,
             residual_unknowns=unknowns,
         )
-        data = adm.to_dict()
-        self.store.put("admissibility", adm.admissibility_id, data)
+        self.store.put("admissibility", adm.admissibility_id, adm.to_dict())
         if result == "INADMISSIBLE":
             ev["status"] = "INADMISSIBLE"
         elif result == "UNKNOWN":
@@ -146,24 +136,27 @@ class PipelineEngine:
     def verify(self, evidence_ids, target_ref, verifier_ref="verifier_01", procedure_ref="procedure_content_match_v1"):
         decision_time = now_iso()
         ok, reason = self._authority_active_at("auth_verifier_01", decision_time, "VERIFICATION")
-        pol = self._get_policy("pol_verify_v1", "1.0.0")
-        if not pol:
-            raise ValueError("POLICY_NOT_FOUND")
-
-        def make_nv(residuals):
+        pol, pol_err = self._get_policy("pol_verify_v1", "1.0.0")
+        if pol_err:
             rec = VerificationRecord(
-                verification_id=new_id("ver"),
-                evidence_ids=evidence_ids,
-                target_ref=target_ref,
-                procedure_ref=procedure_ref,
-                verifier_ref=verifier_ref,
-                verification_authority_id="auth_verifier_01",
-                policy_id="pol_verify_v1",
+                verification_id=new_id("ver"), evidence_ids=evidence_ids, target_ref=target_ref,
+                procedure_ref=procedure_ref, verifier_ref=verifier_ref,
+                verification_authority_id="auth_verifier_01", policy_id="pol_verify_v1",
+                policy_version="1.0.0", policy_integrity_marker="INVALID",
+                scope="target:*", verified_at=decision_time, result="NOT_VERIFIED",
+                residual_unknowns=[pol_err],
+            )
+            self.store.put("verification", rec.verification_id, rec.to_dict())
+            return rec
+
+        def make_nv(residuals, pol_marker=None):
+            rec = VerificationRecord(
+                verification_id=new_id("ver"), evidence_ids=evidence_ids, target_ref=target_ref,
+                procedure_ref=procedure_ref, verifier_ref=verifier_ref,
+                verification_authority_id="auth_verifier_01", policy_id="pol_verify_v1",
                 policy_version="1.0.0",
-                policy_integrity_marker=pol["policy_integrity_marker"],
-                scope="target:*",
-                verified_at=decision_time,
-                result="NOT_VERIFIED",
+                policy_integrity_marker=pol_marker or (pol["policy_integrity_marker"] if pol else ""),
+                scope="target:*", verified_at=decision_time, result="NOT_VERIFIED",
                 residual_unknowns=residuals,
             )
             self.store.put("verification", rec.verification_id, rec.to_dict())
@@ -190,24 +183,30 @@ class PipelineEngine:
         unknowns = []
         for eid in evidence_ids:
             ev = self.store.get(eid)
-            if not ev or not ev.get("content_hash"):
+            if not ev:
+                return make_nv(["EVIDENCE_NOT_FOUND"])
+            payload_ref = ev.get("observation_payload_ref")
+            raw = self.store.get(f"raw_{payload_ref}") if payload_ref else None
+            if not raw or "payload" not in raw:
+                result = "UNKNOWN"
+                unknowns.append("RAW_PAYLOAD_UNAVAILABLE")
+                continue
+            recomputed = content_hash(raw["payload"])
+            stored_hash = ev.get("content_hash") or ""
+            if not stored_hash:
                 result = "UNKNOWN"
                 unknowns.append("MISSING_CONTENT_HASH")
+            elif recomputed != stored_hash:
+                return make_nv([f"CONTENT_HASH_MISMATCH recomputed={recomputed} stored={stored_hash}"])
+            if ev.get("integrity_marker") and ev.get("integrity_marker") != stored_hash:
+                return make_nv(["INTEGRITY_MARKER_MISMATCH"])
 
         rec = VerificationRecord(
-            verification_id=new_id("ver"),
-            evidence_ids=evidence_ids,
-            target_ref=target_ref,
-            procedure_ref=procedure_ref,
-            verifier_ref=verifier_ref,
-            verification_authority_id="auth_verifier_01",
-            policy_id="pol_verify_v1",
-            policy_version="1.0.0",
-            policy_integrity_marker=pol["policy_integrity_marker"],
-            scope="target:*",
-            verified_at=decision_time,
-            result=result,
-            residual_unknowns=unknowns,
+            verification_id=new_id("ver"), evidence_ids=evidence_ids, target_ref=target_ref,
+            procedure_ref=procedure_ref, verifier_ref=verifier_ref,
+            verification_authority_id="auth_verifier_01", policy_id="pol_verify_v1",
+            policy_version="1.0.0", policy_integrity_marker=pol["policy_integrity_marker"],
+            scope="target:*", verified_at=decision_time, result=result, residual_unknowns=unknowns,
         )
         self.store.put("verification", rec.verification_id, rec.to_dict())
         return rec
@@ -215,48 +214,37 @@ class PipelineEngine:
     def accept(self, verification_ids, target_ref, proposed_state, acceptor_ref="acceptor_01"):
         decision_time = now_iso()
         ok, reason = self._authority_active_at("auth_acceptor_01", decision_time, "ACCEPTANCE")
-        pol = self._get_policy("pol_accept_v1", "1.0.0")
-        if not pol:
-            raise ValueError("POLICY_NOT_FOUND")
+        pol, pol_err = self._get_policy("pol_accept_v1", "1.0.0")
         decision = "ACCEPTED"
         reason_code = "OK"
         evidence_ids = []
-        if not ok:
+        if pol_err:
+            decision = "REJECTED"
+            reason_code = pol_err
+            pol_marker = "INVALID"
+        else:
+            pol_marker = pol["policy_integrity_marker"]
+        if decision == "ACCEPTED" and not ok:
             decision = "REJECTED"
             reason_code = reason
-        else:
+        if decision == "ACCEPTED":
             for vid in verification_ids:
                 ver = self.store.get(vid)
                 if not ver:
-                    decision = "REJECTED"
-                    reason_code = "VERIFICATION_NOT_FOUND"
-                    break
+                    decision = "REJECTED"; reason_code = "VERIFICATION_NOT_FOUND"; break
                 if ver.get("result") != "VERIFIED":
-                    decision = "REJECTED"
-                    reason_code = f"VERIFICATION_{ver.get('result')}"
-                    break
+                    decision = "REJECTED"; reason_code = f"VERIFICATION_{ver.get('result')}"; break
                 if ver.get("target_ref") != target_ref:
-                    decision = "REJECTED"
-                    reason_code = "TARGET_MISMATCH"
-                    break
+                    decision = "REJECTED"; reason_code = "TARGET_MISMATCH"; break
                 if ver.get("verification_authority_id") == "auth_acceptor_01":
-                    decision = "REJECTED"
-                    reason_code = "SELF_APPROVAL_FORBIDDEN"
-                    break
+                    decision = "REJECTED"; reason_code = "SELF_APPROVAL_FORBIDDEN"; break
                 evidence_ids.extend(ver.get("evidence_ids") or [])
         acc = AcceptanceDecision(
-            acceptance_id=new_id("acc"),
-            verification_ids=verification_ids,
-            target_ref=target_ref,
-            proposed_state=str(proposed_state),
-            acceptance_authority_id="auth_acceptor_01",
-            policy_id="pol_accept_v1",
-            policy_version="1.0.0",
-            policy_integrity_marker=pol["policy_integrity_marker"],
-            scope="target:*",
-            decided_at=decision_time,
-            decision=decision,
-            reason_code=reason_code,
+            acceptance_id=new_id("acc"), verification_ids=verification_ids, target_ref=target_ref,
+            proposed_state=str(proposed_state), acceptance_authority_id="auth_acceptor_01",
+            policy_id="pol_accept_v1", policy_version="1.0.0",
+            policy_integrity_marker=pol_marker,
+            scope="target:*", decided_at=decision_time, decision=decision, reason_code=reason_code,
             evidence_ids=list(set(evidence_ids)),
         )
         self.store.put("acceptance", acc.acceptance_id, acc.to_dict())
@@ -267,15 +255,9 @@ class PipelineEngine:
         if not acc or acc.get("decision") != "ACCEPTED":
             return None
         st = AcceptedDigitalWorldState(
-            accepted_state_id=new_id("ads"),
-            target_ref=acc["target_ref"],
-            state_payload=state_payload,
-            acceptance_id=acceptance_id,
-            verification_ids=acc.get("verification_ids") or [],
-            accepted_at=now_iso(),
-            scope=acc.get("scope") or "target:*",
-            status="ACTIVE",
-            version="1",
+            accepted_state_id=new_id("ads"), target_ref=acc["target_ref"], state_payload=state_payload,
+            acceptance_id=acceptance_id, verification_ids=acc.get("verification_ids") or [],
+            accepted_at=now_iso(), scope=acc.get("scope") or "target:*", status="ACTIVE", version="1",
             evidence_ids=acc.get("evidence_ids") or [],
         )
         self.store.put("accepted_state", st.accepted_state_id, st.to_dict())
