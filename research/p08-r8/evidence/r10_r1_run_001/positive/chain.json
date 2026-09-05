@@ -1,0 +1,13 @@
+{
+  "trajectory": "POSITIVE_R10_R1",
+  "evidence_id": "ev_62214c4486b24229",
+  "admissibility_id": "adm_6f3803fe92bb416c",
+  "admissibility_result": "ADMISSIBLE",
+  "verification_id": "ver_f3c94bdd9e9342ae",
+  "verification_result": "VERIFIED",
+  "acceptance_id": "acc_b40b032335df4f77",
+  "acceptance_decision": "ACCEPTED",
+  "accepted_state_id": "ads_22d16c73dc9d4fac",
+  "obs_hash": "bfc21bd5fbc0fabf27dbd56592a9fc0a5294545cd3fb346bfd5511cf6f38c578",
+  "executed_at": "2026-09-05T18:46:56.266439Z"
+}

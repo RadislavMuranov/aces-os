@@ -1,0 +1,10 @@
+{
+  "runner": "run_r10_r1.py",
+  "version": "0.1.1-r10r1",
+  "r1_pass": true,
+  "r2_pass": true,
+  "r3_pass": true,
+  "positive_verification": "VERIFIED",
+  "positive_acceptance": "ACCEPTED",
+  "executed_at": "2026-09-05T18:46:56.275922Z"
+}

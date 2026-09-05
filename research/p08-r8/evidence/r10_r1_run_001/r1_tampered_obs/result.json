@@ -1,0 +1,12 @@
+{
+  "test": "R1_TAMPERED_OBSERVATION",
+  "evidence_id": "ev_9c2701c26d764c61",
+  "original_content_hash": "397d827eff7216a5b79c7e35b48c96af88379eb9e4a21e1cf81cadc6a9c443c8",
+  "recomputed_after_tamper": "765f91943f233a537bb892b41a7671c12e883cd9f0e99a8389afa2a88f08c3e6",
+  "hashes_differ": true,
+  "verification_id": "ver_c20176e335114a59",
+  "verification_result": "NOT_VERIFIED",
+  "residuals": ["CONTENT_HASH_MISMATCH recomputed=765f91943f233a537bb892b41a7671c12e883cd9f0e99a8389afa2a88f08c3e6 stored=397d827eff7216a5b79c7e35b48c96af88379eb9e4a21e1cf81cadc6a9c443c8"],
+  "pass": true,
+  "executed_at": "2026-09-05T18:46:56.270167Z"
+}

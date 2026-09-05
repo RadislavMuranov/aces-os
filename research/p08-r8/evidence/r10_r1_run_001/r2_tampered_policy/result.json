@@ -1,0 +1,12 @@
+{
+  "test": "R2_TAMPERED_POLICY",
+  "original_marker": "ae742a147f6224ea869ef6d63a1c617861071cbca9680116527627b00c49cce7",
+  "tampered_marker": "0000000000000000000000000000000000000000000000000000000000000000",
+  "verify_policy_ok_before": true,
+  "verify_policy_ok_after": false,
+  "verification_id": "ver_b55f297907834ae5",
+  "verification_result": "NOT_VERIFIED",
+  "residuals": ["POLICY_INTEGRITY_MISMATCH expected=ae742a147f6224ea869ef6d63a1c617861071cbca9680116527627b00c49cce7 stored=0000000000000000000000000000000000000000000000000000000000000000"],
+  "pass": true,
+  "executed_at": "2026-09-05T18:46:56.272774Z"
+}
