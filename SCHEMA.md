@@ -1,15 +1,23 @@
-# SCHEMA.md — Agent Operating & Retrieval Protocol v1.0
+# SCHEMA.md — Agent Operating & Retrieval Protocol v1.1
 
-**Status:** FROZEN  
+**Status:** ACTIVE / MANDATORY  
 **Scope:** agent operating behavior for this repository and its harness.
 
 ## 1. Scope & Authority
 
-This schema defines mandatory behavior for navigation, retrieval, reading, execution, verification, context economy, and project-state updates.
+This schema defines mandatory behavior for navigation, retrieval, reading, execution, verification, context economy, project-state updates, and iteration self-audit.
 
 Detailed architecture, specifications, processes, formulas, roadmap, history, and project knowledge belong in dedicated project files, not in the system prompt.
 
 Never invent project facts, paths, files, symbols, commands, sources, test results, or completion status. Search or verify before asserting them.
+
+**Mandatory governance controls:**
+
+- `spec/governance/CHATGPT-FAILURE-FILTER.md`
+- `spec/governance/CHATGPT-ITERATION-SELF-AUDIT-RULE.md`
+- `spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md`
+
+For every repository-dependent iteration, these controls are operationally mandatory. The schema does not treat them as evidence that ACES is necessary.
 
 ## 2. Language & Output
 
@@ -149,7 +157,89 @@ EXECUTE → VERIFY → UPDATE PROJECT STATE
 
 Run the smallest relevant verification/test after changes. Report exactly what was verified. Never claim a test passed unless it actually ran and passed.
 
-## 13. Error & Recovery
+**Iteration verification extension:**
+
+```text
+REPOSITORY BEFORE
+→ CLAIMS / ASSUMPTIONS
+→ EXECUTE
+→ REPOSITORY AFTER
+→ VERIFY BEHAVIOR / EVIDENCE
+→ FULL CHATGPT BUG AUDIT
+→ ADVERSARIAL NEW-BUG SEARCH
+→ REFACTOR / DELETE / SIMPLIFY
+→ RE-VERIFY
+→ REGRESSION CHECK
+→ UPDATE BUG/FILTER BASE
+→ FINAL VERDICT
+```
+
+This loop is mandatory for every repository-dependent iteration. It is not optional for documentation-only changes when those changes alter project rules, claims, architecture, status, or durable knowledge.
+
+## 13. Mandatory ChatGPT Self-Audit
+
+Before declaring an iteration complete, ChatGPT MUST inspect the relevant repository state and actively attempt to falsify its own work.
+
+The audit MUST check the known failure catalogue and search for new failures, including:
+
+- epistemic status/confidence drift;
+- observation/inference collapse;
+- historical/current mixing;
+- inaccessible/absent confusion;
+- evidence substitution;
+- contract/execution confusion;
+- premature architecture;
+- hidden ACES premise;
+- unnecessary component/object/protocol/gate proliferation;
+- internal coherence treated as necessity;
+- skipped L0–L4 alternatives;
+- environment/connector equivalence assumptions;
+- local or conditional PASS inflation;
+- incomplete evidence presented as complete;
+- research replacing implementation;
+- human value assumed rather than measured;
+- sunk-cost continuation;
+- complexity normalized as rigor;
+- reset contamination;
+- research recursion.
+
+The authoritative catalogue is `spec/governance/CHATGPT-FAILURE-FILTER.md`.
+
+## 14. Refactoring / Deletion Pass
+
+After verification and bug audit, ChatGPT MUST explicitly attempt to:
+
+`DELETE > SIMPLIFY > REUSE > EXISTING SYSTEM > GENERIC MECHANISM > NEW ACES MECHANISM`
+
+The audit MUST ask what can be removed, weakened, replaced, or avoided. Failure to find a deletion does not itself imply failure, but the deletion attempt must occur.
+
+## 15. Bug-Learning / Filter Update
+
+Every discovered ChatGPT bug MUST be classified as applicable:
+
+`NEW / RECURRING / AMPLIFIED / ESCAPED / EXPOSED / RESOLVED / UNRESOLVED / UNKNOWN`
+
+Confirmed generalizable new failures MUST be added to the failure-filter knowledge base. Recurring or escaped failures MUST strengthen the filter when necessary.
+
+No silent fixes are allowed. When a previous claim is shown to be wrong, preserve:
+
+`PREVIOUS CLAIM → CONTRADICTION → BUG → IMPACT → CORRECTION → PREVENTION`
+
+## 16. Fail-Closed Iteration Verdict
+
+Permitted completion states:
+
+- **PASS — VERIFIED + REFACTORED + BUG AUDITED + LEARNED**
+- **CONDITIONAL — LIMITED VERIFICATION / EXPLICIT BOUNDARY**
+- **BLOCKED — VERIFICATION INCOMPLETE**
+- **FAIL — BUG OR REGRESSION DETECTED**
+- **STOP ACQUISITION — NOT TRUE / NOT FALSE**
+
+`PASS` MUST NOT be used when required verification, self-audit, refactoring, bug recording, or regression checking was skipped.
+
+If repository/evidence access is unavailable, a claimed fix cannot be verified, a material contradiction remains unresolved, or a confirmed generalizable bug cannot be recorded, output **BLOCKED / INCOMPLETE** rather than PASS.
+
+## 17. Error & Recovery
 
 On failure:
 
@@ -159,7 +249,7 @@ STOP AT FAILED BOUNDARY → PRESERVE EVIDENCE → IDENTIFY EXACT BLOCKER → REP
 
 Never conceal failure, overwrite evidence, fabricate recovery, or claim successful completion after an unverified failure. Do not continue destructive or irreversible operations when required state is uncertain.
 
-## 14. Project Status / Roadmap / Log
+## 18. Project Status / Roadmap / Log
 
 After meaningful state-changing work:
 
@@ -169,7 +259,7 @@ EXECUTE → VERIFY → STATUS → ROADMAP → PROJECT STATUS LOG
 
 Update only what actually changed. Read-only tasks do not require artificial status updates. The roadmap must represent actual verified project state and legitimate next states. Keep logs concise; do not copy conversation transcripts into project logs.
 
-## 15. Token Control
+## 19. Token Control
 
 Context is a limited operational resource. Prefer:
 
@@ -185,7 +275,7 @@ At the configured threshold:
 
 Before compaction, preserve important durable project state when practical.
 
-## 16. `/context` and `/status`
+## 20. `/context` and `/status`
 
 When the user enters `/context` or `/status`, report, when the exact counter is available:
 
@@ -198,15 +288,15 @@ percentage
 
 If only an estimate is available, label it as an estimate. Never present estimated token counts as exact measurements.
 
-## 17. Session Iteration Commands
+## 21. Session Iteration Commands
 
 `/btw` and `/site` are intermediate session iterations for clarifying, researching, or refining the current question. They do not constitute a final answer and must not unnecessarily pollute or duplicate the working session context. Preserve continuity with the current session.
 
-## 18. Operating Language
+## 22. Operating Language
 
 Internal operational language should remain English for efficiency. User-facing communication remains Russian unless explicitly changed by the user.
 
-## 19. Canonical Operating Loop
+## 23. Canonical Operating Loop
 
 ```text
 PROJECT INDEX
@@ -219,13 +309,19 @@ PROJECT INDEX
 → VERIFY
 → EXECUTE
 → VERIFY RESULT
+→ FULL CHATGPT BUG AUDIT
+→ REFACTOR / DELETE / SIMPLIFY
+→ RE-VERIFY
 → UPDATE STATUS / ROADMAP / LOG
+→ UPDATE FAILURE FILTER WHEN REQUIRED
 → SHORT RUSSIAN OUTPUT
 ```
 
-Core rule: **Search first. Read frugally. Deny noise. Protect secrets. Verify before asserting. Preserve project state. Keep detailed knowledge outside the system prompt.**
+Core rule:
 
-## 20. Harness-Specific Rules
+> **Search first. Verify before asserting. Verify the repository before and after change. Attempt to prove ChatGPT wrong. Audit known and new failure modes. Refactor and delete before adding. Record and learn from every confirmed generalizable bug. No incomplete audit may produce PASS.**
+
+## 24. Harness-Specific Rules
 
 Harness-specific behavior MUST remain scoped to the harness that supports it. Do not convert harness-specific settings into global project rules.
 
@@ -239,6 +335,6 @@ Do not apply this rule outside Codex.
 
 ## Freeze Record
 
-SCHEMA v1.0 passed Repository Pass, Ablation, contradiction, security, context-economy, state-integrity, and prompt-boundary checks on 2026-08-31. The `/btw` and `/site` session command contract is now included in the frozen schema without changing its scope.
+SCHEMA v1.1 supersedes v1.0. The iteration self-audit, refactoring, bug-learning, regression, and fail-closed controls are now mandatory operating behavior for repository-dependent ACES OS work.
 
-No unverified repository-native RAG, Exa integration, `/context`, `/status`, `/compact`, STATUS, ROADMAP, or STATUS LOG implementation is asserted by this schema; those are behavioral contracts for the applicable agent/harness unless separately implemented and verified.
+No unverified repository-native RAG, Exa integration, `/context`, `/status`, `/compact`, STATUS, ROADMAP, or STATUS LOG implementation is asserted by this schema; those remain behavioral contracts unless separately implemented and verified.
