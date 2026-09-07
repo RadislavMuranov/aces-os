@@ -1,15 +1,15 @@
-# ACES OS — ChatGPT Failure Filter v1.0
+# ACES OS — ChatGPT Failure Filter v1.1
 
 **Status:** ACTIVE / MANDATORY DESIGN FILTER  
-**Scope:** All future ACES OS architecture, specification, protocol, governance, evidence, and implementation decisions  
-**Origin:** R2.2-001 Real-World Failure Discovery Gate / ChatGPT forensic post-mortem  
+**Scope:** All future ACES OS architecture, specification, protocol, governance, evidence, research, and implementation decisions  
+**Origin:** R2.2-001 Real-World Failure Discovery Gate / ChatGPT forensic post-mortem / Zero Audit correction  
 **Authority:** Process-control rule for architectural work; does not itself establish ACES necessity.
 
 ## 1. Purpose
 
-This document is a mandatory anti-overengineering and anti-circularity filter for future ACES OS design work.
+This document is a mandatory anti-overengineering, anti-circularity, and anti-research-erasure filter for future ACES OS work.
 
-Its purpose is to prevent a recurrence of the failure mode in which architectural abstraction, internal coherence, formal evidence, gates, protocols, metrics, or project momentum are allowed to substitute for independently observed real-world necessity.
+Its purpose is to prevent a recurrence of the failure mode in which architectural abstraction, internal coherence, formal evidence, gates, protocols, metrics, project momentum, or premature zeroing are allowed to substitute for independently observed real-world necessity or to erase research evidence relevant to falsification.
 
 **Governing principle:**
 
@@ -97,6 +97,8 @@ Historical evidence cannot establish present architectural necessity by itself.
 
 Hypothesized and unverified problems MUST NOT trigger architecture work.
 
+**Research is evidence-bearing work and MUST NOT be collapsed into architecture.** A research result may be negative, falsifying, boundary-defining, or inconclusive; those outcomes remain part of the evidence base even when the architecture they investigated is deleted.
+
 ## 6. Anti-Circularity Rules
 
 The following reasoning is invalid:
@@ -109,6 +111,7 @@ The following reasoning is invalid:
 - “The Canon validates the architecture because the architecture defines the Canon.”
 - “Internal coherence demonstrates external necessity.”
 - “A large evidence bundle demonstrates that the underlying architectural claim is true.”
+- **“The architecture was deleted, therefore the research that investigated it is also deleted.”**
 
 The architecture MUST NOT be used as its own primary evidence source.
 
@@ -146,6 +149,8 @@ A completed research stage is NOT evidence that the project should continue.
 
 A completed gate is NOT product progress unless it changes an externally meaningful outcome.
 
+However, a completed research stage MUST remain in the research/evidence record when it contains observations, comparisons, experiments, falsification attempts, or negative results relevant to the project decision.
+
 ## 9. Human Value Rule
 
 Claims about human benefit MUST NOT be treated as established without evidence.
@@ -175,6 +180,8 @@ The following MUST trigger an explicit deletion/reduction review:
 - new abstraction whose necessity is justified primarily by existing ACES abstractions.
 
 Default action is **DELETE / DO NOT ADD** until independent necessity is demonstrated.
+
+Deletion of an architectural assumption MUST NOT delete the research record used to evaluate that assumption.
 
 ## 11. Sunk-Cost Rule
 
@@ -277,7 +284,11 @@ The following previously observed ChatGPT failure classes are permanently treate
 - abstraction mistaken for progress;
 - vocabulary/formality mistaken for rigor;
 - reset contamination;
-- failure to perform zero-state deletion test.
+- failure to perform zero-state deletion test;
+- **research collapse into architecture** — deleting or ignoring research findings merely because the architecture investigated by that research has been deleted;
+- **research-layer erasure during zero audit** — treating zeroing as permission to discard comparative studies, falsification attempts, experiments, negative results, or boundary findings;
+- **premature evidence compression** — reducing a multi-line research history to a small set of observed failures before checking whether discarded research contains decision-relevant evidence;
+- **external-research blindness** — omitting relevant external research or comparative ecosystem findings (for example agent-native/harness research) from a revalidation because they do not fit the current zero-state narrative.
 
 ## 16. Mandatory Decision Language
 
@@ -306,13 +317,31 @@ Whenever architectural momentum becomes substantial, the project MUST be willing
 
 > **What remains if every ACES-specific architectural assumption is deleted?**
 
-If the answer is “nothing demonstrably necessary,” architecture development stops.
+The zero-state procedure MUST be:
+
+```text
+DELETE ARCHITECTURAL ASSUMPTIONS
+        ↓
+PRESERVE RESEARCH RECORD
+        ↓
+PRESERVE OBSERVED FAILURES / EXPERIMENTS / COMPARISONS
+        ↓
+RECLASSIFY EACH RESULT
+        ↓
+RECOMPUTE WHAT REMAINS UNFALSIFIED
+        ↓
+ONLY THEN: DECIDE WHETHER ANY NEW MECHANISM IS JUSTIFIED
+```
+
+If the answer is “nothing demonstrably necessary,” architecture development stops. This does **not** mean research evidence is discarded.
 
 ## 18. Final Rule
 
 > **Do not build a system to explain a problem that has not been independently demonstrated.**
 >
 > **Do not add architecture to repair an architectural assumption.**
+>
+> **Do not erase research because the architecture it investigated was deleted.**
 >
 > **Do not confuse intellectual complexity with product value.**
 >
@@ -324,4 +353,14 @@ If the answer is “nothing demonstrably necessary,” architecture development 
 
 This filter is derived from the ChatGPT forensic failure register produced during ACES OS revalidation/reset after R2.2-001.
 
-It is a process-control artifact, not evidence that ACES OS is necessary.
+### B-129 — Research Collapse During Zero Audit
+
+**Classification:** NEW / EXPOSED  
+**Failure:** During a zero-state audit, ChatGPT removed architectural assumptions correctly but simultaneously compressed/removed relevant research lines, including comparative and falsification research, instead of preserving them as evidence.  
+**Previous claim:** “After removing architecture, only observed cross-environment tasks/failures and a remaining hypothesis survive.”  
+**Contradiction:** This omitted prior research that materially bears on the falsification question, including Karpathy/agent-native research, R0–R13 research, H-CENSUS, DSH research, E3, AKCS-40X, and comparative harness/continuity research.  
+**Impact:** The zero audit became epistemically incomplete and risked producing a false conclusion by erasing evidence relevant to whether ACES is necessary, replaceable, or reducible.  
+**Correction:** Separate **architecture**, **research**, **observations**, **experiments**, **failures**, and **measured value**. Delete architectural assumptions without deleting the research that tested them.  
+**Prevention:** Every zero audit MUST preserve the full research inventory first, classify each research result, and only then recompute the surviving hypothesis/evidence base.
+
+This filter is a process-control artifact, not evidence that ACES OS is necessary.
