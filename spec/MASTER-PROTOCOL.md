@@ -1,8 +1,8 @@
 # ACES OS — MASTER PROTOCOL
 
 **Status:** CANONICAL / ACTIVE
-**Version:** 1.0
-**Date:** 2026-08-29
+**Version:** 1.1
+**Date:** 2026-09-07
 **Repository:** `RadislavMuranov/aces-os`
 **Mode:** Architectural / experimental governance record
 
@@ -15,6 +15,8 @@ This document is the master protocol for the current ACES OS architectural inves
 The protocol exists to prevent the project from turning an unproven architectural hypothesis into unnecessary software, storage, UI, or process.
 
 **Rule:** evidence precedes architecture.
+
+**Mandatory iteration controls:** `spec/governance/CHATGPT-FAILURE-FILTER.md` and `spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md` are mandatory process controls for every future iteration. They do not establish ACES necessity.
 
 ---
 
@@ -145,7 +147,98 @@ For every proposed ACES capability:
 
 ---
 
-## 9. Canonical R-series record
+## 9. Mandatory Per-Iteration Verification, Refactoring & Bug-Learning Gate
+
+This section is **mandatory for every iteration**. It is not optional guidance and cannot be bypassed because the change is small, documentation-only, urgent, previously validated, or apparently obvious.
+
+Before an iteration may be marked complete, ChatGPT MUST execute the following loop:
+
+```text
+REPOSITORY BEFORE
+→ CLAIMS / ASSUMPTIONS
+→ MINIMAL CHANGE / EXECUTION
+→ REPOSITORY AFTER
+→ BEHAVIOR / EVIDENCE VERIFICATION
+→ FULL CHATGPT BUG AUDIT
+→ ADVERSARIAL NEW-BUG SEARCH
+→ REFACTOR / DELETE / SIMPLIFY
+→ RE-VERIFY
+→ FAILURE-FILTER + REGRESSION CHECK
+→ BUG-BASE UPDATE
+→ ITERATION VERDICT
+```
+
+### 9.1 Repository verification
+
+The relevant repository state MUST be inspected before repository-dependent work and independently inspected after the change.
+
+Intended state, committed state, and verified behavior MUST NOT be conflated.
+
+When ChatGPT's assertion conflicts with directly observed repository state, repository observation takes precedence unless independently disproven.
+
+### 9.2 Full ChatGPT bug audit
+
+Every iteration MUST actively audit the complete failure catalogue in `spec/governance/CHATGPT-FAILURE-FILTER.md`, including epistemic, architectural, validation, minimality, runtime/environment, evidence, product/human-value, process, sunk-cost, complexity, reset, and research-recursion failure classes.
+
+The audit MUST also search for bugs not already present in the catalogue.
+
+### 9.3 Refactoring and deletion
+
+After verification, ChatGPT MUST perform an explicit refactoring pass:
+
+`DELETE > SIMPLIFY > REUSE > EXISTING SYSTEM > GENERIC MECHANISM > NEW ACES MECHANISM`
+
+The pass MUST consider what can be deleted, simplified, replaced by an existing capability, weakened to match evidence, or eliminated entirely.
+
+### 9.4 Bug learning
+
+Every discovered bug MUST be classified and recorded. At minimum:
+
+`NEW / RECURRING / AMPLIFIED / ESCAPED / EXPOSED / RESOLVED / UNRESOLVED / UNKNOWN`
+
+A generalizable new failure MUST update the failure-filter knowledge base. Existing bugs that recur or escape detection MUST also update the filter when the prevention rule needs strengthening.
+
+ChatGPT MUST NOT silently correct its own prior error. The record must preserve:
+
+`PREVIOUS CLAIM → CONTRADICTION → BUG → IMPACT → CORRECTION → PREVENTION`
+
+### 9.5 Fail-closed completion
+
+An iteration may be marked:
+
+**PASS — VERIFIED + REFACTORED + BUG AUDITED + LEARNED**
+
+only when the applicable repository, evidence, bug-audit, refactoring, and regression checks are complete.
+
+If required verification cannot be performed, the result is:
+
+**BLOCKED / INCOMPLETE — DO NOT CLAIM PASS.**
+
+### 9.6 Mandatory stop conditions
+
+The iteration MUST stop if:
+
+- repository state cannot be inspected;
+- relevant evidence cannot be accessed;
+- a claimed fix cannot be verified;
+- a contradiction remains unresolved;
+- a material bug is discovered without verified containment;
+- a required regression check cannot be performed;
+- the self-audit is incomplete;
+- a confirmed generalizable bug cannot be recorded in the failure base;
+- the proposed change depends on an unverified ACES architectural premise.
+
+### 9.7 Iteration record
+
+Each completed iteration MUST preserve, at minimum:
+
+`ITERATION_ID / OBJECTIVE / REPOSITORY_BEFORE / ACTION / REPOSITORY_AFTER / VERIFICATION / KNOWN_BUGS / NEW_BUGS / RECURRING_BUGS / REFACTORING / DELETIONS_CONSIDERED / REMAINING_UNKNOWN / FILTER_UPDATED / REGRESSION_CHECK / FINAL_VERDICT`
+
+If a field is not applicable, record `N/A`; if it cannot be established, record `UNKNOWN` or `NOT VERIFIED`.
+
+---
+
+## 10. Canonical R-series record
 
 The following results are accepted as the current experimental record:
 
@@ -181,7 +274,7 @@ The experiments demonstrate that multiple apparent gaps can be addressed by mech
 
 ---
 
-## 10. R13.1 — Intuition Preservation Minimality Test
+## 11. R13.1 — Intuition Preservation Minimality Test
 
 ### Objective
 
@@ -219,7 +312,7 @@ No new ACES object, storage, or UI is justified by R13.1.
 
 ---
 
-## 11. The Minimal Mechanism Principle
+## 12. The Minimal Mechanism Principle
 
 Canonical postulate:
 
@@ -241,7 +334,7 @@ The research must measure not only whether a protocol can work, but **who bears 
 
 ---
 
-## 12. The residual question after minimality
+## 13. The residual question after minimality
 
 The next level of inquiry is no longer:
 
@@ -257,7 +350,7 @@ The proposed zero-friction coordinator is therefore not yet an ACES architectura
 
 ---
 
-## 13. Zero-friction coordinator test
+## 14. Zero-friction coordinator test
 
 The minimum falsifiable question is:
 
@@ -282,7 +375,7 @@ The agent may not:
 
 ---
 
-## 14. Success criterion
+## 15. Success criterion
 
 The coordinator hypothesis passes only if a controlled comparison demonstrates a measurable reduction in **human integration work**.
 
@@ -311,7 +404,7 @@ The treatment fails if it merely moves complexity from applications into an ACES
 
 ---
 
-## 15. Reality Layer rule
+## 16. Reality Layer rule
 
 The canonical human-facing output remains:
 
@@ -325,7 +418,7 @@ Internal coordination must remain invisible unless the human explicitly needs to
 
 ---
 
-## 16. No-new-workspace invariant
+## 17. No-new-workspace invariant
 
 The following invariant is active:
 
@@ -335,7 +428,7 @@ No new ACES task manager, knowledge base, CRM, vault, project board, publishing 
 
 ---
 
-## 17. Owner-boundary invariant
+## 18. Owner-boundary invariant
 
 Actions remain in the system that owns the action.
 
@@ -354,7 +447,7 @@ ACES, if eventually required, coordinates rather than becomes the owner.
 
 ---
 
-## 18. Uncertainty invariant
+## 19. Uncertainty invariant
 
 The system must preserve uncertainty.
 
@@ -370,7 +463,7 @@ A summary is not evidence of continuity unless its provenance can be reconstruct
 
 ---
 
-## 19. Human-agency invariant
+## 20. Human-agency invariant
 
 Human judgment remains authoritative wherever the decision is genuinely human.
 
@@ -380,7 +473,7 @@ Automation must not silently convert recommendation into intention, technical pe
 
 ---
 
-## 20. Current architecture status
+## 21. Current architecture status
 
 **ACES architectural hypothesis:** NOT CONFIRMED.
 
@@ -398,7 +491,7 @@ Automation must not silently convert recommendation into intention, technical pe
 
 ---
 
-## 21. Immediate next experiment
+## 22. Immediate next experiment
 
 Do not build an ACES layer.
 
@@ -422,7 +515,7 @@ If the agent materially reduces cross-system maintenance while preserving all in
 
 ---
 
-## 22. Governance rule
+## 23. Governance rule
 
 No new architecture is admitted because it is elegant, desirable, or theoretically cleaner.
 
@@ -450,7 +543,7 @@ Only then may an ACES architectural component be considered necessary.
 
 ---
 
-## 23. Canonical closing statement
+## 24. Canonical closing statement
 
 > **ACES OS does not exist to add another place where the human must work. It exists, if it is necessary at all, to make the existing Digital World continuously usable without making the human responsible for maintaining its connections.**
 
