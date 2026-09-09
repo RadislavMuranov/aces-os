@@ -6,7 +6,7 @@
 
 - `README.md` — project orientation and current repository purpose.
 - `SECURITY.md` — repository security and secret-handling rules.
-- `spec/MASTER-PROTOCOL.md` — canonical governing architecture and research protocol.
+- `spec/MASTER-PROTOCOL.md` — engineering/research protocol and architectural investigation record; not the ACES rule authority.
 - `spec/asa/` — ASA specifications and data model.
 - `docs/research/` — research record; start with `docs/research/INDEX.md`.
 - `docs/research/H-CENSUS-003-HARNESS-ARCHITECTURE-MATRIX.md` — current canonical harness census, substrate decision, and ACES Harness Contract boundary.
@@ -17,7 +17,8 @@
 
 ## Routing Rules
 
-- Architecture / Canon → `spec/MASTER-PROTOCOL.md`
+- ACES rules / authoritative governance → Notion
+- Architecture / engineering protocol → `spec/MASTER-PROTOCOL.md`
 - ASA → `spec/asa/`
 - Research → `docs/research/INDEX.md`
 - Harness ecosystem / substrate selection → `docs/research/H-CENSUS-003-HARNESS-ARCHITECTURE-MATRIX.md`
