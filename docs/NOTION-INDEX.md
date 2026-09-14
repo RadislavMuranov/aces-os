@@ -11,6 +11,8 @@ This file does not reproduce ACES knowledge, rules, evidence, or research. Subst
 - [13 — Rules](https://app.notion.com/p/3d50e90e16c681548b37f09a490fa2ee?pvs=204) — authoritative ACES rule layer.
 - [ACES Priority Direction — Control → Orca → DSH](https://app.notion.com/p/3d70e90e16c68144a9ebfe4f83db1c5f?pvs=204) — current working execution architecture.
 - [EXECUTION-LOG-DSH-REPO-PRESENCE-001 — DSH Repository Reality](https://app.notion.com/p/3d70e90e16c6817a9f9cdaa96bf26585?pvs=204) — verified repository-presence record and epistemic state.
+- [E1-CONTRACT-GAP-REGISTRATION — R1.5 Authority Gaps](https://app.notion.com/p/3db0e90e16c68114b531f94c39c154ef?pvs=204) — registered R1.5 authority-gap ledger and current E1 blocker.
+- [E1-AUTHORITY-GAP-RESEARCH — Fundamental Git Community + ACES Authority Reconciliation](https://app.notion.com/p/3db0e90e16c681199ffbd95e01b4e531?pvs=204) — fundamental authority research and GitHub community survey for the R1.5 gaps.
 
 ## DSH repository-presence state
 
