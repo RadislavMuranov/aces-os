@@ -61,6 +61,59 @@ Required safeguards:
 - no silent transitions;
 - no PASS/CLOSED without evidence and reconciliation.
 
+## ACTUAL EXECUTION ENFORCEMENT VERIFICATION — 2026-09-18
+
+**Verification target:** `RALPH/P7 GOVERNANCE → ACTUAL EXECUTION ENFORCEMENT`
+
+**Result:** **RUNTIME ENFORCEMENT NOT PROVEN / ACES IMPLEMENTATION ABSENT IN INSPECTED REPOSITORY STATE**
+
+### ACES repository evidence
+
+Inspected repository: `RadislavMuranov/aces-os`  
+Branch: `control/reconcile-iteration-integrity-20260917`  
+Commit before this reconciliation: `0f6266ebf6780247536f9e6d94bf7b118d4ca667`
+
+The inspected tree contains the governance/index artifacts, but `src/` contains only `.gitkeep` and `tests/` contains only `.gitkeep`. No ACES runtime implementation of Ralph/P7, iteration counter, execution budget, retry/repetition threshold, no-progress circuit breaker, or Closure Gate enforcement was found in the inspected repository state.
+
+### DSH comparison evidence
+
+Official external execution substrate: `deepseek-ai/deepseek-harness`, branch `master`.
+
+Observed DSH `packages/core/agent-loop` responsibilities include the per-agent execution loop, turn/step lifecycle, cancellation, durable session integration, bounded parallel tool calls, and the lifecycle extension point `agent/turn-stopping`.
+
+DSH documentation explicitly states **No built-in turn budget**; a policy that bounds runaway turns must cancel from an existing lifecycle extension point such as `agent/turn-stopping`.
+
+Therefore DSH provides an execution-kernel lifecycle seam, but it is **not evidence of ACES Ralph/P7 enforcement**.
+
+### Enforcement boundary
+
+`RALPH GOVERNANCE = ACES CONTROL CONTRACT`  
+`P7 = RECURRENCE-PREVENTION RESPONSIBILITY`  
+`ITERATION-CLOSURE-GATE-001 = PER-ITERATION CONTROL CONTRACT`  
+`DSH = PER-AGENT EXECUTION KERNEL`  
+`ACES RUNTIME ENFORCEMENT OF RALPH/P7 = NOT PROVEN`
+
+The enforcement boundary remains ACES-owned above the DSH execution kernel. No implemented ACES control component at that boundary was found.
+
+### Consequence
+
+The governance reconciliation is valid, but the anti-infinite-loop protection is presently **documented rather than runtime-enforced** in the inspected ACES repository. DSH must not be treated as implicit enforcement of Ralph/P7.
+
+### Required next atomic action
+
+`HARNESS-CAPABILITY-RECONSTRUCTION-002 → DEFINE MINIMAL ACES↔ORCA↔DSH ENFORCEMENT CONTRACT → AUTHORIZE IMPLEMENTATION ONLY AFTER EVIDENCE-BASED CONTRACT CLOSURE`
+
+Required scope:
+
+1. exact pre-execution gate;
+2. continuation decision;
+3. boundedness state;
+4. stop/circuit-breaker state;
+5. post-iteration closure/reconciliation check;
+6. evidence/trace proving enforcement.
+
+No numeric budget values are invented. No R1.5/R1.6 state changes. No production Notion projection.
+
 ## Git ↔ Notion Reconciliation
 
 Git contains:
@@ -68,7 +121,7 @@ Git contains:
 - `spec/governance/NOTION-CONTROL-PLANE-INDEX.md`
 - `PROJECT_INDEX.md` route to this index.
 
-The authoritative Notion Control Plan contains the corresponding reconciliation record.
+The authoritative Notion Control Plan contains the corresponding governance and enforcement-verification record.
 
 This Git artifact is an index, not a second source of truth. It deliberately does not duplicate the full Notion governance contract.
 
@@ -78,7 +131,9 @@ This Git artifact is an index, not a second source of truth. It deliberately doe
 - Iteration Closure Gate: **ACTIVE IN NOTION / GIT INDEXED**
 - P7 recurrence-prevention responsibility: **IDENTIFIED / EVIDENCE-BOUND**
 - STIL: **RESEARCH MODEL / NOT RUNTIME IMPLEMENTATION**
-- Runtime P7 enforcement: **NOT PROVEN**
+- ACES runtime P7/Ralph enforcement: **NOT PROVEN / NOT FOUND IN INSPECTED ACES RUNTIME TREE**
+- DSH execution kernel: **EXTERNAL / SOURCE-LEVEL EVIDENCE EXISTS**
+- DSH as Ralph/P7 enforcement: **NOT PROVEN**
 - R1.5: **BLOCKED**
 - R1.6: **NOT AUTHORIZED**
 - Production Notion projection: **NOT EXECUTED**
@@ -87,7 +142,8 @@ This Git artifact is an index, not a second source of truth. It deliberately doe
 
 This index does not claim:
 
-- that Ralph/P7 has been implemented as runtime code;
+- that Ralph/P7 has been implemented as ACES runtime code;
+- that DSH implicitly enforces Ralph/P7;
 - that STIL is Canon;
 - that the control plane is fully implemented in Git;
 - that R1.5 is unblocked;
@@ -98,7 +154,7 @@ This index does not claim:
 
 An independent reader must be able to trace:
 
-`Git index → authoritative Notion Ralph mandate → Closure Gate → P7 → current control state`
+`Git index → authoritative Notion Ralph mandate → Closure Gate → P7 → actual enforcement evidence → current control state`
 
 without conversation-memory reconstruction.
 
