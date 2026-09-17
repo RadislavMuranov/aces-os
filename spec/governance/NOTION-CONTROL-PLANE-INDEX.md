@@ -1,8 +1,8 @@
 # ACES OS — Notion Control-Plane Index / Iteration Integrity
 
-**Status:** INDEX / CROSS-SYSTEM RECONCILIATION RECORD  
-**Date:** 2026-09-17  
-**Repository:** `RadislavMuranov/aces-os`  
+**Status:** INDEX / CROSS-SYSTEM RECONCILIATION RECORD
+**Date:** 2026-09-18
+**Repository:** `RadislavMuranov/aces-os`
 **Branch:** `control/reconcile-iteration-integrity-20260917`
 
 ## Authority Boundary
@@ -11,83 +11,104 @@ The authoritative operational control-plane rules are maintained in Notion under
 
 Authoritative Notion control artifacts:
 
+- **RALPH LOOP — ACES Governance Mandate v1.0**
 - **ACES EXECUTION CONTROL PLAN — Plan / Control / Roadmap / Protocols v1.0**
 - **PROTOCOL-ITERATION-CLOSURE-001 — Evidence / Report / Roadmap Synchronization**
 - **P1 — STIL RESEARCH-VERIFICATION NODE / REPORT**
 
 ## Responsibility Mapping
 
-The control responsibility for preventing recurrence of unbounded or degrading iterations is split by function:
-
 | Control function | Authoritative node / gate | Role |
 |---|---|---|
+| Bounded governance pattern across every non-trivial process | **RALPH-LOOP-GOVERNANCE-MANDATE-001** | Global bounded continuation/closure governance |
 | Identify and model state-transition integrity failure | **P1 — STIL RESEARCH-VERIFICATION NODE** | Research / verification only; not runtime enforcement |
 | Consolidate closure, reporting, roadmap sync, blocker propagation and anti-drift | **P2 — CONTROL PROTOCOL CONSOLIDATION** | Normative control-protocol consolidation |
-| Enforce iteration closure and continuation boundary | **ITERATION-CLOSURE-GATE-001 / PROTOCOL-ITERATION-CLOSURE-001** | Immediate closure / continuation control |
-| Prevent recurrence across subsequent iterations | **P7 — CONTINUOUS CONTROL** | Operational recurrence-prevention node |
+| Enforce closure/continuation at an iteration boundary | **ITERATION-CLOSURE-GATE-001 / PROTOCOL-ITERATION-CLOSURE-001** | Per-iteration guard |
+| Prevent recurrence across subsequent iterations | **P7 — CONTINUOUS CONTROL** | Recurrence-prevention node |
 | Runtime boundedness of a specific A-RL mechanism | **H-F-001 configuration governance** | Mechanism-specific runtime configuration; not the general iteration controller |
 
-### Critical distinction
+## Critical Distinction
 
-**P7 is the roadmap node responsible for continuous recurrence prevention.**
+For the specific question “what prevents an infinite/degrading iteration loop?” the control stack is:
 
-**ITERATION-CLOSURE-GATE-001 / PROTOCOL-ITERATION-CLOSURE-001 is the concrete control gate that prevents an individual iteration from continuing or terminating without bounded, evidence-backed closure and an explicit continuation state.**
+`RALPH LOOP GOVERNANCE → ITERATION-CLOSURE-GATE-001 → P7 CONTINUOUS CONTROL`
 
-**P1/STIL is the research model that explains the control-plane failure; it is not itself the execution guard.**
+- **Ralph Loop** defines the mandatory boundedness, iteration counter, execution budget, stop conditions, retry/repetition threshold and/or no-progress circuit breaker.
+- **ITERATION-CLOSURE-GATE-001** prevents an individual iteration from continuing or terminating without evidence-backed closure and an explicit continuation state.
+- **P7** owns recurrence prevention across subsequent iterations.
+- **P1/STIL** explains and verifies the systemic failure model; it is not itself the runtime guard.
 
-## Required Control Chain
+Therefore, **P7 alone is too narrow to describe the full anti-infinite-loop control.** The governing mechanism is the **Ralph Loop Governance Mandate**, operationalized through the Closure Gate and P7.
+
+## Failure Model
+
+`UNBOUNDED ITERATION → STALE / DIVERGENT STATE → REPEATED NON-PROGRESS → CONTEXT / ABSTRACTION DRIFT → OPERATIONAL HALLUCINATION → PROGRESSIVE DEGRADATION → RECURRENCE`
+
+## Mandatory Control Chain
 
 `LOAD STATE → SELECT ONE NEXT ATOMIC NODE → EXECUTE → CAPTURE EVIDENCE → VERIFY → UPDATE PERSISTENT STATE → RECONCILE → CONTINUE / BLOCKED / STALLED / EXHAUSTED / CLOSED`
 
-Iteration closure:
+Required safeguards:
 
-`EXECUTION → EVIDENCE → VERDICT → REPORT → ROADMAP SYNC → CURRENT-STATE RECONCILIATION → NEXT AUTHORIZATION / DECISION HANDOFF`
-
-Required safeguards include:
-
-- explicit execution bounds and stop/circuit-breaker conditions;
-- no bare `NONE — HUMAN DECISION REQUIRED` as terminal iteration state;
+- explicit execution bounds;
+- iteration counter / budget;
+- stop conditions;
+- retry/repetition threshold and/or no-progress circuit breaker;
+- authoritative-state reload at each fresh iteration;
 - control-plane discovery before requesting human discovery;
+- no bare `NONE — HUMAN DECISION REQUIRED`;
 - no downstream execution from BLOCKED/FAIL;
 - no silent transitions;
-- one authoritative current state per workstream;
-- no PASS/CLOSED without required evidence and reconciliation.
+- no PASS/CLOSED without evidence and reconciliation.
 
-## Failure Class Covered
+## Git ↔ Notion Reconciliation
 
-The relevant failure is not merely "infinite loop". The ACES control risk is a compound failure:
+Git contains:
 
-`UNBOUNDED ITERATION → STALE / DIVERGENT STATE → REPEATED NON-PROGRESS → ABSTRACTION / CONTEXT DRIFT → OPERATIONAL HALLUCINATION → PROGRESSIVE DEGRADATION`
+- `spec/governance/NOTION-CONTROL-PLANE-INDEX.md`
+- `PROJECT_INDEX.md` route to this index.
 
-External 2026 research independently describes infinite agentic loops and operational hallucination/livelock as control failures requiring bounded execution, state tracking, provenance, and forced termination. This is research corroboration only; it does not establish ACES architecture.
+The authoritative Notion Control Plan contains the corresponding reconciliation record.
 
-## Current Reconciliation Finding — 2026-09-17
+This Git artifact is an index, not a second source of truth. It deliberately does not duplicate the full Notion governance contract.
 
-Notion contains the P0–P7 control model and the mandatory iteration-closure protocol. The Git repository previously contained general ChatGPT failure-filter / iteration-audit controls but did not expose an equivalent routed index for the Notion control-plane responsibility split.
+## Current State
 
-This file closes that **index/reconciliation gap** without duplicating Notion's authoritative control text.
+- Ralph Loop Governance: **ACTIVE IN NOTION / GIT INDEXED**
+- Iteration Closure Gate: **ACTIVE IN NOTION / GIT INDEXED**
+- P7 recurrence-prevention responsibility: **IDENTIFIED / EVIDENCE-BOUND**
+- STIL: **RESEARCH MODEL / NOT RUNTIME IMPLEMENTATION**
+- Runtime P7 enforcement: **NOT PROVEN**
+- R1.5: **BLOCKED**
+- R1.6: **NOT AUTHORIZED**
+- Production Notion projection: **NOT EXECUTED**
 
 ## Non-Claims
 
-This index does **not** claim:
+This index does not claim:
 
-- P7 has been implemented in runtime code;
-- STIL is Canon;
-- the control plane is fully implemented in Git;
-- R1.5 is unblocked;
-- R1.6 is authorized;
-- production Notion projection has executed.
+- that Ralph/P7 has been implemented as runtime code;
+- that STIL is Canon;
+- that the control plane is fully implemented in Git;
+- that R1.5 is unblocked;
+- that R1.6 is authorized;
+- that production Notion projection has executed.
 
 ## Verification Target
 
-An independent reader should be able to trace:
+An independent reader must be able to trace:
 
-`Git index → authoritative Notion control plan → P7 / ITERATION-CLOSURE-GATE-001 → current control state`
+`Git index → authoritative Notion Ralph mandate → Closure Gate → P7 → current control state`
 
-without relying on conversation memory.
+without conversation-memory reconstruction.
 
-## Source-of-Truth Links
+## Authoritative Notion Sources
 
-- Notion control plan: https://app.notion.com/p/3da0e90e16c68179ba7be96f8e6cfdb7?pvs=204
-- Notion closure protocol: https://app.notion.com/p/3da0e90e16c6814a872afc7b13fc3236?pvs=204
-- Notion P1/STIL node: https://app.notion.com/p/3da0e90e16c681e38c2ff3e2877ae488?pvs=204
+- RALPH LOOP — ACES Governance Mandate v1.0:
+  https://app.notion.com/p/3de0e90e16c681558685d90c1ba4e5f3?pvs=204
+- ACES EXECUTION CONTROL PLAN:
+  https://app.notion.com/p/3da0e90e16c68179ba7be96f8e6cfdb7?pvs=204
+- PROTOCOL-ITERATION-CLOSURE-001:
+  https://app.notion.com/p/3da0e90e16c6814a872afc7b13fc3236?pvs=204
+- P1 / STIL:
+  https://app.notion.com/p/3da0e90e16c681e38c2ff3e2877ae488?pvs=204
