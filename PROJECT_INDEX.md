@@ -7,7 +7,7 @@
 - `README.md` — project orientation and current repository purpose.
 - `SECURITY.md` — repository security and secret-handling rules.
 - `spec/MASTER-PROTOCOL.md` — canonical governing architecture and research protocol.
-- `spec/governance/NOTION-CONTROL-PLANE-INDEX.md` — Git index to the authoritative Notion control plane for iteration integrity, closure, continuation, and recurrence prevention.
+- `spec/governance/NOTION-CONTROL-PLANE-INDEX.md` — Git index to the authoritative Notion control plane for Ralph bounded iteration governance, closure, continuation, and recurrence prevention.
 - `spec/asa/` — ASA specifications and data model.
 - `docs/research/` — research record; start with `docs/research/INDEX.md`.
 - `docs/research/H-CENSUS-003-HARNESS-ARCHITECTURE-MATRIX.md` — current canonical harness census, substrate decision, and ACES Harness Contract boundary.
