@@ -69,8 +69,8 @@ Required safeguards:
 
 ### ACES repository evidence
 
-Inspected repository: `RadislavMuranov/aces-os`  
-Branch: `control/reconcile-iteration-integrity-20260917`  
+Inspected repository: `RadislavMuranov/aces-os`
+Branch: `control/reconcile-iteration-integrity-20260917`
 Commit before this reconciliation: `0f6266ebf6780247536f9e6d94bf7b118d4ca667`
 
 The inspected tree contains the governance/index artifacts, but `src/` contains only `.gitkeep` and `tests/` contains only `.gitkeep`. No ACES runtime implementation of Ralph/P7, iteration counter, execution budget, retry/repetition threshold, no-progress circuit breaker, or Closure Gate enforcement was found in the inspected repository state.
@@ -87,10 +87,10 @@ Therefore DSH provides an execution-kernel lifecycle seam, but it is **not evide
 
 ### Enforcement boundary
 
-`RALPH GOVERNANCE = ACES CONTROL CONTRACT`  
-`P7 = RECURRENCE-PREVENTION RESPONSIBILITY`  
-`ITERATION-CLOSURE-GATE-001 = PER-ITERATION CONTROL CONTRACT`  
-`DSH = PER-AGENT EXECUTION KERNEL`  
+`RALPH GOVERNANCE = ACES CONTROL CONTRACT`
+`P7 = RECURRENCE-PREVENTION RESPONSIBILITY`
+`ITERATION-CLOSURE-GATE-001 = PER-ITERATION CONTROL CONTRACT`
+`DSH = PER-AGENT EXECUTION KERNEL`
 `ACES RUNTIME ENFORCEMENT OF RALPH/P7 = NOT PROVEN`
 
 The enforcement boundary remains ACES-owned above the DSH execution kernel. No implemented ACES control component at that boundary was found.
@@ -99,39 +99,57 @@ The enforcement boundary remains ACES-owned above the DSH execution kernel. No i
 
 The governance reconciliation is valid, but the anti-infinite-loop protection is presently **documented rather than runtime-enforced** in the inspected ACES repository. DSH must not be treated as implicit enforcement of Ralph/P7.
 
-### Required next atomic action
+## HARNESS-CAPABILITY-RECONSTRUCTION-002
 
-`HARNESS-CAPABILITY-RECONSTRUCTION-002 → DEFINE MINIMAL ACES↔ORCA↔DSH ENFORCEMENT CONTRACT → AUTHORIZE IMPLEMENTATION ONLY AFTER EVIDENCE-BASED CONTRACT CLOSURE`
+**Contract artifact:** [HARNESS-CAPABILITY-RECONSTRUCTION-002 — Minimal ACES ↔ Orca ↔ DSH Enforcement Contract](https://app.notion.com/p/3de0e90e16c6819c8c78e2c97cbac06d?pvs=204)
 
-Required scope:
+**Status:** RESEARCH / CONTRACT DEFINITION — NOT YET ACCEPTED / NOT IMPLEMENTATION-AUTHORIZED
 
-1. exact pre-execution gate;
-2. continuation decision;
-3. boundedness state;
-4. stop/circuit-breaker state;
-5. post-iteration closure/reconciliation check;
-6. evidence/trace proving enforcement.
+The contract defines the minimum boundary:
 
-No numeric budget values are invented. No R1.5/R1.6 state changes. No production Notion projection.
+`ACES PRECHECK → ORCA DISPATCH → DSH EXECUTE → DSH TRACE/RECEIPT → ORCA AGGREGATE → ACES VERIFY/RECONCILE → CONTINUE / BLOCKED / STALLED / EXHAUSTED / CLOSED`
+
+Ownership:
+
+- ACES: authorization, bounds policy reference, acceptance criteria, verification, continuation, AcceptedState.
+- Orca: fleet dispatch, delegation, admission, orchestration state, correlation preservation.
+- DSH: per-agent loop, session/history, tools, lifecycle, cancellation, execution trace.
+- Digital World / CLA: actual external effects.
+
+Critical invariants:
+
+`ExecutionReceipt ⇏ AcceptedState`
+`DSH/Orca MUST NOT create or extend ACES authorization`
+`Every run MUST remain correlatable: ExecutionID → AgentRunID → trace/evidence`
+`Persistent ACES state MUST be reconciled before continuation`
+
+Required implementation evidence before authorization:
+
+1. exact Orca dispatch/admission surface;
+2. exact DSH lifecycle API for stop enforcement;
+3. executable field mapping;
+4. end-to-end trace correlation;
+5. normal completion test;
+6. forced-stop/circuit-breaker test;
+7. failure-closed behavior;
+8. independent verification.
+
+No runtime implementation is authorized by this artifact.
 
 ## Git ↔ Notion Reconciliation
 
-Git contains:
+Git contains this index and the `PROJECT_INDEX.md` route. The substantive contract remains in Notion.
 
-- `spec/governance/NOTION-CONTROL-PLANE-INDEX.md`
-- `PROJECT_INDEX.md` route to this index.
-
-The authoritative Notion Control Plan contains the corresponding governance and enforcement-verification record.
-
-This Git artifact is an index, not a second source of truth. It deliberately does not duplicate the full Notion governance contract.
+This Git artifact is an index, not a second source of truth.
 
 ## Current State
 
 - Ralph Loop Governance: **ACTIVE IN NOTION / GIT INDEXED**
 - Iteration Closure Gate: **ACTIVE IN NOTION / GIT INDEXED**
 - P7 recurrence-prevention responsibility: **IDENTIFIED / EVIDENCE-BOUND**
-- STIL: **RESEARCH MODEL / NOT RUNTIME IMPLEMENTATION**
-- ACES runtime P7/Ralph enforcement: **NOT PROVEN / NOT FOUND IN INSPECTED ACES RUNTIME TREE**
+- HARNESS-CAPABILITY-RECONSTRUCTION-002: **CONTRACT DEFINED / NOT ACCEPTED**
+- ACES runtime P7/Ralph enforcement: **NOT PROVEN**
+- ACES↔Orca↔DSH executable integration: **NOT PROVEN**
 - DSH execution kernel: **EXTERNAL / SOURCE-LEVEL EVIDENCE EXISTS**
 - DSH as Ralph/P7 enforcement: **NOT PROVEN**
 - R1.5: **BLOCKED**
@@ -140,23 +158,13 @@ This Git artifact is an index, not a second source of truth. It deliberately doe
 
 ## Non-Claims
 
-This index does not claim:
-
-- that Ralph/P7 has been implemented as ACES runtime code;
-- that DSH implicitly enforces Ralph/P7;
-- that STIL is Canon;
-- that the control plane is fully implemented in Git;
-- that R1.5 is unblocked;
-- that R1.6 is authorized;
-- that production Notion projection has executed.
+This index does not claim runtime implementation, AcceptedState, R1.5 unblocking, R1.6 authorization, or production projection.
 
 ## Verification Target
 
-An independent reader must be able to trace:
+`Git index → authoritative Notion Ralph mandate → Closure Gate → P7 → enforcement contract → actual implementation evidence → verification`
 
-`Git index → authoritative Notion Ralph mandate → Closure Gate → P7 → actual enforcement evidence → current control state`
-
-without conversation-memory reconstruction.
+An independent reader must be able to follow this chain without conversation-memory reconstruction.
 
 ## Authoritative Notion Sources
 
