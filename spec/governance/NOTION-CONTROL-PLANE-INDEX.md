@@ -136,6 +136,50 @@ Required implementation evidence before authorization:
 
 No runtime implementation is authorized by this artifact.
 
+## SOURCE-LEVEL VERIFICATION — ORCA DISPATCH + DSH LIFECYCLE — 2026-09-18
+
+**Result:** ORCA DISPATCH SURFACE = VERIFIED; DSH LIFECYCLE API = VERIFIED; ACES↔Orca↔DSH executable integration = NOT PROVEN.
+
+### Orca
+
+Official public source: `stablyai/orca`, orchestration guide. Verified Run/Task/Dispatch model, `worker-start`, lower-level `dispatch`, `dispatch-show`, typed Task states, worker receipts, settlement via `worker_done`, recovery controls, and a Task-level circuit breaker after three consecutive failures. Orca does not expose the ACES-specific authority envelope as one native typed admission object.
+
+### DSH
+
+Official source: `deepseek-ai/deepseek-harness`. Verified `Agent.cancel(cause, options?)`, `Agent.whenIdle()`, durable turn/step/session lifecycle, cancellation/abort terminal outcomes, and serial `agent/turn-stopping` lifecycle seam. DSH explicitly has **no built-in turn budget**; bounded runaway-turn policy must be supplied through a lifecycle extension.
+
+### Contract mapping verdict
+
+- `ExecutionID`: PARTIAL — map to Orca Run/Task/Dispatch identities.
+- `CurrentStateRef`: NOT NATIVE / adapter required.
+- `AtomicNode`: NOT NATIVE / adapter required.
+- `AuthorizationRef`: NOT NATIVE / adapter required.
+- `BoundsRef`: NOT NATIVE / adapter required.
+- `StopConditionsRef`: supported as DSH lifecycle adapter seam, not native ACES policy.
+- `AcceptanceCriteriaRef`: NOT NATIVE / adapter required.
+- `CapabilityScope`: PARTIAL across Orca placement/agent controls and DSH agent-scoped context.
+- `ProvenanceContext`: PARTIAL — native identities/events exist, ACES cross-layer correlation not proven.
+- `ContractVersion`: NOT NATIVE / adapter required.
+
+**Critical finding:** the minimal contract is source-compatible but not source-native. The remaining blocker is now specifically the ACES adapter/correlation contract plus executable proof of authority propagation, bounded stop enforcement, end-to-end trace correlation, and failure-closed admission.
+
+**Verification verdict:**
+- ORCA DISPATCH SURFACE = **VERIFIED**
+- DSH LIFECYCLE API = **VERIFIED**
+- MINIMAL CONTRACT = **COMPATIBLE WITH BOTH SUBSTRATES**
+- NATIVE ACES AUTHORITY CONTRACT = **NOT PROVEN**
+- END-TO-END EXECUTIONID CORRELATION = **NOT PROVEN**
+- FORCED-STOP VERTICAL TEST = **NOT EXECUTED**
+- FAILURE-CLOSED ACES ADMISSION TEST = **NOT EXECUTED**
+- INDEPENDENT INTEGRATION VERIFICATION = **NOT EXECUTED**
+- CONTRACT ACCEPTANCE = **BLOCKED / NOT YET VERIFIED**
+- RUNTIME IMPLEMENTATION = **NOT AUTHORIZED**
+
+**Next atomic control action:** `DEFINE + VERIFY ACES↔ORCA ADAPTER/CORRELATION CONTRACT — EXECUTIONID / AUTHORIZATIONREF / BOUNDSREF / STOPCONDITIONSREF / ACCEPTANCECRITERIAREF`
+
+Scope remains contract mapping/evidence definition only. No runtime implementation, numeric configuration selection, R1.5 mutation, or R1.6 execution.
+
+
 ## Git ↔ Notion Reconciliation
 
 Git contains this index and the `PROJECT_INDEX.md` route. The substantive contract remains in Notion.
