@@ -180,6 +180,24 @@ Official source: `deepseek-ai/deepseek-harness`. Verified `Agent.cancel(cause, o
 Scope remains contract mapping/evidence definition only. No runtime implementation, numeric configuration selection, R1.5 mutation, or R1.6 execution.
 
 
+## AOC-001 — ACES ↔ ORCA ADAPTER / CORRELATION CONTRACT
+
+**Notion artifact:** https://app.notion.com/p/3df0e90e16c6814b8f1efeedc8599406?pvs=204
+
+**Status:** CONTRACT DEFINITION COMPLETE / SOURCE COMPATIBILITY VERIFIED / ACCEPTANCE BLOCKED / RUNTIME NOT AUTHORIZED
+
+Canonical correlation chain:
+
+ExecutionID → Orca RunID → TaskID → DispatchID → AgentRunID → DSH SessionID → Turn/Step/Tool Evidence
+
+Mandatory ACES envelope: ExecutionID, CurrentStateRef, AtomicNode, AuthorizationRef, BoundsRef, StopConditionsRef, AcceptanceCriteriaRef, CapabilityScope, ProvenanceContext, ContractVersion.
+
+Source verification: Orca Run/Task/Dispatch, worker-start/dispatch, typed Task states, worker settlement/receipts, and three-failure Task circuit breaker are evidenced. DSH cancellation, quiescence, durable lifecycle evidence, and agent/turn-stopping are evidenced. Neither substrate natively supplies the ACES authority envelope.
+
+**Verdict:** AOC-001 DEFINITION = COMPLETE; SOURCE COMPATIBILITY = VERIFIED; END-TO-END CORRELATION = NOT PROVEN; FAILURE-CLOSED ADAPTER TEST = NOT PROVEN; FORCED-STOP INTEGRATION TEST = NOT PROVEN; CONTRACT ACCEPTANCE = BLOCKED; RUNTIME IMPLEMENTATION = NOT AUTHORIZED.
+
+**Next atomic action:** AUTHORIZE AOC-001 VERTICAL ADAPTER TEST FIXTURE
+
 ## Git ↔ Notion Reconciliation
 
 Git contains this index and the `PROJECT_INDEX.md` route. The substantive contract remains in Notion.
