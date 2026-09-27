@@ -109,6 +109,12 @@ class TransitionContractValidatorTests(unittest.TestCase):
 
         self.assertEqual(first, second)
         self.assertFalse(first.accepted)
+    def test_validation_result_is_immutable(self):
+        result = validate_transition_contract(self.valid_contract())
+
+        with self.assertRaises(AttributeError):
+            result.accepted = False
+
     def test_missing_constructor_argument_fails_closed_at_type_boundary(self):
         with self.assertRaises(TypeError):
             TransitionContract(
