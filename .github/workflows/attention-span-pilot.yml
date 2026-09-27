@@ -1,0 +1,23 @@
+name: Attention Span Pilot
+
+on:
+  push:
+    paths:
+      - 'plugins/dsh-attention-span/**'
+      - '.github/workflows/attention-span-pilot.yml'
+  pull_request:
+    paths:
+      - 'plugins/dsh-attention-span/**'
+      - '.github/workflows/attention-span-pilot.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --check plugins/dsh-attention-span/core.js
+      - run: node --check plugins/dsh-attention-span/index.js
+      - run: node plugins/dsh-attention-span/test-core.mjs

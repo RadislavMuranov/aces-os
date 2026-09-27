@@ -1,0 +1,12 @@
+{
+  "name": "dsh-aces-attention-span",
+  "version": "0.1.0",
+  "description": "Conservative Attention Span optimizer for DeepSeek Harness: simplicity, brevity, clarity, humanity.",
+  "type": "module",
+  "main": "index.js",
+  "files": ["index.js", "core.js", "cordis.patch.yml", "README.md"],
+  "keywords": ["dsh-plugin", "deepseek-harness", "attention-span", "aces"],
+  "dependencies": {"@deepseek-ai/dsh-tools": "*"},
+  "peerDependencies": {"@deepseek-ai/cordis": "*"},
+  "dsh": {"bundle": {"patch": "./cordis.patch.yml"}}
+}
