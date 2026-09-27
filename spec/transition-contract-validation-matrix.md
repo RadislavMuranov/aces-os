@@ -12,7 +12,7 @@
 | V-06 | Evidence is empty/whitespace | REJECTED |
 | V-07 | VerificationRequirement is empty/whitespace | REJECTED |
 | V-08 | AuthorizationRequirement is empty/whitespace | REJECTED |
-| V-09 | Any field has a non-string runtime value | REJECTED |
+| V-09 | Any field has a representative non-string runtime value (None, bool, int, float, bytes, list, dict, object) | REJECTED |
 | V-10 | Multiple fields invalid | REJECTED; all errors reported in fixed field order |
 
 ## Boundary semantics
@@ -21,4 +21,5 @@
 - No field is inferred or defaulted.
 - No runtime value is coerced to string.
 - A rejected contract cannot be represented as accepted by this validator.
+- Representative non-string runtime values are tested across all six fields; this is coverage evidence, not a proof over every possible Python object.
 - This matrix does not establish truthfulness of evidence, validity of authorization, verification success, replay/idempotency, or production effectiveness.
