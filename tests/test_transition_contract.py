@@ -71,6 +71,29 @@ class TransitionContractValidatorTests(unittest.TestCase):
         self.assertFalse(result.accepted)
         self.assertEqual(result.errors, ("Evidence: expected string",))
 
+    def test_validation_does_not_mutate_contract(self):
+        contract = self.valid_contract()
+        before = (
+            contract.PredecessorState,
+            contract.CandidateAction,
+            contract.ExpectedResultingState,
+            contract.Evidence,
+            contract.VerificationRequirement,
+            contract.AuthorizationRequirement,
+        )
+
+        result = validate_transition_contract(contract)
+
+        after = (
+            contract.PredecessorState,
+            contract.CandidateAction,
+            contract.ExpectedResultingState,
+            contract.Evidence,
+            contract.VerificationRequirement,
+            contract.AuthorizationRequirement,
+        )
+        self.assertTrue(result.accepted)
+        self.assertEqual(after, before)
     def test_missing_constructor_argument_fails_closed_at_type_boundary(self):
         with self.assertRaises(TypeError):
             TransitionContract(
