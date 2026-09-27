@@ -94,6 +94,21 @@ class TransitionContractValidatorTests(unittest.TestCase):
         )
         self.assertTrue(result.accepted)
         self.assertEqual(after, before)
+    def test_validation_is_deterministic_for_identical_input(self):
+        contract = TransitionContract(
+            PredecessorState=" ",
+            CandidateAction="ACTION_A",
+            ExpectedResultingState="STATE_B",
+            Evidence=123,  # type: ignore[arg-type]
+            VerificationRequirement="VERIFY_PASS",
+            AuthorizationRequirement=" ",
+        )
+
+        first = validate_transition_contract(contract)
+        second = validate_transition_contract(contract)
+
+        self.assertEqual(first, second)
+        self.assertFalse(first.accepted)
     def test_missing_constructor_argument_fails_closed_at_type_boundary(self):
         with self.assertRaises(TypeError):
             TransitionContract(
