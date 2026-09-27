@@ -15,9 +15,9 @@ handoff = bundle["handoff"]["content"]
 # Deterministic assertion pass over a freshly acquired authoritative evidence snapshot.
 must(r1, r"MAS-RECOVERY-000\.3\.16A-R1\s*=\s*BLOCKED\s*/\s*VERIFICATION INCOMPLETE", "R1 blocked state")
 must(r1, r"C7 Postcondition / State-Reconciliation Check\s*=\s*PASS", "C7 PASS")
-must(r1, r"C6 Independent Verifier\s*=\s*NOT AVAILABLE", "recorded C6 limitation")
-must(r1, r"\.3\.16 authorization\s*=\s*NOT ISSUED", "downstream authorization remains absent")
-must(r1, r"\.3\.16B\s*=\s*BLOCKED", "3.16B remains blocked")
+must(r1, r"C6 Independent Verifier\s*[:=]\s*NOT AVAILABLE", "recorded C6 limitation")
+must(r1, r"\.3\.16 authorization\s*[:=]\s*NOT ISSUED", "downstream authorization remains absent")
+must(r1, r"\.3\.16B\s*[:=]\s*BLOCKED", "3.16B remains blocked")
 must(roadmap, r"MAS-RECOVERY-000\.3\.16A-R1.*?BLOCKED / VERIFICATION INCOMPLETE", "roadmap current state")
 must(handoff, r"Establish an independent verification path", "A disposition recorded")
 must(handoff, r"No downstream execution follows automatically", "handoff boundary")
