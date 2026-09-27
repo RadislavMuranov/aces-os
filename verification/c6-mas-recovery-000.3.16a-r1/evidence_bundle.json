@@ -1,0 +1,16 @@
+{
+  "schema": "C6-EVIDENCE-SNAPSHOT-001",
+  "captured_at": "2026-09-27T00:19:46.564Z",
+  "r1": {
+    "source_url": "https://app.notion.com/p/3e70e90e16c681a4b98fd231476f33ff",
+    "content": "MAS-RECOVERY-000.3.16A-R1 = BLOCKED / VERIFICATION INCOMPLETE.\\nC6 Independent Verifier: NOT AVAILABLE in the current execution surface.\\nC7 Postcondition / State-Reconciliation Check = PASS.\\n.3.16 authorization = NOT ISSUED.\\n.3.16B = BLOCKED.\\nIteration cannot transition to PASS or CLOSED.\\nNo downstream node is authorized."
+  },
+  "roadmap": {
+    "source_url": "https://app.notion.com/p/3d50e90e16c681f6b332c6ce896c7e31",
+    "content": "Current Node: MAS-RECOVERY-000.3.16A-R1\\nStatus: BLOCKED / VERIFICATION INCOMPLETE\\nC6 Independent Verifier: NOT AVAILABLE in current execution surface.\\n.3.16 authorization: NOT ISSUED.\\n.3.16B: BLOCKED."
+  },
+  "handoff": {
+    "source_url": "https://app.notion.com/p/3e80e90e16c681e48074fd4653297b9e",
+    "content": "A — Establish an independent verification path\\nAcceptance criteria for A: Independent verifier capability is explicitly identified, independently executable, has access to the authoritative evidence surface, and can produce a separate verification result without relying on the same execution claim being verified.\\nNo downstream execution follows automatically from this handoff."
+  }
+}
