@@ -1,4 +1,5 @@
 import unittest
+from dataclasses import fields
 
 from transition_contract import TransitionContract, validate_transition_contract
 
@@ -93,6 +94,10 @@ class TransitionContractValidationMatrixTests(unittest.TestCase):
         result = validate_transition_contract(self.make_valid())
         self.assertTrue(result.accepted)
         self.assertEqual(result.errors, ())
+
+    def test_validator_field_order_matches_contract_field_order(self):
+        contract_fields = tuple(field.name for field in fields(TransitionContract))
+        self.assertEqual(contract_fields, self.FIELDS)
 
 
 if __name__ == "__main__":
