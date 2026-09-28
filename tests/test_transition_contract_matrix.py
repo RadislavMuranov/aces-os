@@ -89,6 +89,11 @@ class TransitionContractValidationMatrixTests(unittest.TestCase):
                 self.assertFalse(type_result.accepted)
                 self.assertTrue(type_result.errors)
 
+    def test_accepted_results_carry_no_errors(self):
+        result = validate_transition_contract(self.make_valid())
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.errors, ())
+
 
 if __name__ == "__main__":
     unittest.main()
