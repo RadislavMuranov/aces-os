@@ -74,6 +74,21 @@ class TransitionContractValidationMatrixTests(unittest.TestCase):
             ),
         )
 
+    def test_rejected_results_always_carry_errors(self):
+        for field in self.FIELDS:
+            with self.subTest(field=field):
+                whitespace_result = validate_transition_contract(
+                    self.replace(self.make_valid(), **{field: "   "})
+                )
+                self.assertFalse(whitespace_result.accepted)
+                self.assertTrue(whitespace_result.errors)
+
+                type_result = validate_transition_contract(
+                    self.replace(self.make_valid(), **{field: None})
+                )
+                self.assertFalse(type_result.accepted)
+                self.assertTrue(type_result.errors)
+
 
 if __name__ == "__main__":
     unittest.main()
