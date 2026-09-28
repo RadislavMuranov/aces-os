@@ -94,6 +94,7 @@ class TransitionContractValidatorTests(unittest.TestCase):
         )
         self.assertTrue(result.accepted)
         self.assertEqual(after, before)
+
     def test_validation_is_deterministic_for_identical_input(self):
         contract = TransitionContract(
             PredecessorState=" ",
@@ -109,6 +110,7 @@ class TransitionContractValidatorTests(unittest.TestCase):
 
         self.assertEqual(first, second)
         self.assertFalse(first.accepted)
+
     def test_validation_result_is_immutable(self):
         result = validate_transition_contract(self.valid_contract())
 
