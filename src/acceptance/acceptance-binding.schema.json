@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aces-os.local/schema/acceptance-binding.schema.json",
+  "title": "ACES AcceptanceBinding",
+  "description": "Machine-readable shape for the fixed Minimal ACES Acceptance Protocol acceptance binding. This schema does not authorize acceptance by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "canonical_ref",
+    "authority_ref",
+    "capability_ref",
+    "policy_ref",
+    "verification_context_ref"
+  ],
+  "properties": {
+    "canonical_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference to the canonical reality being transitioned."
+    },
+    "authority_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference to the authority domain responsible for acceptance."
+    },
+    "capability_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference to the delegated right permitting the acceptance action."
+    },
+    "policy_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference to the policy/version governing admissibility."
+    },
+    "verification_context_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Reference binding acceptance to the exact verification context."
+    }
+  }
+}
