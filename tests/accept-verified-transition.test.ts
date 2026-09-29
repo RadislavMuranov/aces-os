@@ -81,6 +81,23 @@ test("rejects missing binding or authority acceptance", () => {
   );
 });
 
+test("rejects empty acceptance binding references", () => {
+  const emptyRefs = [
+    { ...binding, canonical_ref: "" },
+    { ...binding, authority_ref: "" },
+    { ...binding, capability_ref: "" },
+    { ...binding, policy_ref: "" },
+    { ...binding, verification_context_ref: "" },
+  ];
+
+  for (const invalidBinding of emptyRefs) {
+    assert.equal(
+      acceptVerifiedTransition(transition, verification, invalidBinding, authority),
+      null,
+    );
+  }
+});
+
 test("rejects every cross-boundary reference mismatch", () => {
   const mismatches = [
     { ...binding, canonical_ref: "canonical-2" },
