@@ -49,6 +49,7 @@ export function acceptVerifiedTransition(
   if (!transition.has_history) return null;
   if (verification.status !== "PASS") return null;
   if (!binding) return null;
+  if (Object.values(binding).some((ref) => ref.length === 0)) return null;
   if (!authority.accepted) return null;
 
   if (binding.canonical_ref !== transition.canonical_ref) return null;
