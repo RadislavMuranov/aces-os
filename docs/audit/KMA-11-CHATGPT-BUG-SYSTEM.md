@@ -57,8 +57,30 @@ These facts do **not** independently prove every historical conversational event
 | BUG-018 | User intent rewritten by ChatGPT | UNVERIFIED | Intent-lock and acceptance check |
 | BUG-019 | Silent epistemic correction | STRUCTURAL RISK CONFIRMED; incidents partial | OLD/NEW/WHY/EVIDENCE/IMPACT record |
 | BUG-020 | Research erasure caused by simplification | HISTORICAL B-129 INSTANCE + STRUCTURAL CLASS CONFIRMED | Zero-state research preservation gate |
+| BUG-021 | Executable implementation failed to enforce a fixed non-empty reference constraint from the acceptance-binding contract | HISTORICAL INCIDENT — OBSERVED AND CORRECTED; regression verification completed for the corrected primitive | Contract-to-runtime integrity check; validate executable constraints against fixed schema/contract |
 
 ## 4. Severity Classes
+
+### BUG-021 — Executable Contract Constraint Gap
+
+**Classification:** NEW / EXPOSED
+
+**Previous implementation state:** `acceptVerifiedTransition()` checked cross-boundary equality of AcceptanceBinding references but did not reject empty reference values, although the fixed `acceptance-binding.schema.json` contract requires non-empty strings (`minLength: 1`).
+
+**Expected behavior:** A runtime AcceptanceBinding must satisfy the fixed non-empty-reference constraint before an AcceptedState can be produced.
+
+**Observed failure:** During the ChatGPT bug audit, the primitive accepted an AcceptanceBinding whose required references could be empty when they matched the corresponding transition, authority, policy, capability, and verification context references.
+
+**Evidence:** Repository implementation at the pre-correction state; deterministic negative tests were subsequently added for each of the five required references.
+
+**Impact:** The executable primitive could accept malformed binding data despite the fixed contract, weakening runtime integrity at the acceptance boundary.
+
+**Correction:** Added an explicit empty-reference rejection guard and six-case deterministic verification coverage. Local verification on the real repository working tree completed with 6/6 tests passing and exit code 0.
+
+**Residual uncertainty:** No production/runtime integration was tested or authorized; this record establishes only the local primitive correction.
+
+**Prevention:** Future executable implementations MUST compare runtime validation constraints against the fixed contract/schema, including non-empty, type, cross-reference, and other explicitly declared admissibility constraints.
+
 
 - **C1 — Epistemic corruption:** BUG-002, BUG-010, BUG-011
 - **C2 — Evidence/provenance corruption:** BUG-001, BUG-003, BUG-005, BUG-009
