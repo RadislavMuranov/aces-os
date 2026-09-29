@@ -289,6 +289,21 @@ The following previously observed ChatGPT failure classes are permanently treate
 - **research-layer erasure during zero audit** — treating zeroing as permission to discard comparative studies, falsification attempts, experiments, negative results, or boundary findings;
 - **premature evidence compression** — reducing a multi-line research history to a small set of observed failures before checking whether discarded research contains decision-relevant evidence;
 - **external-research blindness** — omitting relevant external research or comparative ecosystem findings (for example agent-native/harness research) from a revalidation because they do not fit the current zero-state narrative.
+- **executable-contract constraint gap** — implementing a fixed contract or schema incompletely, especially by enforcing structural/reference equality while omitting explicit runtime admissibility constraints such as non-empty values.
+
+
+### B-130 — Executable Contract Constraint Gap
+
+**Classification:** NEW / EXPOSED  
+**Failure:** ChatGPT produced an executable acceptance primitive that enforced the fixed AcceptanceBinding cross-reference relationships but omitted the explicit non-empty-reference constraint present in the fixed schema.  
+**Previous state:** Empty required references could pass the executable boundary when all corresponding references matched.  
+**Expected state:** Every required AcceptanceBinding reference must satisfy the fixed contract before AcceptedState can be produced.  
+**Observable consequence:** The primitive could return AcceptedState for malformed empty reference values.  
+**Impact:** Runtime implementation semantics were weaker than the fixed acceptance-binding contract.  
+**Correction:** Added explicit rejection of empty AcceptanceBinding references and deterministic negative coverage for all five required references.  
+**Independent verification:** Real local working tree verification completed: 6 tests passed, 0 failed, exit code 0.  
+**Residual boundary:** No production/runtime integration was performed or authorized.  
+**Prevention:** Before declaring an executable contract implementation complete, compare every explicit schema/contract constraint against runtime enforcement, not only cross-object relationships.
 
 ## 16. Mandatory Decision Language
 
