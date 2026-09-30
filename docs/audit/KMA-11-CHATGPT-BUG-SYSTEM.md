@@ -162,3 +162,28 @@ KMA-11 is frozen for the current audit checkpoint. KMA-12 remains frozen. No mat
 **Prevention:** A synchronization operation is incomplete unless it explicitly reconstructs and preserves the original research objective before deriving the next legitimate scope.
 
 **Verification status:** GOVERNANCE REPAIR APPLIED; downstream refactor/re-verification gates remain separate.
+
+
+### BUG-023 — Undurable Repair Claim
+
+**Classification:** NEW / EXPOSED
+
+**Failure:** ChatGPT described formulated invariants and a repair design as a completed repair before those controls had been materially fixed in the authoritative governance/bug-prevention records.
+
+**Expected transition:**
+`DEFECT → REPAIR SPECIFICATION → GOVERNANCE MATERIALIZATION → READ-BACK / VERIFICATION`
+
+**Observed incorrect transition:**
+`DEFECT → FORMULATED INVARIANTS → CLAIMED AS REPAIR`
+
+**Observable consequence:** The conversation temporarily represented a prevention mechanism as repaired although no durable governance control had yet been created.
+
+**Impact:** Confusion between proposed correction and materially applied correction; a future recurrence could occur because the prevention rule did not yet exist in the authoritative control base.
+
+**Root cause:** Repair design and repair materialization were treated as the same state.
+
+**Correction:** Materialized BUG-022 and its prevention rule in the KMA-11 forensic register, B-131 in the active Failure Filter, and a mandatory Scope-Anchor Integrity Requirement in the canonical Master Protocol.
+
+**Prevention:** A repair MUST NOT be reported as applied until the authoritative artifact containing the repair exists and its resulting state is observable. A formulated invariant is a repair proposal until materialized.
+
+**Residual uncertainty:** The governance changes themselves remain subject to their separate downstream verification/refactor gates.
