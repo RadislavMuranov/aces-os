@@ -379,3 +379,26 @@ This filter is derived from the ChatGPT forensic failure register produced durin
 **Prevention:** Every zero audit MUST preserve the full research inventory first, classify each research result, and only then recompute the surviving hypothesis/evidence base.
 
 This filter is a process-control artifact, not evidence that ACES OS is necessary.
+
+
+### B-131 — Chat-Sync Scope Anchor Loss
+
+**Classification:** NEW / EXPOSED
+
+**Failure:** A 100% synchronization operation can preserve repository/implementation state while dropping the original research objective that gives the branch its purpose. If next-scope derivation then uses repository state as its principal input, it can produce a false `NO NEW SCOPE JUSTIFIED` result.
+
+**Expected state reconstruction:**
+`ENTIRE CHAT PURPOSE → ORIGINAL RESEARCH OBJECTIVE → OBJECTIVE LINEAGE → OPEN / CLOSED OBJECTIVES → AUTHORIZATIONS → EVIDENCE / DEFECTS / CORRECTIONS → CURRENT VERIFIED STATE → NEXT LEGITIMATE SCOPE`
+
+**Prohibited substitution:**
+`REPOSITORY STATE → NEXT SCOPE`
+
+**Observable consequence:** A still-open research objective may disappear from the derived scope even though the implementation branch associated with it is closed.
+
+**Impact:** Loss of research intent continuity can terminate the wrong objective and cause subsequent actions to be derived from an incomplete state.
+
+**Correction:** Scope derivation is now governed by an explicit scope-anchor requirement in the Master Protocol. Repository/implementation state is not a sufficient representation of complete chat state.
+
+**Prevention rule:** Every 100% synchronization MUST explicitly reconstruct the entire chat purpose and original research objective before classifying objectives as open/closed or deriving the next legitimate scope. If the original objective cannot be established, scope derivation MUST be `UNKNOWN / NOT VERIFIED`, not `NO NEW SCOPE JUSTIFIED`.
+
+**Residual boundary:** This control prevents the reasoning transition; it does not itself prove any research objective or ACES architectural necessity.
