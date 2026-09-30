@@ -552,3 +552,55 @@ And the current research question is therefore:
 > **Can one zero-friction connective agent make the existing Digital World behave as a coherent environment for a human, without becoming another environment itself?**
 
 **Status: OPEN — FALSIFIABLE.**
+
+
+---
+
+## 25. Scope-Anchor Integrity Requirement
+
+A 100% synchronization operation MUST reconstruct the **entire chat state**, not merely repository or implementation state.
+
+The minimum reconstruction order is:
+
+`ENTIRE CHAT PURPOSE`
+→ `ORIGINAL RESEARCH OBJECTIVE`
+→ `OBJECTIVE LINEAGE`
+→ `OPEN / CLOSED OBJECTIVES`
+→ `AUTHORIZATIONS`
+→ `EVIDENCE / DEFECTS / CORRECTIONS`
+→ `CURRENT VERIFIED STATE`
+→ `NEXT LEGITIMATE SCOPE`
+
+The following substitutions are prohibited:
+
+- `RepositoryState ≠ CompleteChatState`
+- `ClosedImplementationIteration ⇏ ClosedResearchObjective`
+- `RepositoryState ⇏ NextLegitimateScope`
+
+### Scope-Derivation Invariant
+
+> **No original research objective → no valid scope derivation.**
+
+If the original research objective cannot be established from available evidence, the result MUST be:
+
+**UNKNOWN / NOT VERIFIED**
+
+and MUST NOT be:
+
+**NO NEW SCOPE JUSTIFIED**.
+
+### Scope-Anchor Preservation
+
+The original research objective remains open until evidence explicitly establishes its closure, rejection, supersession, or authorization-controlled termination.
+
+Closing an implementation iteration MUST NOT implicitly close the research objective that initiated the branch.
+
+### Required Scope-Derivation Input
+
+Before deriving a next legitimate scope, ChatGPT MUST have:
+
+`ENTIRE_CHAT_PURPOSE / ORIGINAL_RESEARCH_OBJECTIVE / OBJECTIVE_LINEAGE / OPEN_OBJECTIVES / CLOSED_OBJECTIVES / AUTHORIZATIONS / EVIDENCE / DEFECTS / CORRECTIONS / CURRENT_VERIFIED_STATE`
+
+If any material scope anchor is missing, derivation is incomplete and the process MUST stop rather than infer a new scope or terminate the objective.
+
+This requirement is a process-control rule. It does not establish ACES architectural necessity.
