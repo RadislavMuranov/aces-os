@@ -133,3 +133,32 @@ This verdict establishes a control target and forensic register. It does not est
 ## 8. Freeze Boundary
 
 KMA-11 is frozen for the current audit checkpoint. KMA-12 remains frozen. No materialization verdict or repair design may be inferred from this record alone.
+
+
+### BUG-022 — Chat-Sync Scope Anchor Loss
+
+**Classification:** NEW / EXPOSED
+
+**Failure:** During the 100% synchronization operation, ChatGPT synchronized the repository/implementation state but failed to preserve the original research objective of the chat as a mandatory scope anchor. The subsequent scope derivation therefore operated on an incomplete representation of the chat state.
+
+**Expected transition:**
+`ENTIRE CHAT PURPOSE → ORIGINAL RESEARCH OBJECTIVE → OPEN / CLOSED OBJECTIVES → CURRENT VERIFIED STATE → NEXT LEGITIMATE SCOPE`
+
+**Observed incorrect transition:**
+`REPOSITORY STATE → NO NEW SCOPE JUSTIFIED`
+
+**Observable consequence:** The valid open research objective — finding/verifying an implemented DSH-compatible RU→EN pre-LLM model-visible translation mechanism — was incorrectly treated as if no new scope were justified.
+
+**Primary evidence:** The synchronized repository state and the subsequent conversation correction explicitly distinguish repository-state synchronization from preservation of the original chat purpose and research objective.
+
+**What was lost:** The causal link between the original research objective and next-scope derivation.
+
+**Root cause:** `RepositoryState` was implicitly treated as a sufficient representation of `EntireChatState`.
+
+**Correction required:** Scope derivation MUST consume the original chat purpose, original research objective, objective lineage, open/closed objectives, authorizations, evidence, defects/corrections, and current verified state. Repository state alone is insufficient.
+
+**Residual uncertainty:** This record does not claim that every historical synchronization operation suffered the same failure; it records the observed incident in this branch.
+
+**Prevention:** A synchronization operation is incomplete unless it explicitly reconstructs and preserves the original research objective before deriving the next legitimate scope.
+
+**Verification status:** GOVERNANCE REPAIR APPLIED; downstream refactor/re-verification gates remain separate.
