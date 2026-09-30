@@ -402,3 +402,22 @@ This filter is a process-control artifact, not evidence that ACES OS is necessar
 **Prevention rule:** Every 100% synchronization MUST explicitly reconstruct the entire chat purpose and original research objective before classifying objectives as open/closed or deriving the next legitimate scope. If the original objective cannot be established, scope derivation MUST be `UNKNOWN / NOT VERIFIED`, not `NO NEW SCOPE JUSTIFIED`.
 
 **Residual boundary:** This control prevents the reasoning transition; it does not itself prove any research objective or ACES architectural necessity.
+
+
+### B-132 — Undurable Repair Claim
+
+**Classification:** NEW / EXPOSED
+
+**Failure:** A proposed invariant or repair design was presented as repaired before the corresponding authoritative governance/bug-prevention control had been materially created.
+
+**Expected:** `DEFECT → REPAIR SPECIFICATION → GOVERNANCE MATERIALIZATION → VERIFICATION`.
+
+**Observed:** `DEFECT → FORMULATED INVARIANTS → CLAIMED REPAIR`.
+
+**Impact:** A repair can exist only in conversational reasoning while the authoritative prevention system remains unchanged.
+
+**Correction:** The current chat-sync repair has now been materially recorded in KMA-11, the active Failure Filter, and the canonical Master Protocol.
+
+**Prevention rule:** Never report a repair as applied merely because its design has been formulated. Applied repair requires an observable authoritative artifact; verification of that artifact remains a separate gate.
+
+**Residual boundary:** Materialization does not imply that the new control has already passed its subsequent refactor/re-verification gates.
