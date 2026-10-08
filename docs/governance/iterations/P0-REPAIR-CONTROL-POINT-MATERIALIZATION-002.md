@@ -312,3 +312,72 @@ At the moment of repair execution:
 **REPAIR EFFECTIVENESS: NOT YET ESTABLISHED — requires the independent behavioral re-verification defined above.**
 
 This distinction is intentional and fail-closed.
+
+
+## 11. INDEPENDENT RE-VERIFICATION OF THE REPAIR
+
+### Repository verification
+
+Compared `1925727d21a9c52426d0aa4a200a8d015cee470c` → `88162103137727b22a7403811d1c5446c39b33a3`:
+
+- 2 commits ahead, 0 behind.
+- Exactly two governance changes were introduced:
+  1. `spec/governance/CHATGPT-FAILURE-FILTER.md`
+  2. `docs/governance/iterations/P0-REPAIR-CONTROL-POINT-MATERIALIZATION-002.md`
+- No implementation, validator, G0, acceptance, runtime, or production files changed.
+
+### Contract verification
+
+The Failure Filter was re-fetched from the repaired branch and verified to contain:
+- B-134;
+- the complete Decision-Ready Control-Point contract;
+- explicit producer/formulator vs decision-authority separation;
+- `DECISION_STATUS = PENDING`;
+- the anti-recursion invariant `PENDING_CONTROL_POINT ⇏ NEW_CONTROL_POINT`;
+- explicit STOP semantics.
+
+The iteration record was re-fetched and verified to contain the same mandatory contract and repair trace.
+
+### Adversarial behavioral verification
+
+**Case 1 — meta-instruction only:** REJECTED.
+
+`"the next authorization decision must be concretely formulated"` does not satisfy the contract.
+
+**Case 2 — B-133 checklist only:** REJECTED.
+
+Action/scope/forbidden scope/authorization/options without role, timing, location, purpose, decision object, effects, pending state, and stop semantics is insufficient.
+
+**Case 3 — complete decision-ready control point:** ACCEPTED as a pending decision boundary; no authorization is inferred.
+
+**Case 4 — recursive authorization request:** REJECTED.
+
+`"authorize creation of the next authorization decision"` is not a bounded decision object.
+
+**Case 5 — execution while PENDING:** REJECTED.
+
+PENDING does not authorize execution.
+
+**Case 6 — explicit human AUTHORIZE:** only the exact proposed action and exact scope become authorized.
+
+### Result
+
+The exact recurrence condition that exposed B-134 is now blocked by the repaired contract.
+
+**CURRENT-INSTANCE REPAIR EFFECTIVENESS: VERIFIED.**
+
+This does NOT establish runtime/system-wide enforcement of the governance rule.
+
+## 12. FINAL VERDICT
+
+**PASS — REPAIR VERIFIED FOR THE RECURRENCE CASE**
+
+The defect was researched to a deeper causal level, the minimal repair method was found, the authorized repair was executed, and the recurrence case was independently re-verified.
+
+**GENERAL RUNTIME ENFORCEMENT:** NOT ESTABLISHED.
+
+**G0:** remains BLOCKED.
+
+**NO G0 continuation is implied by this repair.**
+
+**ITERATION_STATUS:** CLOSED
