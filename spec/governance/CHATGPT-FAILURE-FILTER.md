@@ -509,3 +509,102 @@ This filter is a process-control artifact, not evidence that ACES OS is necessar
 **Prevention rule:** Never report a repair as applied merely because its design has been formulated. Applied repair requires an observable authoritative artifact; verification of that artifact remains a separate gate.
 
 **Residual boundary:** Materialization does not imply that the new control has already passed its subsequent refactor/re-verification gates.
+
+
+### B-134 — Decision-Ready Control-Point Materialization Failure
+
+**Classification:** RECURRING / CONTROL-PLANE CONTRACT DEFECT / REPAIR EFFECTIVENESS FAILURE
+
+**Observed defect:** The B-133 repair required a terminal response to expose an exact action, exact scope, forbidden scope, authorization requirement, and exact user decision. The resulting response still used meta-language such as “the next authorization decision must be concretely formulated”. That language names a requirement for a future control point but does not itself constitute a decision-ready control point.
+
+**Why this is a distinct deeper defect:** B-133 treated control-point materialization as a content checklist. It did not define the roles, timing, placement, trigger, purpose, decision object, decision state, and transition semantics that make a control point executable as a human decision boundary.
+
+**Fundamental correction:** Separate **control-point materialization** from **authorization decision**.
+
+The control process/assistant is responsible for **materializing the decision-ready control point**. The designated human authority is responsible for **making the authorization decision**. The control point MUST exist before the human decision is requested. The system MUST NOT ask the human to formulate the control point that the system is responsible for exposing.
+
+**Decision-ready control-point contract:**
+```
+CONTROL_POINT_ID
+PRODUCER / FORMULATOR
+DECISION_AUTHORITY
+TRIGGER / TERMINAL_DISPOSITION
+CREATION_POINT / WHEN
+LOCATION / WHERE
+REASON / WHY
+PURPOSE / FOR WHAT
+DECISION_OBJECT / WHAT IS BEING DECIDED
+PROPOSED_ACTION
+EXACT_SCOPE
+FORBIDDEN_SCOPE
+EVIDENCE_STATE
+AUTHORIZATION_REQUIRED
+DECISION_OPTIONS
+EFFECT_OF_EACH_OPTION
+STOP_CONDITION
+DECISION_STATUS = PENDING
+```
+
+**Mandatory semantics:**
+
+1. **WHO:** the control process/assistant materializes the control point; the designated human authority makes the decision. These roles MUST NOT be conflated.
+2. **WHEN:** materialization occurs immediately when a terminal disposition is reached and before any continuation.
+3. **WHERE:** the complete control point is present in the terminal response; when durable governance provenance is required, the same control point is recorded in the applicable iteration/control record.
+4. **WHY:** the terminal disposition has closed the current bounded action and a human decision is required to determine whether a separately bounded continuation may occur.
+5. **PURPOSE:** expose a deterministic human decision boundary without executing or implying the proposed continuation.
+6. **WHAT:** the decision object MUST be one concrete proposed action or an explicitly enumerated alternative, not “the next decision”.
+7. **ACTION/SCOPE:** the proposed action and its exact scope MUST be stated.
+8. **FORBIDDEN SCOPE:** prohibited expansion MUST be stated.
+9. **EVIDENCE:** the control point MUST state the verified state and terminal disposition on which it is based.
+10. **AUTHORIZATION:** authorization requirement MUST be explicit.
+11. **OPTIONS:** at minimum AUTHORIZE and DO NOT AUTHORIZE / ALTERNATIVE MUST be explicit when authorization is required.
+12. **EFFECT:** the consequence of each decision option MUST be stated.
+13. **STOP:** after materialization, the process MUST stop and wait for the human decision. No decision may be inferred.
+14. **NO META-LOOP:** a decision-ready control point MUST NOT point to “another authorization decision” as its action. Its action is the bounded operation that the human may authorize or reject.
+15. **PENDING IS REAL STATE:** before the human responds, `DECISION_STATUS = PENDING`; it is neither AUTHORIZED nor REJECTED.
+16. **NO SELF-AUTHORIZATION:** the producer/formulator MUST NOT also supply the human authorization outcome.
+17. **NO GENERIC SUBSTITUTION:** phrases such as “explicit authorization is required”, “the next decision must be formulated”, or “a new control point is needed” are invalid unless accompanied by the complete decision-ready contract.
+
+**Validity predicate:**
+
+`DecisionReadyControlPoint` is TRUE iff all mandatory fields are present, the proposed action is bounded, the decision authority is explicit, the decision status is PENDING, and the output terminates in a STOP awaiting that decision.
+
+Therefore:
+
+```
+TerminalDisposition ∧ ContinuationCandidate
+    ⇒ DecisionReadyControlPoint(PENDING)
+    ⇒ STOP_AND_WAIT_FOR_HUMAN_DECISION
+
+DecisionReadyControlPoint(PENDING)
+    ⇏ Authorization
+
+HumanAuthorization
+    ⇒ only the exact proposed action/scope becomes authorized
+
+HumanRejection
+    ⇒ proposed continuation is not authorized
+
+DecisionReadyControlPoint(PENDING)
+    ⇏ NewAuthorizationLoop
+```
+
+**Terminal cases:**
+
+- If no continuation is legitimate or necessary: emit the terminal disposition and STOP; no authorization control point is required.
+- If continuation is possible and requires human authority: emit exactly one Decision-Ready Control Point in PENDING state and STOP.
+- If the human selects an alternative: that alternative becomes a new explicitly scoped objective only after the human decision; it is not inferred from the terminal disposition.
+
+**Repair-effectiveness criterion:** A terminal output fails the contract if the human must still determine or formulate WHO, WHEN, WHERE, WHY, PURPOSE, WHAT, ACTION, SCOPE, FORBIDDEN SCOPE, AUTHORITY, OPTIONS, EFFECT, or STOP semantics. The control process must provide these before asking for a decision.
+
+**Fundamental anti-recursion invariant:**
+
+`CONTROL_POINT_MATERIALIZED ⇒ DECISION_READY ∧ PENDING ∧ STOP`
+
+`PENDING_CONTROL_POINT ⇏ NEW_CONTROL_POINT`
+
+`TERMINAL_DISPOSITION ⇏ AUTOMATIC_CONTINUATION`
+
+`USER_DECISION ⇒ TRANSITION_TO_AUTHORIZED_OR_REJECTED`
+
+This repair closes the identified recursion by making the **decision itself** the control point rather than making “the next authorization decision” the next control point.
