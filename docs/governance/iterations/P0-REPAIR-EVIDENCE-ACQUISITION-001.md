@@ -121,3 +121,83 @@ DO NOT AUTHORIZE / CHOOSE ANOTHER EXPLICITLY SCOPED OBJECTIVE.
 **ITERATION_STATUS:** CLOSED
 
 **SCOPE CONSEQUENCE:** This correction repairs the control-plane closure defect. It does not execute G0 evidence acquisition. The next legitimate control point is explicit human authorization as recorded above.
+
+
+## RECURRENCE — CONTROL-POINT MATERIALIZATION FAILURE
+
+**Classification:** RECURRING / REPAIR EFFECTIVENESS FAILURE
+
+The previously repaired closure defect was reproduced behaviorally after the prior repair had been declared CLOSED/PASS. Therefore:
+
+```
+previous defect
+    ↓
+repair
+    ↓
+repair declared CLOSED
+    ↓
+same behavioral failure reproduced
+    ↓
+repair effectiveness = NOT ESTABLISHED
+```
+
+The previous PASS is superseded as evidence of repair effectiveness for this defect. It remains historical evidence of the prior verification scope only.
+
+**RECURRENT DEFECT:** terminal disposition was followed by generic authorization language rather than a concrete user authorization decision containing exact action, exact scope, forbidden scope, and exact user choice.
+
+**ROOT CAUSE:** the prior repair materialized the next action in the iteration record, but did not make the terminal response itself subject to a mandatory next-control-point contract.
+
+**AUTHORIZED REPAIR METHOD:**  
+```
+TERMINAL DISPOSITION
+        ↓
+MANDATORY NEXT-CONTROL-POINT CONTRACT
+        ↓
+EXACT ACTION
+        ↓
+EXACT SCOPE
+        ↓
+FORBIDDEN SCOPE
+        ↓
+AUTHORIZATION REQUIRED = YES/NO
+        ↓
+EXACT USER DECISION
+        ↓
+STOP
+```
+
+**REPAIR EXECUTED:**  
+1. Recorded the recurrence as B-133 in the Failure Filter.  
+2. Defined the mandatory terminal-output contract, including explicit AUTHORIZE and DO NOT AUTHORIZE choices.  
+3. Explicitly prohibited generic “new authorization is required” wording as sufficient control materialization.  
+4. Preserved the rule that a defect report is not authorization to repair or continue the underlying work.  
+5. Did not reopen G0, create a new research loop, create a new gate, or modify ControlRecord/validateControlRecord().
+
+**ADVERSARIAL RECURRENCE TEST:**  
+Input condition: terminal disposition has been reached and continuation would require human authorization.  
+Rejected output pattern: “The next legitimate control point is a new explicitly authorized decision.”  
+Required output pattern: exact action + exact scope + forbidden scope + authorization required + explicit AUTHORIZE choice + explicit DO NOT AUTHORIZE choice + STOP.  
+Current response is being evaluated against this contract before closure.
+
+**REPAIR-EFFECTIVENESS STATUS:** NOT ESTABLISHED as a general behavioral enforcement property. The governance contract itself is now VERIFIED in the repository, and the current recurrence case is being subjected to direct behavioral compliance verification. A future recurrence would invalidate effectiveness again.
+
+**CURRENT VERIFIED STATE:**  
+- B-133 recorded: VERIFIED.  
+- Mandatory next-control-point contract: VERIFIED in Failure Filter.  
+- Previous PASS as evidence of effectiveness: SUPERSEDED for this recurrence.  
+- G0 execution: NOT performed.  
+- G0 remains BLOCKED.  
+- No implementation/runtime/production change authorized or performed.
+
+**NEXT CONTROL POINT:** The current terminal response itself must expose the exact authorization decision below. No underlying G0 continuation is implied.
+
+**AUTHORIZATION REQUIRED:** YES — only for the exact action stated below.
+
+**EXACT HUMAN DECISION:**  
+**AUTHORIZE:** P0-G0 EXECUTION-SURFACE RECONSTRUCTION in the exact scope: establish whether an actual current producer → persistence/transport → consumer → G0 decision boundary → validateControlRecord() → VALID/REJECTED → promotion path exists, using only admissible current execution/promotion surfaces; stop at EVIDENCE ESTABLISHED, NO EXECUTION PATH ESTABLISHED, or STOP ACQUISITION — NOT TRUE / NOT FALSE.  
+**FORBIDDEN:** historical branch expansion, alternate-runtime expansion, producer/consumer creation, ControlRecord/validator modification, new gate creation, G1, implementation, integration, production work.  
+**DO NOT AUTHORIZE:** do not authorize the above action / choose another explicitly scoped objective.
+
+**REGRESSION_CHECK:** The repaired terminal-output contract is present; recurrence is explicitly recorded; generic authorization language is explicitly insufficient; defect-report ≠ repair authorization; no G0 continuation was performed by this repair.
+
+**VERDICT:** REPAIR MATERIALIZED; CURRENT-INSTANCE BEHAVIORAL COMPLIANCE = SUBJECT TO FINAL RESPONSE CHECK; GENERAL REPAIR EFFECTIVENESS = NOT ESTABLISHED.
