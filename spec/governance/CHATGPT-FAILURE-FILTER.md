@@ -209,6 +209,41 @@ If a test cannot materially change the architectural decision, the test SHOULD N
 
 Meta-analysis without new empirical evidence is insufficient grounds for continuation.
 
+### Evidence Acquisition Stop Rule
+
+Evidence acquisition is a **bounded action**, not an open-ended state.
+
+For every evidence-acquisition action, the control record MUST define before execution:
+
+1. the exact claim or seam being tested;
+2. the admissible source/surface set;
+3. the closure condition;
+4. the terminal dispositions.
+
+The terminal dispositions MUST include, as applicable:
+
+- **EVIDENCE ESTABLISHED** — the requested execution path or claim is directly established;
+- **NO EXECUTION PATH ESTABLISHED** — the admissible source/surface set was exhausted without establishing the path;
+- **STOP ACQUISITION — NOT TRUE / NOT FALSE** — the available evidence cannot establish either side.
+
+Once a terminal disposition is reached, the acquisition action MUST STOP.
+
+A terminal **UNKNOWN** or **NO EXECUTION PATH ESTABLISHED** result MUST NOT automatically create another search, another gate, another historical reconstruction, another branch search, or another research seam.
+
+Continuation after a terminal disposition requires a **new explicitly scoped objective and authorization**. It MUST NOT be inferred from the unresolved UNKNOWN itself.
+
+This rule applies equally to current, historical, repository, runtime, connector, and external evidence surfaces.
+
+**Invariant:**
+
+`TerminalEvidenceDisposition ⇒ StopCurrentAcquisition`
+
+`UNKNOWN ⇏ NewEvidenceLoop`
+
+`NO EXECUTION PATH ESTABLISHED ⇏ NewSearch`
+
+The purpose of evidence acquisition is to resolve the declared question, not to eliminate UNKNOWN by indefinite search.
+
 ## 13. Failure Survival Rule
 
 For every candidate failure:
@@ -290,6 +325,7 @@ The following previously observed ChatGPT failure classes are permanently treate
 - **premature evidence compression** — reducing a multi-line research history to a small set of observed failures before checking whether discarded research contains decision-relevant evidence;
 - **external-research blindness** — omitting relevant external research or comparative ecosystem findings (for example agent-native/harness research) from a revalidation because they do not fit the current zero-state narrative.
 - **executable-contract constraint gap** — implementing a fixed contract or schema incompletely, especially by enforcing structural/reference equality while omitting explicit runtime admissibility constraints such as non-empty values.
+- **unbounded evidence-acquisition loop** — continuing evidence search after the declared seam has reached a terminal disposition, especially by expanding into historical branches, alternate runtimes, adjacent seams, or new searches without a new objective and authorization. This converts UNKNOWN into indefinite process activity and can erase the closure semantics of a fail-closed gate. Prevention: define the source set, closure condition, and terminal dispositions before acquisition; once terminal disposition is reached, stop current acquisition.
 
 
 ### B-130 — Executable Contract Constraint Gap
