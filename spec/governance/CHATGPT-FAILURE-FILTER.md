@@ -328,6 +328,58 @@ The following previously observed ChatGPT failure classes are permanently treate
 - **unbounded evidence-acquisition loop** — continuing evidence search after the declared seam has reached a terminal disposition, especially by expanding into historical branches, alternate runtimes, adjacent seams, or new searches without a new objective and authorization. This converts UNKNOWN into indefinite process activity and can erase the closure semantics of a fail-closed gate. Prevention: define the source set, closure condition, and terminal dispositions before acquisition; once terminal disposition is reached, stop current acquisition.
 
 
+
+### B-133 — Recurrent Control-Point Materialization Failure
+
+**Classification:** RECURRING / REPAIR EFFECTIVENESS FAILURE
+
+**Failure:** After a previous control-plane repair was declared CLOSED and PASS, the same behavioral failure was reproduced: a terminal disposition was emitted without a concrete authorization decision stating the exact action, exact scope, forbidden scope, and the exact user choice required to authorize or reject continuation.
+
+**Previous state:** The earlier repair materialized NEXT LEGITIMATE ACTION and AUTHORIZATION REQUIRED in the iteration record, but did not make the terminal response itself conform to a mandatory control-point contract.
+
+**Observed recurrence:**
+```
+previous defect
+    ↓
+repair
+    ↓
+repair declared CLOSED
+    ↓
+same behavioral failure reproduced
+    ↓
+repair effectiveness = NOT ESTABLISHED
+```
+
+**Impact:** A terminal state could still leave the human without a deterministic authorization surface, allowing the same ambiguity to recur immediately after a supposedly closed repair.
+
+**Correction:** Introduce a mandatory next-control-point contract for terminal dispositions:
+```
+TERMINAL DISPOSITION
+        ↓
+MANDATORY NEXT-CONTROL-POINT CONTRACT
+        ↓
+EXACT ACTION
+        ↓
+EXACT SCOPE
+        ↓
+FORBIDDEN SCOPE
+        ↓
+AUTHORIZATION REQUIRED = YES/NO
+        ↓
+EXACT USER DECISION
+        ↓
+STOP
+```
+
+**Required behavioral output:** When authorization is required, the terminal response MUST explicitly contain both an **AUTHORIZE** decision with the exact action and exact scope, and a **DO NOT AUTHORIZE / CHOOSE ANOTHER EXPLICITLY SCOPED OBJECTIVE** decision. Generic language such as “a new explicitly authorized decision is required” is insufficient.
+
+**Repair-effectiveness criterion:** No terminal disposition may be considered correctly closed if the user cannot determine from that terminal output exactly what action is proposed, exactly what scope is authorized, what is forbidden, whether authorization is required, and what exact decision the user must make.
+
+**Recurrence rule:** A prior PASS does not establish repair effectiveness after the same behavioral failure is reproduced. The repair remains NOT ESTABLISHED until the behavioral output contract is independently re-verified against the recurrence case.
+
+**Prevention:** Treat the next-control-point contract as a mandatory terminal-output invariant, not merely as information stored in an iteration record. Do not infer authorization from a defect report; a defect report is not authorization to repair or continue the underlying work.
+
+
 ### B-130 — Executable Contract Constraint Gap
 
 **Classification:** NEW / EXPOSED  
