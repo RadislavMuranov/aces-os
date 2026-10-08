@@ -469,6 +469,32 @@ This filter is derived from the ChatGPT forensic failure register produced durin
 This filter is a process-control artifact, not evidence that ACES OS is necessary.
 
 
+### B-135 — Absence Claim Requires Absence Reconstruction
+
+**Invariant**
+
+```text
+SearchMiss ⇏ ObjectAbsence
+SearchMiss ⇏ ExecutionPathAbsence
+AbsenceClaim ⇒ AbsenceReconstructionCompleted
+```
+
+**Bounded Method of Absence Reconstruction**
+
+```text
+EXPECTED OBJECT/SEAM
+→ EXPECTED REPRESENTATION
+→ ADMISSIBLE SOURCE/SURFACE SET
+→ BACKWARD TRACE
+→ FORWARD TRACE
+→ CALL/DATA/CONTROL EDGES
+→ ALTERNATIVE REPRESENTATIONS
+→ EXECUTABLE ENTRY/EXIT
+→ TEST/RUNTIME EVIDENCE
+→ FIRST BROKEN/UNOBSERVABLE EDGE
+→ ABSENCE CLASSIFICATION
+```
+
 ### B-131 — Chat-Sync Scope Anchor Loss
 
 **Classification:** NEW / EXPOSED
