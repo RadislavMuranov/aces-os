@@ -52,3 +52,7 @@ The governing protocol is `spec/MASTER-PROTOCOL.md`.
 P0 tests whether a single zero-friction connective coordinator produces measurable human benefit while preserving owner boundaries and avoiding new user-maintained infrastructure.
 
 P0 documentation belongs under `docs/product/P0/`.
+
+## Ecosystem studies
+
+- `ECC-AFFAAN-M-REPOSITORY-STUDY-2026-10-17.md` — read-only study of `affaan-m/everything-claude-code` (now `affaan-m/ECC`): composition, architecture, risks, relevance to ACES.
