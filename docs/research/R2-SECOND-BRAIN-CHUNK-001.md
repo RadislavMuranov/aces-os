@@ -262,7 +262,7 @@
 | Структурные особенности chunking | CONFIRMED |
 | Русская морфология и query handling | REVIEW |
 | Токенная эффективность на реальном tokenizer | UNKNOWN |
-| Сравнительный benchmark execution | UNKNOWN / NOT STARTED |
+| Initial cross-candidate lexical probe and Boring benchmark-v2 | CONFIRMED — limited scope; full R2 incomplete |
 | MoE Qwen card generation benchmark | UNKNOWN / NOT STARTED |
 | Выбор итоговой реализации | NOT DECIDED |
 
@@ -280,3 +280,16 @@
 10. Принять winner/no-winner решение только после прохождения критериев.
 
 **Текущий вывод:** Boring Agent Memory наиболее интересен для изучения структурного chunking и стабильных ID; kb-mcp — как готовый MCP lexical retrieval компонент; DocSearch — минимальный контроль. Ни одна реализация не получила benchmark PASS.
+
+## 15. Execution results — 2026-11-18
+
+- second-brain-mcp Windows path fix verified on pinned commit 53c45847d178f50b45e7620c0e701380f76cc4f6: TypeScript build PASS, npm test 9/9 PASS, git diff --check PASS. No upstream commit/PR.
+- Boring Agent Memory Windows suite: 102/102 PASS after local SQLite connection-cleanup and Windows test portability fixes in isolated clone; not upstream.
+- DocSearch Windows suite: 9/9 PASS after test-only Windows adjustments; source unchanged.
+- kb-mcp Windows suite: 40 PASS / 1 FAIL / 2 SKIP; one process-lock PID mismatch remains REVIEW.
+- Initial lexical probe: 5 synthetic Markdown documents / 11 Russian, English and mixed queries, FTS5/BM25 only. Boring 81.8% evidence recall@5; DocSearch 72.7%; kb-mcp 72.7%. Character sizes are diagnostics, not token counts.
+- Boring benchmark-v2: 7 documents / 12 queries; chunked BM25 Recall@1/3 and evidence recall@1/3 = 1.0; MRR 1.0; no-answer precision/source accuracy/stale-conflict accuracy 1.0; privacy leaks 0. Whole-document BM25 evidence recall@1/3 = 0/0.
+- Incremental scenario: 1 modified, 1 moved, 1 removed, 4 unchanged; 4 chunks added, 5 removed; removed source absent after apply.
+- Russian morphology remains REVIEW. Exact MoE Qwen model/version/quantization/tokenizer and consumer tokenizer remain UNKNOWN; card generation not started. Winner not decided.
+
+Full execution report: https://github.com/RadislavMuranov/aces-os/blob/research/r2-second-brain-chunk-001-2026-11-18/docs/research/R2-SECOND-BRAIN-EXECUTION-RESULTS-2026-11-18.md
