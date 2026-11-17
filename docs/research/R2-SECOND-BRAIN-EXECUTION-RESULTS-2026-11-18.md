@@ -82,3 +82,23 @@ Research-only. No ACES Canon, ACES OS runtime, BASTION, DSH, Orca, local MCP reg
 Raw local results:
 - Cross-candidate JSON SHA-256: 99bb0fac38cf9f81c2804d3f751abaaecbcc7696b7942d3fb5e15386b5e73e40
 - Boring benchmark-v2 JSON SHA-256: a07db1901cbf0b96611d950a1b59a431cb4edaf340130f955e3611742e568070
+
+
+## Shared BM25 chunking-isolation probe
+
+The same FTS5 unicode61 schema, BM25 ranking weights and 11-query set were applied to whole-document, paragraph-aware, hierarchical, kb-mcp, Boring and DocSearch chunk sets. OR / AND / phrase modes were tested. This isolates chunking from native query-parser differences.
+
+| Strategy | Chunks | OR evidence Recall@5 | OR Precision@5 | OR MRR | AND Recall@5 | Phrase Recall@5 |
+|---|---:|---:|---:|---:|---:|---:|
+| Whole-document | 5 | 0.0% | 0.0% | 0.000 | 0.0% | 0.0% |
+| Paragraph-aware | 35 | 90.9% | 30.9% | 0.909 | 72.7% | 63.6% |
+| Hierarchical prototype | 35 | 90.9% | 30.9% | 0.909 | 72.7% | 63.6% |
+| Boring structural | 23 | 90.9% | 21.8% | 0.909 | 72.7% | 63.6% |
+| DocSearch 60-line | 20 | 90.9% | 18.2% | 0.909 | 72.7% | 63.6% |
+| kb-mcp heading-aware | 6 | 63.6% | 12.7% | 0.636 | 45.5% | 36.4% |
+
+Whole-document BM25 had 90.9% source Recall@5 in OR mode but 0% subsection evidence Recall@5 because it lacks the expected heading granularity. OR improves recall but precision remains low. Paragraph-aware and hierarchical prototypes are indistinguishable on this small fixture; deeper nested-heading cases are required. Character counts are not token counts.
+
+Shared BM25 report: https://github.com/RadislavMuranov/aces-os/blob/research/r2-second-brain-chunk-001-2026-11-18/docs/research/R2-SHARED-BM25-RESULTS-2026-11-18.md
+Runner SHA-256: 5d3cce8bedf6acb69035e59f40a2d6c8da363a4e714a7e0e9440f422a55a5e62
+Raw JSON SHA-256: ef5f79ed8df9a6b5b20db7d6a8158445ec585dd015cf491a3a9f9c501a29fc01
