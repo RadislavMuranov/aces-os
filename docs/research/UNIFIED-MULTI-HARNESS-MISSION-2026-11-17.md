@@ -93,7 +93,7 @@ Read-only inspection of the user's Windows host confirmed:
 - OS: Windows 10 IoT Enterprise, version 10.0.19045, build 19045.
 - Memory: 17.9 GiB.
 - Node.js: v24.22.1; npm: 11.19.1; pnpm: 12.11.2.
-- ZCode Desktop 3.18.2 is installed; ZCode.exe exists. The `zcode` command is not on PATH. The desktop app has not been launched or runtime-tested in this research.
+- ZCode Desktop 3.18.2 is installed; ZCode.exe exists. The `zcode` command is not on PATH. The desktop app was not launched by this research; existing ZCode processes were already running. Runtime behavior has not been tested.
 - Tabby is not found as a command and was not found in the inspected Windows uninstall registry entries.
 - DSH 0.2.1-rc.3 is installed; a `dsh` npm shim is on PATH.
 - Claude Code 2.1.302 is installed; `claude.exe` is on PATH.
