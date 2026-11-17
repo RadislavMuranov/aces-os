@@ -132,3 +132,9 @@ Tabby remains the stronger direct candidate if the decisive requirement is a neu
 ZCode remains the lead candidate for the user's stated priority: simplify complex, decomposed engineering work. It is already installed and running, has native task/agent/skills/subagent/MCP/review features, and its current release includes worktree-based parallel task support. Do not install Tabby yet.
 
 Before deciding, test the existing ZCode desktop's integrated terminal with harmless commands and verify whether external interactive CLIs can run as separate sessions. Because the machine had only about 0.5 GiB free memory at the measurement point, begin with serial execution and measure resource use before any multi-agent parallel run. Tabby remains the fallback if ZCode cannot provide reliable independent terminal sessions.
+
+
+## Additional resource and license note — 2026-11-17
+- Tabby's upstream README explicitly states that Tabby is not lightweight and suggests considering ConEmu or Alacritty when RAM use is important. Therefore, Tabby must not be assumed to be the low-memory option; no local Tabby measurement exists.
+- Repository license facts only: Tabby source repository = MIT; ZCode source repository = Apache-2.0. ZCode's NOTICE limits the Apache-2.0 statement to first-party repository code and separately identifies third-party components. No judgment is made about the user's acceptability of either license or about every hosted service.
+- This strengthens the no-install-yet decision: first test the already-installed ZCode, and only test Tabby if ZCode fails the independent-session requirement.
