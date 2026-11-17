@@ -119,3 +119,16 @@ Tabby remains the stronger direct candidate if the decisive requirement is a neu
 - **ZCode leads** for integrated task execution and reducing manual coordination.
 - **Tabby leads** for neutral multi-CLI terminal multiplexing.
 - **No selection, no installation, no configuration changes, no Canon changes** have been made.
+
+
+## Release, license and resource evidence — 2026-11-17
+
+- Tabby latest release found: v1.0.238 (2026-10-07). Official product page documents nested panes, tab/pane restoration and Windows shell support. Repository LICENSE is MIT.
+- ZCode latest release found: v3.18.2 (released 2026-11-13). Release notes add Worktree support for parallel task development and a session-management tool. The checked source repository LICENSE is Apache-2.0; NOTICE.md explicitly limits that statement to first-party repository code and distinguishes third-party components and deployment/runtime data behavior. This is a source-license fact only; it does not decide the user's proprietary-product acceptability.
+- Local inspection found 10 existing ZCode processes. Snapshot: total ZCode working set about 864 MiB; summed private memory about 1,151 MiB; system free physical memory about 0.5 GiB of 17.9 GiB. This is a point-in-time measurement, not proof that ZCode alone caused memory pressure or a representative clean-idle baseline.
+- ZCode processes were already running before this research; this investigation did not launch them. Runtime behavior and current session contents were not inspected.
+
+### Updated recommendation
+ZCode remains the lead candidate for the user's stated priority: simplify complex, decomposed engineering work. It is already installed and running, has native task/agent/skills/subagent/MCP/review features, and its current release includes worktree-based parallel task support. Do not install Tabby yet.
+
+Before deciding, test the existing ZCode desktop's integrated terminal with harmless commands and verify whether external interactive CLIs can run as separate sessions. Because the machine had only about 0.5 GiB free memory at the measurement point, begin with serial execution and measure resource use before any multi-agent parallel run. Tabby remains the fallback if ZCode cannot provide reliable independent terminal sessions.
