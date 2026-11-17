@@ -293,3 +293,10 @@
 - Russian morphology remains REVIEW. Exact MoE Qwen model/version/quantization/tokenizer and consumer tokenizer remain UNKNOWN; card generation not started. Winner not decided.
 
 Full execution report: https://github.com/RadislavMuranov/aces-os/blob/research/r2-second-brain-chunk-001-2026-11-18/docs/research/R2-SECOND-BRAIN-EXECUTION-RESULTS-2026-11-18.md
+
+
+## 16. Shared BM25 chunking-isolation results
+
+A shared FTS5 unicode61/BM25 backend was used to isolate chunking strategies from native query-parser differences. On 5 synthetic documents / 11 queries, OR evidence Recall@5 was: paragraph-aware 90.9%, hierarchical prototype 90.9%, Boring structural 90.9%, DocSearch 90.9%, kb-mcp 63.6%, whole-document 0% subsection evidence (although whole-document source recall was 90.9%). OR Precision@5 ranged from 12.7% to 30.9%; AND/phrase modes reduced recall. The hierarchical and paragraph prototypes were indistinguishable on this small fixture. No token counts; character sizes are not token counts. No winner.
+
+Report: https://github.com/RadislavMuranov/aces-os/blob/research/r2-second-brain-chunk-001-2026-11-18/docs/research/R2-SHARED-BM25-RESULTS-2026-11-18.md
