@@ -85,3 +85,37 @@ These are not equivalent product categories:
 
 ## Research conclusion (preliminary)
 For a neutral terminal that hosts multiple independent harness CLIs, Tabby is the more direct fit. For the user's broader goal—making complex, decomposed engineering tasks simpler—ZCode currently shows more native workflow capabilities and is the more compelling primary candidate, subject to resolving the hook limitation, DSH/Hermes integration and actual hardware/resource tests. This is a research recommendation, not a selection or installation authorization.
+
+
+## Local environment preflight — 2026-11-17
+
+Read-only inspection of the user's Windows host confirmed:
+- OS: Windows 10 IoT Enterprise, version 10.0.19045, build 19045.
+- Memory: 17.9 GiB.
+- Node.js: v24.22.1; npm: 11.19.1; pnpm: 12.11.2.
+- ZCode Desktop 3.18.2 is installed; ZCode.exe exists. The `zcode` command is not on PATH. The desktop app has not been launched or runtime-tested in this research.
+- Tabby is not found as a command and was not found in the inspected Windows uninstall registry entries.
+- DSH 0.2.1-rc.3 is installed; a `dsh` npm shim is on PATH.
+- Claude Code 2.1.302 is installed; `claude.exe` is on PATH.
+- `hermes`, `pi`, and `wezterm` commands were not found. This is not proof that no alternate launch path exists; exact binary/package locations remain to be checked.
+
+## Updated practical assessment
+
+ZCode is already installed. A no-download, controlled desktop validation is the lowest-friction next experiment. The absence of a `zcode` PATH command does not prove the desktop app cannot run its integrated terminal or Agent.
+
+Given the user's stated priority—making complex, decomposed work simpler—ZCode is the current lead candidate because it provides native task context, long-horizon planning, execution modes, terminal/browser, review, Skills, subagents and MCP. This is a recommendation for the user's consideration, not a selection.
+
+Tabby remains the stronger direct candidate if the decisive requirement is a neutral, multi-pane terminal hosting several independent CLI sessions. Its official product documentation lists nested panes and restored tabs/panes. ZCode's documented terminal-panel behavior does not yet prove five simultaneous interactive external harness sessions with reliable PTY, cancellation, output capture and process identity.
+
+### Required controlled tests before selection
+1. Launch the already-installed ZCode Desktop and record exact visible version, sign-in/model prerequisites and first-run behavior.
+2. Open its integrated terminal and run harmless read-only commands.
+3. Test one external interactive CLI process at a time, starting with `claude --version` and `dsh --version`; do not run agent tasks or edit files.
+4. Test whether multiple terminal sessions remain independently active and whether output, cancellation and working directories remain distinct.
+5. Inspect ZCode's actual hook configuration and event behavior without enabling policy-changing hooks.
+6. Only then decide whether Tabby adds a necessary terminal capability or would be redundant.
+
+### Decision boundary
+- **ZCode leads** for integrated task execution and reducing manual coordination.
+- **Tabby leads** for neutral multi-CLI terminal multiplexing.
+- **No selection, no installation, no configuration changes, no Canon changes** have been made.
