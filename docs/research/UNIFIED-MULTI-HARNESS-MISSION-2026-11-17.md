@@ -138,3 +138,49 @@ Before deciding, test the existing ZCode desktop's integrated terminal with harm
 - Tabby's upstream README explicitly states that Tabby is not lightweight and suggests considering ConEmu or Alacritty when RAM use is important. Therefore, Tabby must not be assumed to be the low-memory option; no local Tabby measurement exists.
 - Repository license facts only: Tabby source repository = MIT; ZCode source repository = Apache-2.0. ZCode's NOTICE limits the Apache-2.0 statement to first-party repository code and separately identifies third-party components. No judgment is made about the user's acceptability of either license or about every hosted service.
 - This strengthens the no-install-yet decision: first test the already-installed ZCode, and only test Tabby if ZCode fails the independent-session requirement.
+
+
+## R1 — Controlled ZCode Validation — 2026-11-17
+
+Status: **IN PROGRESS / NOT PASS**. ZCode 3.18.2 remains the lead candidate; Tabby remains uninstalled.
+
+### CONFIRMED
+- Local executable product version: ZCode Desktop 3.18.2.10443.
+- User-level ZCode config `~/.zcode/cli/config.json` currently contains MCP configuration only; no Hooks configuration or event definitions.
+- Seven user-level ZCode Skills exist under `~/.zcode/skills`, each with `SKILL.md`: graphify, imagegen, openai-docs, prompt-master, review-agent, skill-creator, skill-installer.
+- Five persisted session JSON artifacts exist under `~/.zcode/v2/sessions`; saved artifacts are present, but restart recovery is not tested.
+- ACES repo contains `.claude/hooks/aces-hook-engine.mjs`, `.claude/hooks/aces-policy-controls.mjs`, and `.claude/settings.json`.
+- Existing DSH and Claude Code process ancestry does not lead to ZCode.
+
+### BLOCKING — HOOKS
+ZCode official documentation states project-level hooks are not executed in the current version. Legacy `.claude/settings.json` / `.agents/settings.json` configurations are read-only until explicitly imported. Supported hook scopes are user-level and enabled plugin-level. Current local ZCode config has no hooks configured. Existing ACES repository hooks therefore are not proven to execute under the current setup and must be treated as non-enforcing.
+
+Sources:
+- https://zcode.z.ai/en/docs/hooks
+- https://zcode.z.ai/en/docs/skill
+- https://zcode.z.ai/en/docs/ADE-tools
+- https://zcode.z.ai/en/docs/plugin
+
+### RESOURCE SNAPSHOT
+- 17.95 GiB RAM total; 0.80 GiB free at snapshot.
+- 29 ZCode processes; summed Working Set about 2,549 MiB; summed Private Memory about 3,174 MiB.
+- Other heavy applications were active; this is not a clean idle baseline.
+
+### REVIEW / UNKNOWN
+- ZCode app-server has child shell/runtime processes, including `cmd.exe`; interactive PTY behavior and independent I/O/cancellation remain unverified.
+- DSH and Claude Code are running outside the ZCode process tree. Their launch from ZCode's integrated terminal is UNKNOWN.
+- Seven Skills are installed, but actual invocation is unverified.
+- Five persisted session artifacts exist, but recovery after app restart is unverified.
+
+### Decision
+ZCode remains the lead candidate but is **NOT YET ACCEPTED** as sufficient for ACES unified execution. Tabby is not required yet and remains uninstalled. Reconsider Tabby only if ZCode fails the independent interactive terminal-session test. Tabby would not resolve ZCode's project-hook limitation.
+
+### Next controlled test
+In ZCode integrated terminal run:
+```powershell
+where.exe dsh
+where.exe claude
+dsh.cmd --version
+claude.exe --version
+```
+Then use two harmless independent terminal tabs to verify distinct PIDs, working directories, output and cancellation. Do not start agent tasks. A plugin-scope marker-hook test requires separate approval. No local configuration, ACES repo, Canon, branch or production changes were made.
