@@ -1,0 +1,13 @@
+{
+  "corpus_id": "CHATGPT-CORPUS-001",
+  "version": "1.0",
+  "platform": "ChatGPT",
+  "total_conversations": 56,
+  "original_archive_sha256": "42e8b11daf45934ecacb472ecef364d30e28767d0dc70e4176f7406571a07a79",
+  "semantic_pass": "APPROVED",
+  "human_checkpoint": "APPROVED",
+  "stage0_finalization": "COMPLETE",
+  "source_independence": true,
+  "original_archive_mutation": false,
+  "status": "SOURCE_FROZEN"
+}
