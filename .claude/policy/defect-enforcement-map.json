@@ -1,0 +1,1634 @@
+{
+  "status": "PARTIALLY ENFORCED / NON-CANON / SEMANTIC VERDICT NOT AUTOMATED",
+  "authority": "KMA-11 and active policy source documents remain authoritative. This map records coverage; it does not replace or promote them.",
+  "entries": [
+    {
+      "id": "BUG-001",
+      "title": "Research collapse during zero audit",
+      "forensic_status": "HISTORICAL INCIDENT — PARTIALLY VERIFIED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-001",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-001"
+    },
+    {
+      "id": "BUG-002",
+      "title": "Synthesis given excessive epistemic weight",
+      "forensic_status": "STRUCTURAL FAILURE CLASS CONFIRMED; incidents require trace",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-002",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-002"
+    },
+    {
+      "id": "BUG-003",
+      "title": "Summary substituted for primary source",
+      "forensic_status": "STRUCTURAL FAILURE CLASS CONFIRMED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-003",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-003"
+    },
+    {
+      "id": "BUG-004",
+      "title": "Historical state treated as current state",
+      "forensic_status": "STRUCTURAL FAILURE CLASS CONFIRMED; incidents partial",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-004",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-004"
+    },
+    {
+      "id": "BUG-005",
+      "title": "Repository artifact treated as truth",
+      "forensic_status": "FAILURE CLASS CONFIRMED; individual incidents not all proven",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-005",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-005"
+    },
+    {
+      "id": "BUG-006",
+      "title": "Specification treated as implementation",
+      "forensic_status": "FAILURE CLASS CONFIRMED; incident not independently reconstructed",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-006",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-006"
+    },
+    {
+      "id": "BUG-007",
+      "title": "Test existence treated as test success",
+      "forensic_status": "FAILURE CLASS CONFIRMED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-007",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-007"
+    },
+    {
+      "id": "BUG-008",
+      "title": "Research escalated into architecture",
+      "forensic_status": "HISTORICAL STRUCTURAL RISK CONFIRMED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-008",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-008"
+    },
+    {
+      "id": "BUG-009",
+      "title": "Negative evidence compressed away",
+      "forensic_status": "FAILURE MODE CONFIRMED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-009",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-009"
+    },
+    {
+      "id": "BUG-010",
+      "title": "Uncertainty compressed into stronger status",
+      "forensic_status": "STRUCTURAL FAILURE CONFIRMED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-010",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-010"
+    },
+    {
+      "id": "BUG-011",
+      "title": "Circular self-validation",
+      "forensic_status": "STRUCTURAL RISK CONFIRMED; incidents partial",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-011",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-011"
+    },
+    {
+      "id": "BUG-012",
+      "title": "Premature closure from coherent explanation",
+      "forensic_status": "FAILURE CLASS SUPPORTED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-012",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-012"
+    },
+    {
+      "id": "BUG-013",
+      "title": "Architecture used to explain its own necessity",
+      "forensic_status": "STRUCTURAL FAILURE CLASS CONFIRMED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-013",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-013"
+    },
+    {
+      "id": "BUG-014",
+      "title": "Governance used to repair epistemic failure",
+      "forensic_status": "HISTORICAL RESPONSE CONFIRMED; necessity of added governance unproven",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-014",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-014"
+    },
+    {
+      "id": "BUG-015",
+      "title": "Claiming inspections not performed",
+      "forensic_status": "FAILURE CLASS REQUIRED CONTROL; specific incident not proven here",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-015",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-015"
+    },
+    {
+      "id": "BUG-016",
+      "title": "Sunk-cost reasoning",
+      "forensic_status": "FAILURE CLASS CONFIRMED; causal incidents partial",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-016",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-016"
+    },
+    {
+      "id": "BUG-017",
+      "title": "Coherence optimization over contradiction preservation",
+      "forensic_status": "SUPPORTED FAILURE CLASS",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-017",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-017"
+    },
+    {
+      "id": "BUG-018",
+      "title": "User intent rewritten by ChatGPT",
+      "forensic_status": "UNVERIFIED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-018",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-018"
+    },
+    {
+      "id": "BUG-019",
+      "title": "Silent epistemic correction",
+      "forensic_status": "STRUCTURAL RISK CONFIRMED; incidents partial",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-019",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-019"
+    },
+    {
+      "id": "BUG-020",
+      "title": "Research erasure caused by simplification",
+      "forensic_status": "HISTORICAL B-129 INSTANCE + STRUCTURAL CLASS CONFIRMED",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BUG-020",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-BUG-020"
+    },
+    {
+      "id": "B-129",
+      "title": "Research Collapse During Zero Audit",
+      "forensic_status": "HISTORICAL INCIDENT WITH PARTIAL RECONSTRUCTION",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for B-129",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-B-129"
+    },
+    {
+      "id": "B-135",
+      "title": "Absence Claim Requires Absence Reconstruction",
+      "forensic_status": "REGISTERED IN FAILURE FILTER; incident status not asserted",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for B-135",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-B-135"
+    },
+    {
+      "id": "B-136",
+      "title": "Mandatory Action Must Not Be Materialized as a Choice",
+      "forensic_status": "REGISTERED IN FAILURE FILTER; incident status not asserted",
+      "enforcement_point": "Stop: defect-specific evidence validator",
+      "enforcement": "Requires rule-specific evidence fields, an explicit result, and a test reference. A PASS without those fields is blocked.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for B-136",
+      "enforcement_limit": "STRUCTURED_EVIDENCE_ONLY: does not prove historical incident occurrence or independently establish semantic truth.",
+      "control_id": "DEFECT-CONTROL-B-136"
+    }
+  ],
+  "policy_rules": [
+    {
+      "id": "METHOD-SELECTION-001",
+      "title": "Fundamental interdisciplinary method-selection rule",
+      "source": "Notion RULE-METHOD-SELECTION-001",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for METHOD-SELECTION-001",
+      "control_id": "POLICY-REVIEW-METHOD-SELECTION-001"
+    },
+    {
+      "id": "AGENTS-01",
+      "title": "Language and Output",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-01",
+      "control_id": "POLICY-REVIEW-AGENTS-01"
+    },
+    {
+      "id": "AGENTS-02",
+      "title": "Project Navigation",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-02",
+      "control_id": "POLICY-REVIEW-AGENTS-02"
+    },
+    {
+      "id": "AGENTS-03",
+      "title": "Retrieval and Reading",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-03",
+      "control_id": "POLICY-REVIEW-AGENTS-03"
+    },
+    {
+      "id": "AGENTS-04",
+      "title": "Deny Noise and Secrets",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-04",
+      "control_id": "POLICY-REVIEW-AGENTS-04"
+    },
+    {
+      "id": "AGENTS-05",
+      "title": "Truth, Verification, and Recovery",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-05",
+      "control_id": "POLICY-REVIEW-AGENTS-05"
+    },
+    {
+      "id": "AGENTS-06",
+      "title": "Project State and Context Economy",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-06",
+      "control_id": "POLICY-REVIEW-AGENTS-06"
+    },
+    {
+      "id": "AGENTS-07",
+      "title": "Session Iteration Commands",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-07",
+      "control_id": "POLICY-REVIEW-AGENTS-07"
+    },
+    {
+      "id": "AGENTS-08",
+      "title": "Canonical Rules",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-08",
+      "control_id": "POLICY-REVIEW-AGENTS-08"
+    },
+    {
+      "id": "AGENTS-09",
+      "title": "Harness-Specific Rule",
+      "source": "AGENTS.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for AGENTS-09",
+      "control_id": "POLICY-REVIEW-AGENTS-09"
+    },
+    {
+      "id": "SCHEMA-01",
+      "title": "Scope & Authority",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-01",
+      "control_id": "POLICY-REVIEW-SCHEMA-01"
+    },
+    {
+      "id": "SCHEMA-02",
+      "title": "Language & Output",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-02",
+      "control_id": "POLICY-REVIEW-SCHEMA-02"
+    },
+    {
+      "id": "SCHEMA-03",
+      "title": "Project Index First",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-03",
+      "control_id": "POLICY-REVIEW-SCHEMA-03"
+    },
+    {
+      "id": "SCHEMA-04",
+      "title": "Search First",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-04",
+      "control_id": "POLICY-REVIEW-SCHEMA-04"
+    },
+    {
+      "id": "SCHEMA-05",
+      "title": "Symbol + Related-Term Search",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-05",
+      "control_id": "POLICY-REVIEW-SCHEMA-05"
+    },
+    {
+      "id": "SCHEMA-06",
+      "title": "Frugal Reading",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-06",
+      "control_id": "POLICY-REVIEW-SCHEMA-06"
+    },
+    {
+      "id": "SCHEMA-07",
+      "title": "Deny Noise",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-07",
+      "control_id": "POLICY-REVIEW-SCHEMA-07"
+    },
+    {
+      "id": "SCHEMA-08",
+      "title": "External Search",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-08",
+      "control_id": "POLICY-REVIEW-SCHEMA-08"
+    },
+    {
+      "id": "SCHEMA-09",
+      "title": "Source of Truth",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-09",
+      "control_id": "POLICY-REVIEW-SCHEMA-09"
+    },
+    {
+      "id": "SCHEMA-10",
+      "title": "Documentation Routing",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-10",
+      "control_id": "POLICY-REVIEW-SCHEMA-10"
+    },
+    {
+      "id": "SCHEMA-11",
+      "title": "No-Invention Rule",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-11",
+      "control_id": "POLICY-REVIEW-SCHEMA-11"
+    },
+    {
+      "id": "SCHEMA-12",
+      "title": "Execution & Verification",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-12",
+      "control_id": "POLICY-REVIEW-SCHEMA-12"
+    },
+    {
+      "id": "SCHEMA-13",
+      "title": "Mandatory ChatGPT Self-Audit",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-13",
+      "control_id": "POLICY-REVIEW-SCHEMA-13"
+    },
+    {
+      "id": "SCHEMA-14",
+      "title": "Refactoring / Deletion Pass",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-14",
+      "control_id": "POLICY-REVIEW-SCHEMA-14"
+    },
+    {
+      "id": "SCHEMA-15",
+      "title": "Bug-Learning / Filter Update",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-15",
+      "control_id": "POLICY-REVIEW-SCHEMA-15"
+    },
+    {
+      "id": "SCHEMA-16",
+      "title": "Fail-Closed Iteration Verdict",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-16",
+      "control_id": "POLICY-REVIEW-SCHEMA-16"
+    },
+    {
+      "id": "SCHEMA-17",
+      "title": "Error & Recovery",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-17",
+      "control_id": "POLICY-REVIEW-SCHEMA-17"
+    },
+    {
+      "id": "SCHEMA-18",
+      "title": "Project Status / Roadmap / Log",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-18",
+      "control_id": "POLICY-REVIEW-SCHEMA-18"
+    },
+    {
+      "id": "SCHEMA-19",
+      "title": "Token Control",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-19",
+      "control_id": "POLICY-REVIEW-SCHEMA-19"
+    },
+    {
+      "id": "SCHEMA-20",
+      "title": "/context and /status",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-20",
+      "control_id": "POLICY-REVIEW-SCHEMA-20"
+    },
+    {
+      "id": "SCHEMA-21",
+      "title": "Session Iteration Commands",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-21",
+      "control_id": "POLICY-REVIEW-SCHEMA-21"
+    },
+    {
+      "id": "SCHEMA-22",
+      "title": "Operating Language",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-22",
+      "control_id": "POLICY-REVIEW-SCHEMA-22"
+    },
+    {
+      "id": "SCHEMA-23",
+      "title": "Canonical Operating Loop",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-23",
+      "control_id": "POLICY-REVIEW-SCHEMA-23"
+    },
+    {
+      "id": "SCHEMA-24",
+      "title": "Harness-Specific Rules",
+      "source": "SCHEMA.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SCHEMA-24",
+      "control_id": "POLICY-REVIEW-SCHEMA-24"
+    },
+    {
+      "id": "FF-01",
+      "title": "Purpose",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-01",
+      "control_id": "POLICY-REVIEW-FF-01"
+    },
+    {
+      "id": "FF-02",
+      "title": "Primary Architectural Rule",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-02",
+      "control_id": "POLICY-REVIEW-FF-02"
+    },
+    {
+      "id": "FF-03",
+      "title": "Required Causal Chain",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-03",
+      "control_id": "POLICY-REVIEW-FF-03"
+    },
+    {
+      "id": "FF-04",
+      "title": "Mandatory Minimality Order",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-04",
+      "control_id": "POLICY-REVIEW-FF-04"
+    },
+    {
+      "id": "FF-05",
+      "title": "Evidence Classification",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-05",
+      "control_id": "POLICY-REVIEW-FF-05"
+    },
+    {
+      "id": "FF-06",
+      "title": "Anti-Circularity Rules",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-06",
+      "control_id": "POLICY-REVIEW-FF-06"
+    },
+    {
+      "id": "FF-07",
+      "title": "Runtime / Environment Boundary Rule",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-07",
+      "control_id": "POLICY-REVIEW-FF-07"
+    },
+    {
+      "id": "FF-08",
+      "title": "Product Reality Rule",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-08",
+      "control_id": "POLICY-REVIEW-FF-08"
+    },
+    {
+      "id": "FF-09",
+      "title": "Human Value Rule",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-09",
+      "control_id": "POLICY-REVIEW-FF-09"
+    },
+    {
+      "id": "FF-10",
+      "title": "Complexity Kill Rule",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-10",
+      "control_id": "POLICY-REVIEW-FF-10"
+    },
+    {
+      "id": "FF-11",
+      "title": "Sunk-Cost Rule",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-11",
+      "control_id": "POLICY-REVIEW-FF-11"
+    },
+    {
+      "id": "FF-12",
+      "title": "Gate Discipline",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-12",
+      "control_id": "POLICY-REVIEW-FF-12"
+    },
+    {
+      "id": "FF-13",
+      "title": "Failure Survival Rule",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-13",
+      "control_id": "POLICY-REVIEW-FF-13"
+    },
+    {
+      "id": "FF-14",
+      "title": "Architecture Escalation Gate",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-14",
+      "control_id": "POLICY-REVIEW-FF-14"
+    },
+    {
+      "id": "FF-15",
+      "title": "Mandatory Failure Register",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-15",
+      "control_id": "POLICY-REVIEW-FF-15"
+    },
+    {
+      "id": "FF-16",
+      "title": "Mandatory Decision Language",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-16",
+      "control_id": "POLICY-REVIEW-FF-16"
+    },
+    {
+      "id": "FF-17",
+      "title": "Zero-State Test",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-17",
+      "control_id": "POLICY-REVIEW-FF-17"
+    },
+    {
+      "id": "FF-18",
+      "title": "Final Rule",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-18",
+      "control_id": "POLICY-REVIEW-FF-18"
+    },
+    {
+      "id": "FF-19",
+      "title": "Provenance",
+      "source": "CHATGPT-FAILURE-FILTER.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for FF-19",
+      "control_id": "POLICY-REVIEW-FF-19"
+    },
+    {
+      "id": "SA-01",
+      "title": "Purpose",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-01",
+      "control_id": "POLICY-REVIEW-SA-01"
+    },
+    {
+      "id": "SA-02",
+      "title": "Absolute Rule",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-02",
+      "control_id": "POLICY-REVIEW-SA-02"
+    },
+    {
+      "id": "SA-03",
+      "title": "Mandatory Iteration Cycle",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-03",
+      "control_id": "POLICY-REVIEW-SA-03"
+    },
+    {
+      "id": "SA-04",
+      "title": "Repository-First Requirement",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-04",
+      "control_id": "POLICY-REVIEW-SA-04"
+    },
+    {
+      "id": "SA-05",
+      "title": "Post-Iteration Repository Verification",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-05",
+      "control_id": "POLICY-REVIEW-SA-05"
+    },
+    {
+      "id": "SA-06",
+      "title": "Mandatory Self-Audit Against Known ChatGPT Bugs",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-06",
+      "control_id": "POLICY-REVIEW-SA-06"
+    },
+    {
+      "id": "SA-07",
+      "title": "Mandatory Bug Discovery Rule",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-07",
+      "control_id": "POLICY-REVIEW-SA-07"
+    },
+    {
+      "id": "SA-08",
+      "title": "No Self-Exemption",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-08",
+      "control_id": "POLICY-REVIEW-SA-08"
+    },
+    {
+      "id": "SA-09",
+      "title": "Bug Register Integrity",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-09",
+      "control_id": "POLICY-REVIEW-SA-09"
+    },
+    {
+      "id": "SA-10",
+      "title": "Mandatory Severity Interpretation",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-10",
+      "control_id": "POLICY-REVIEW-SA-10"
+    },
+    {
+      "id": "SA-11",
+      "title": "Contradiction Rule",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-11",
+      "control_id": "POLICY-REVIEW-SA-11"
+    },
+    {
+      "id": "SA-12",
+      "title": "Scope Boundary Rule",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-12",
+      "control_id": "POLICY-REVIEW-SA-12"
+    },
+    {
+      "id": "SA-13",
+      "title": "Architecture Escalation Lock",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-13",
+      "control_id": "POLICY-REVIEW-SA-13"
+    },
+    {
+      "id": "SA-14",
+      "title": "Iteration-Level Stop Conditions",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-14",
+      "control_id": "POLICY-REVIEW-SA-14"
+    },
+    {
+      "id": "SA-15",
+      "title": "Mandatory Decision Hierarchy",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-15",
+      "control_id": "POLICY-REVIEW-SA-15"
+    },
+    {
+      "id": "SA-16",
+      "title": "Iteration Acceptance Gate",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-16",
+      "control_id": "POLICY-REVIEW-SA-16"
+    },
+    {
+      "id": "SA-17",
+      "title": "Mandatory Decision Materialization Rule",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-17",
+      "control_id": "POLICY-REVIEW-SA-17"
+    },
+    {
+      "id": "SA-18",
+      "title": "Required Output for Every Iteration",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-18",
+      "control_id": "POLICY-REVIEW-SA-18"
+    },
+    {
+      "id": "SA-19",
+      "title": "Relationship to the Existing Failure Filter",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-19",
+      "control_id": "POLICY-REVIEW-SA-19"
+    },
+    {
+      "id": "SA-20",
+      "title": "Final Enforcement Rule",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-20",
+      "control_id": "POLICY-REVIEW-SA-20"
+    },
+    {
+      "id": "BP-01",
+      "title": "Core Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-01",
+      "control_id": "POLICY-REVIEW-BP-01"
+    },
+    {
+      "id": "BP-02",
+      "title": "Evidence Before Promotion",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-02",
+      "control_id": "POLICY-REVIEW-BP-02"
+    },
+    {
+      "id": "BP-03",
+      "title": "Primary-Source Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-03",
+      "control_id": "POLICY-REVIEW-BP-03"
+    },
+    {
+      "id": "BP-04",
+      "title": "State Separation Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-04",
+      "control_id": "POLICY-REVIEW-BP-04"
+    },
+    {
+      "id": "BP-05",
+      "title": "Research Preservation Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-05",
+      "control_id": "POLICY-REVIEW-BP-05"
+    },
+    {
+      "id": "BP-06",
+      "title": "Uncertainty and Negative-Evidence Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-06",
+      "control_id": "POLICY-REVIEW-BP-06"
+    },
+    {
+      "id": "BP-07",
+      "title": "Circularity Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-07",
+      "control_id": "POLICY-REVIEW-BP-07"
+    },
+    {
+      "id": "BP-08",
+      "title": "Inspection-Scope Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-08",
+      "control_id": "POLICY-REVIEW-BP-08"
+    },
+    {
+      "id": "BP-09",
+      "title": "Minimality Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-09",
+      "control_id": "POLICY-REVIEW-BP-09"
+    },
+    {
+      "id": "BP-10",
+      "title": "Governance Minimality Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-10",
+      "control_id": "POLICY-REVIEW-BP-10"
+    },
+    {
+      "id": "BP-11",
+      "title": "Sunk-Cost Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-11",
+      "control_id": "POLICY-REVIEW-BP-11"
+    },
+    {
+      "id": "BP-12",
+      "title": "Intent Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-12",
+      "control_id": "POLICY-REVIEW-BP-12"
+    },
+    {
+      "id": "BP-13",
+      "title": "Bug-Record Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-13",
+      "control_id": "POLICY-REVIEW-BP-13"
+    },
+    {
+      "id": "BP-14",
+      "title": "Fail-Closed Rule",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-14",
+      "control_id": "POLICY-REVIEW-BP-14"
+    },
+    {
+      "id": "BP-15",
+      "title": "KMA-11 Enforcement Boundary",
+      "source": "CHATGPT-BUG-PREVENTION-RULES.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BP-15",
+      "control_id": "POLICY-REVIEW-BP-15"
+    },
+    {
+      "id": "BC-01",
+      "title": "Control Objective",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-01",
+      "control_id": "POLICY-REVIEW-BC-01"
+    },
+    {
+      "id": "BC-02",
+      "title": "Control Pipeline",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-02",
+      "control_id": "POLICY-REVIEW-BC-02"
+    },
+    {
+      "id": "BC-03",
+      "title": "Control Matrix",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-03",
+      "control_id": "POLICY-REVIEW-BC-03"
+    },
+    {
+      "id": "BC-04",
+      "title": "Mandatory Materialization Record",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-04",
+      "control_id": "POLICY-REVIEW-BC-04"
+    },
+    {
+      "id": "BC-05",
+      "title": "Transformation Invariants",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-05",
+      "control_id": "POLICY-REVIEW-BC-05"
+    },
+    {
+      "id": "BC-06",
+      "title": "Verification Protocol",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-06",
+      "control_id": "POLICY-REVIEW-BC-06"
+    },
+    {
+      "id": "BC-07",
+      "title": "Bug Reproduction Standard",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-07",
+      "control_id": "POLICY-REVIEW-BC-07"
+    },
+    {
+      "id": "BC-08",
+      "title": "Correction Protocol",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-08",
+      "control_id": "POLICY-REVIEW-BC-08"
+    },
+    {
+      "id": "BC-09",
+      "title": "Zero-State Safety Protocol",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-09",
+      "control_id": "POLICY-REVIEW-BC-09"
+    },
+    {
+      "id": "BC-10",
+      "title": "Release Gate for KMA-11 Controls",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-10",
+      "control_id": "POLICY-REVIEW-BC-10"
+    },
+    {
+      "id": "BC-11",
+      "title": "Non-Goals",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-11",
+      "control_id": "POLICY-REVIEW-BC-11"
+    },
+    {
+      "id": "BC-12",
+      "title": "Verdict Vocabulary",
+      "source": "CHATGPT-BUG-CONTROL-SPEC.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-12",
+      "control_id": "POLICY-REVIEW-BC-12"
+    },
+    {
+      "id": "SA-A",
+      "title": "Epistemic failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-A",
+      "control_id": "POLICY-REVIEW-SA-A"
+    },
+    {
+      "id": "SA-B",
+      "title": "Object-of-research failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-B",
+      "control_id": "POLICY-REVIEW-SA-B"
+    },
+    {
+      "id": "SA-C",
+      "title": "Architecture-generation failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-C",
+      "control_id": "POLICY-REVIEW-SA-C"
+    },
+    {
+      "id": "SA-D",
+      "title": "Minimality / substitution failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-D",
+      "control_id": "POLICY-REVIEW-SA-D"
+    },
+    {
+      "id": "SA-E",
+      "title": "Evidence failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-E",
+      "control_id": "POLICY-REVIEW-SA-E"
+    },
+    {
+      "id": "SA-F",
+      "title": "Repository/runtime failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-F",
+      "control_id": "POLICY-REVIEW-SA-F"
+    },
+    {
+      "id": "SA-G",
+      "title": "Validation and gate failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-G",
+      "control_id": "POLICY-REVIEW-SA-G"
+    },
+    {
+      "id": "SA-H",
+      "title": "Research-loop failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-H",
+      "control_id": "POLICY-REVIEW-SA-H"
+    },
+    {
+      "id": "SA-I",
+      "title": "Human-value failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-I",
+      "control_id": "POLICY-REVIEW-SA-I"
+    },
+    {
+      "id": "SA-J",
+      "title": "Complexity and product failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-J",
+      "control_id": "POLICY-REVIEW-SA-J"
+    },
+    {
+      "id": "SA-K",
+      "title": "Process and cognitive failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-K",
+      "control_id": "POLICY-REVIEW-SA-K"
+    },
+    {
+      "id": "SA-L",
+      "title": "Reset/recovery failures",
+      "source": "CHATGPT-ITERATION-SELF-AUDIT-RULE.md",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for SA-L",
+      "control_id": "POLICY-REVIEW-SA-L"
+    },
+    {
+      "id": "Z-1",
+      "title": "PreToolUse command/path prohibition Z-1",
+      "source": "User-approved Z-1..Z-8 list",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for Z-1",
+      "control_id": "POLICY-REVIEW-Z-1"
+    },
+    {
+      "id": "Z-2",
+      "title": "PreToolUse command/path prohibition Z-2",
+      "source": "User-approved Z-1..Z-8 list",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for Z-2",
+      "control_id": "POLICY-REVIEW-Z-2"
+    },
+    {
+      "id": "Z-3",
+      "title": "PreToolUse command/path prohibition Z-3",
+      "source": "User-approved Z-1..Z-8 list",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for Z-3",
+      "control_id": "POLICY-REVIEW-Z-3"
+    },
+    {
+      "id": "Z-4",
+      "title": "PreToolUse command/path prohibition Z-4",
+      "source": "User-approved Z-1..Z-8 list",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for Z-4",
+      "control_id": "POLICY-REVIEW-Z-4"
+    },
+    {
+      "id": "Z-5",
+      "title": "PreToolUse command/path prohibition Z-5",
+      "source": "User-approved Z-1..Z-8 list",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for Z-5",
+      "control_id": "POLICY-REVIEW-Z-5"
+    },
+    {
+      "id": "Z-6",
+      "title": "PreToolUse command/path prohibition Z-6",
+      "source": "User-approved Z-1..Z-8 list",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for Z-6",
+      "control_id": "POLICY-REVIEW-Z-6"
+    },
+    {
+      "id": "Z-7",
+      "title": "PreToolUse command/path prohibition Z-7",
+      "source": "User-approved Z-1..Z-8 list",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for Z-7",
+      "control_id": "POLICY-REVIEW-Z-7"
+    },
+    {
+      "id": "Z-8",
+      "title": "PreToolUse command/path prohibition Z-8",
+      "source": "User-approved Z-1..Z-8 list",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for Z-8",
+      "control_id": "POLICY-REVIEW-Z-8"
+    },
+    {
+      "id": "ITR-01",
+      "title": "Purpose",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-01",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-01"
+    },
+    {
+      "id": "ITR-02",
+      "title": "Non-Negotiable Rule",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-02",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-02"
+    },
+    {
+      "id": "ITR-03",
+      "title": "Iteration State Machine",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-03",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-03"
+    },
+    {
+      "id": "ITR-04",
+      "title": "Repository-First Verification",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-04",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-04"
+    },
+    {
+      "id": "ITR-05",
+      "title": "Complete Self-Audit Requirement",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-05",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-05"
+    },
+    {
+      "id": "ITR-06",
+      "title": "Mandatory Refactoring Pass",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-06",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-06"
+    },
+    {
+      "id": "ITR-07",
+      "title": "Bug Discovery Requirement",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-07",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-07"
+    },
+    {
+      "id": "ITR-08",
+      "title": "Bug Classification",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-08",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-08"
+    },
+    {
+      "id": "ITR-09",
+      "title": "No Silent Bug Fixes",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-09",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-09"
+    },
+    {
+      "id": "ITR-10",
+      "title": "Failure-Filter Learning Loop",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-10",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-10"
+    },
+    {
+      "id": "ITR-11",
+      "title": "Filter Expansion Rule",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-11",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-11"
+    },
+    {
+      "id": "ITR-12",
+      "title": "Regression Rule",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-12",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-12"
+    },
+    {
+      "id": "ITR-13",
+      "title": "Evidence Rule",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-13",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-13"
+    },
+    {
+      "id": "ITR-14",
+      "title": "Refactoring Completion Gate",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-14",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-14"
+    },
+    {
+      "id": "ITR-15",
+      "title": "Mandatory Stop Conditions",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-15",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-15"
+    },
+    {
+      "id": "ITR-16",
+      "title": "Mandatory Iteration Record",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-16",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-16"
+    },
+    {
+      "id": "ITR-17",
+      "title": "Verdicts",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-17",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-17"
+    },
+    {
+      "id": "ITR-18",
+      "title": "Relationship to Existing Failure Filter",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-18",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-18"
+    },
+    {
+      "id": "ITR-19",
+      "title": "Final Rule",
+      "source": "spec/governance/CHATGPT-ITERATION-REFACTOR-AND-BUG-LEARNING-GATE.md",
+      "control_id": "POLICY-REVIEW-ITR-19",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for ITR-19"
+    },
+    {
+      "id": "BC-I1",
+      "title": "Source fidelity",
+      "source": "spec/CHATGPT-BUG-CONTROL-SPEC.md",
+      "control_id": "POLICY-REVIEW-BC-I1",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-I1"
+    },
+    {
+      "id": "BC-I2",
+      "title": "Status preservation",
+      "source": "spec/CHATGPT-BUG-CONTROL-SPEC.md",
+      "control_id": "POLICY-REVIEW-BC-I2",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-I2"
+    },
+    {
+      "id": "BC-I3",
+      "title": "Negative preservation",
+      "source": "spec/CHATGPT-BUG-CONTROL-SPEC.md",
+      "control_id": "POLICY-REVIEW-BC-I3",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-I3"
+    },
+    {
+      "id": "BC-I4",
+      "title": "Temporal preservation",
+      "source": "spec/CHATGPT-BUG-CONTROL-SPEC.md",
+      "control_id": "POLICY-REVIEW-BC-I4",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-I4"
+    },
+    {
+      "id": "BC-I5",
+      "title": "Independence preservation",
+      "source": "spec/CHATGPT-BUG-CONTROL-SPEC.md",
+      "control_id": "POLICY-REVIEW-BC-I5",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-I5"
+    },
+    {
+      "id": "BC-I6",
+      "title": "Scope fidelity",
+      "source": "spec/CHATGPT-BUG-CONTROL-SPEC.md",
+      "control_id": "POLICY-REVIEW-BC-I6",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-I6"
+    },
+    {
+      "id": "BC-I7",
+      "title": "Minimality",
+      "source": "spec/CHATGPT-BUG-CONTROL-SPEC.md",
+      "control_id": "POLICY-REVIEW-BC-I7",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-I7"
+    },
+    {
+      "id": "BC-I8",
+      "title": "Reversibility",
+      "source": "spec/CHATGPT-BUG-CONTROL-SPEC.md",
+      "control_id": "POLICY-REVIEW-BC-I8",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for BC-I8"
+    },
+    {
+      "id": "KMA-01",
+      "title": "Purpose",
+      "source": "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md",
+      "control_id": "POLICY-REVIEW-KMA-01",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for KMA-01"
+    },
+    {
+      "id": "KMA-02",
+      "title": "Evidence Boundary",
+      "source": "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md",
+      "control_id": "POLICY-REVIEW-KMA-02",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for KMA-02"
+    },
+    {
+      "id": "KMA-03",
+      "title": "Registered Bug System",
+      "source": "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md",
+      "control_id": "POLICY-REVIEW-KMA-03",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for KMA-03"
+    },
+    {
+      "id": "KMA-04",
+      "title": "Severity Classes",
+      "source": "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md",
+      "control_id": "POLICY-REVIEW-KMA-04",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for KMA-04"
+    },
+    {
+      "id": "KMA-05",
+      "title": "B-129 Boundary",
+      "source": "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md",
+      "control_id": "POLICY-REVIEW-KMA-05",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for KMA-05"
+    },
+    {
+      "id": "KMA-06",
+      "title": "Required Bug Trace",
+      "source": "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md",
+      "control_id": "POLICY-REVIEW-KMA-06",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for KMA-06"
+    },
+    {
+      "id": "KMA-07",
+      "title": "KMA-11 Verdict",
+      "source": "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md",
+      "control_id": "POLICY-REVIEW-KMA-07",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for KMA-07"
+    },
+    {
+      "id": "KMA-08",
+      "title": "Freeze Boundary",
+      "source": "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md",
+      "control_id": "POLICY-REVIEW-KMA-08",
+      "enforcement_point": "Stop: per-section evidence attestation validator",
+      "enforcement_limit": "REVIEW_EVIDENCE_GATE: requires source-specific evidence and a positive test reference; not an independent semantic judge.",
+      "test": "tests/hooks/policy-controls.test.mjs: positive and negative tests for KMA-08"
+    }
+  ],
+  "coverage_note": "Defect controls require defect-specific evidence fields. Policy section controls require a source-specific evidence pointer and positive test reference. These are machine-validated attestations, not independent semantic proof."
+}
