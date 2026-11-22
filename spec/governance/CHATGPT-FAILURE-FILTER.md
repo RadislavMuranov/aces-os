@@ -363,4 +363,60 @@ This filter is derived from the ChatGPT forensic failure register produced durin
 **Correction:** Separate **architecture**, **research**, **observations**, **experiments**, **failures**, and **measured value**. Delete architectural assumptions without deleting the research that tested them.  
 **Prevention:** Every zero audit MUST preserve the full research inventory first, classify each research result, and only then recompute the surviving hypothesis/evidence base.
 
+### B-135 — Absence Claim Requires Absence Reconstruction
+
+**Invariant**
+
+```text
+SearchMiss ⇏ ObjectAbsence
+SearchMiss ⇏ ExecutionPathAbsence
+AbsenceClaim ⇒ AbsenceReconstructionCompleted
+```
+
+**Bounded Method of Absence Reconstruction**
+
+```text
+EXPECTED OBJECT/SEAM
+→ EXPECTED REPRESENTATION
+→ ADMISSIBLE SOURCE/SURFACE SET
+→ BACKWARD TRACE
+→ FORWARD TRACE
+→ CALL/DATA/CONTROL EDGES
+→ ALTERNATIVE REPRESENTATIONS
+→ EXECUTABLE ENTRY/EXIT
+→ TEST/RUNTIME EVIDENCE
+→ FIRST BROKEN/UNOBSERVABLE EDGE
+→ ABSENCE CLASSIFICATION
+```
+
+### B-136 — Mandatory Action Must Not Be Materialized as a Choice
+
+**Invariant**
+
+```text
+CURRENT STATE + APPLICABLE RULES
+→ MANDATORY ACTIONS / FORBIDDEN ACTIONS
+→ MANDATORY STOP / CLOSURE, IF APPLICABLE
+→ ONLY THEN OPTIONAL NEXT NODES
+→ HUMAN AUTHORIZATION ONLY FOR ACTUALLY OPTIONAL ACTIONS
+```
+
+**Failure**
+
+Presenting a rule-mandated action as an A/B or other discretionary choice forces the human to reconstruct the decision hierarchy from hidden control rules. This is a decision-materialization failure even when the underlying rule is correct.
+
+**Materialization checklist**
+
+Before exposing an optional choice, state explicitly:
+
+1. the observed current state and applicable rule(s);
+2. mandatory actions and forbidden actions;
+3. any mandatory stop/closure and whether it has been satisfied;
+4. the evidence used to verify completion of mandatory actions; and
+5. only then, the permitted optional next nodes and any authorization genuinely required.
+
+**Prevention**
+
+Mandatory transitions MUST be materialized as mandatory. Optional nodes MUST NOT be exposed before mandatory actions and terminal dispositions are satisfied. If the hierarchy or completion evidence cannot be established from observable state and rules, the result is **UNKNOWN / NOT VERIFIED**, not a discretionary choice. Apply this checklist consistently with `§16A — Mandatory Decision Materialization Rule` in `spec/governance/CHATGPT-ITERATION-SELF-AUDIT-RULE.md` and the tool-execution boundary in `§23.1` of `spec/MASTER-PROTOCOL.md`.
+
 This filter is a process-control artifact, not evidence that ACES OS is necessary.

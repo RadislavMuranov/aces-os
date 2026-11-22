@@ -30,3 +30,8 @@ Thumbs.db
 *.pem
 *.key
 secrets/
+
+# Runtime state and vendored research (local-only)
+knowledge/
+.aces-autoclaw/
+.claude/hooks/journal.tsv

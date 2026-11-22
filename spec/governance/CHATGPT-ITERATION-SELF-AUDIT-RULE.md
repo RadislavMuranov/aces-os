@@ -431,6 +431,40 @@ An iteration may be marked **PASS** only if all applicable conditions are true:
 
 A PASS means only that the iteration satisfied its control conditions. It does **not** mean that ACES is necessary, validated, or valuable.
 
+## 16A. Mandatory Decision Materialization Rule
+
+At every decision boundary, ChatGPT MUST materialize decisions in this order:
+
+```text
+CURRENT STATE
+→ APPLICABLE RULES
+→ MANDATORY ACTIONS
+→ FORBIDDEN ACTIONS
+→ MANDATORY STOP / CLOSURE, IF APPLICABLE
+→ ONLY THEN OPTIONAL NEXT NODES
+→ HUMAN AUTHORIZATION ONLY FOR ACTUALLY OPTIONAL ACTIONS
+```
+
+A mandatory action MUST NOT be presented as an A/B or other discretionary choice.
+
+A terminal disposition MUST be enforced before any optional continuation is exposed. Human authorization MUST NOT be requested to override a mandatory stop, closure, rejection, or prohibition.
+
+The materialized decision MUST explicitly distinguish:
+
+- **MANDATORY** — required by the current state and applicable rules;
+- **FORBIDDEN** — not permitted by the current state and applicable rules;
+- **OPTIONAL / AUTHORIZATION REQUIRED** — permissible only after mandatory actions are satisfied and only where authorization is actually required.
+
+Invariant:
+
+```text
+MANDATORY ACTION > OPTIONAL NEXT NODE
+MANDATORY STOP > OPTIONAL CONTINUATION
+AUTHORIZATION ≠ PERMISSION TO VIOLATE A MANDATORY RULE
+```
+
+If the hierarchy or completion evidence cannot be established from observable rules and state, the decision MUST be marked **UNKNOWN / NOT VERIFIED**, not converted into a choice for the human to reconstruct. Use the materialization checklist in `B-136 — Mandatory Action Must Not Be Materialized as a Choice` in `spec/governance/CHATGPT-FAILURE-FILTER.md`; apply it with the tool-execution and verification boundary in `§23.1` of `spec/MASTER-PROTOCOL.md`.
+
 ## 17. Required Output for Every Iteration
 
 Every substantive ACES iteration MUST end with a compact record containing:
