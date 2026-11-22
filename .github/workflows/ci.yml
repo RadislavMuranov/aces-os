@@ -1,0 +1,17 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Contract and hook tests
+        run: node --test tests/transition-decision.test.ts tests/accept-verified-transition.test.ts tests/hooks/aces-hook-engine.test.mjs tests/hooks/defect-enforcement-map.test.mjs tests/hooks/policy-controls.test.mjs
+      - name: Local e2e (bridge over stdio)
+        run: node tests/integration/rad10-e2e.mjs
