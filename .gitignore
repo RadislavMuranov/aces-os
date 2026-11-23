@@ -35,3 +35,7 @@ secrets/
 knowledge/
 .aces-autoclaw/
 .claude/hooks/journal.tsv
+
+# Local e2e run artifacts
+tests/integration/e2e-evidence.json
+tests/integration/e2e-scratch.md
