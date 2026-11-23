@@ -957,12 +957,23 @@ async function handlePayload(text) {
     if (parsed.length === 0) return rpcError(null, -32600, "empty batch");
     const responses = [];
     for (const item of parsed) {
-      const res = await handleMessage(item);
+      let res = null;
+      try {
+        res = await handleMessage(item);
+      } catch (err) {
+        const id = item && typeof item === "object" && item.id != null ? item.id : null;
+        res = rpcError(id, -32603, `internal error: ${err.message}`);
+      }
       if (res) responses.push(res);
     }
     return responses.length ? responses : null;
   }
-  return handleMessage(parsed);
+  try {
+    return await handleMessage(parsed);
+  } catch (err) {
+    const id = parsed && typeof parsed === "object" && parsed.id != null ? parsed.id : null;
+    return rpcError(id, -32603, `internal error: ${err.message}`);
+  }
 }
 
 // ----------------------------------------------------------------- stdio framing

@@ -8,6 +8,9 @@ import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 
 export const MAX_READ_BYTES = 262144;
+// Edits load the whole file to diff it; refuse oversized files instead of
+// buffering unbounded input (fail-closed).
+export const MAX_EDIT_BYTES = 8 * 1024 * 1024;
 
 export class FsOpError extends Error {
   constructor(code, message, detail) {
@@ -96,12 +99,16 @@ export function readTarget(root, target, { maxBytes = MAX_READ_BYTES } = {}) {
   const abs = assertInside(root, target);
   const st = statOrThrow(abs);
   if (st.isDirectory()) return listTarget(root, target);
-  const real = fs.realpathSync(abs);
-  if (!isInside(fs.realpathSync(root), real)) {
-    throw new FsOpError("PATH-ESCAPE", `file resolves outside the root: ${abs}`);
-  }
+  const rootReal = fs.realpathSync(root);
   const fd = fs.openSync(abs, "r");
   try {
+    // Post-open re-verification: the pre-open anchor check plus this realpath
+    // of the now-open path closes the swap window down to "between open and
+    // realpath"; the fd itself never follows a later swap.
+    const real = fs.realpathSync(abs);
+    if (!isInside(rootReal, real)) {
+      throw new FsOpError("PATH-ESCAPE", `file resolves outside the root: ${abs}`);
+    }
     const size = Math.min(st.size, maxBytes);
     const buf = Buffer.alloc(size);
     const read = fs.readSync(fd, buf, 0, size, 0);
@@ -131,17 +138,50 @@ function countOccurrences(haystack, needle) {
   return count;
 }
 
+// Contained write: open without truncation (r+, or exclusive wx for a new
+// file), re-verify containment of the now-open path, and only then truncate
+// and write. A path swapped to an outside symlink is rejected before any
+// byte is written; a race after verification still writes to the opened fd,
+// i.e. the inode inside the root.
+function writeContained(rootReal, abs, content) {
+  let fd;
+  let created = false;
+  try {
+    fd = fs.openSync(abs, "r+");
+  } catch (err) {
+    if (err.code !== "ENOENT") throw err;
+    fd = fs.openSync(abs, "wx");
+    created = true;
+  }
+  let ok = false;
+  try {
+    const real = fs.realpathSync(abs);
+    if (!isInside(rootReal, real)) {
+      throw new FsOpError("PATH-ESCAPE", `file resolves outside the root: ${abs}`);
+    }
+    fs.ftruncateSync(fd, 0);
+    fs.writeSync(fd, content, null, "utf8");
+    ok = true;
+  } finally {
+    fs.closeSync(fd);
+    if (!ok && created) {
+      try {
+        fs.unlinkSync(abs);
+      } catch {
+        /* best effort cleanup of the file we just created */
+      }
+    }
+  }
+}
+
 export function writeTarget(root, target, content) {
   if (typeof content !== "string") {
     throw new FsOpError("INVALID_CONTENT", "tool_input.content (string) is required for write");
   }
   const abs = assertInside(root, target);
+  const rootReal = fs.realpathSync(root);
   fs.mkdirSync(path.dirname(abs), { recursive: true });
-  const real = fs.realpathSync(path.dirname(abs));
-  if (!isInside(fs.realpathSync(root), real)) {
-    throw new FsOpError("PATH-ESCAPE", `target directory resolves outside the root: ${abs}`);
-  }
-  fs.writeFileSync(abs, content, "utf8");
+  writeContained(rootReal, abs, content);
   return {
     kind: "write",
     path: abs,
@@ -152,36 +192,39 @@ export function writeTarget(root, target, content) {
 
 export function editTarget(root, target, toolInput = {}) {
   const abs = assertInside(root, target);
-  statOrThrow(abs);
+  const st = statOrThrow(abs);
+  if (st.size > MAX_EDIT_BYTES) {
+    throw new FsOpError("FILE_TOO_LARGE", `file exceeds edit limit: ${st.size} > ${MAX_EDIT_BYTES} bytes`);
+  }
+  const rootReal = fs.realpathSync(root);
   const current = fs.readFileSync(abs, "utf8");
+  let next;
+  let mode;
   if (typeof toolInput.old_string === "string") {
     const occurrences = countOccurrences(current, toolInput.old_string);
     if (occurrences !== 1) {
       throw new FsOpError("EDIT_AMBIGUOUS", `old_string occurs ${occurrences} time(s); exactly 1 required`);
     }
-    const next = current.replace(toolInput.old_string, toolInput.new_string ?? "");
-    fs.writeFileSync(abs, next, "utf8");
-    return {
-      kind: "edit",
-      path: abs,
-      mode: "replace",
-      replaced: 1,
-      bytes: Buffer.byteLength(next, "utf8"),
-      sha256: sha256Hex(next),
-    };
+    // Function form: the replacement is used literally; "$&", "$'" and friends
+    // in new_string must not be interpreted as replacement patterns.
+    const replacement = toolInput.new_string ?? "";
+    next = current.replace(toolInput.old_string, () => replacement);
+    mode = "replace";
+  } else if (typeof toolInput.content === "string") {
+    next = toolInput.content;
+    mode = "overwrite";
+  } else {
+    throw new FsOpError("INVALID_CONTENT", "edit requires tool_input.old_string (unique) or tool_input.content");
   }
-  if (typeof toolInput.content === "string") {
-    fs.writeFileSync(abs, toolInput.content, "utf8");
-    return {
-      kind: "edit",
-      path: abs,
-      mode: "overwrite",
-      replaced: 0,
-      bytes: Buffer.byteLength(toolInput.content, "utf8"),
-      sha256: sha256Hex(toolInput.content),
-    };
-  }
-  throw new FsOpError("INVALID_CONTENT", "edit requires tool_input.old_string (unique) or tool_input.content");
+  writeContained(rootReal, abs, next);
+  return {
+    kind: "edit",
+    path: abs,
+    mode,
+    replaced: mode === "replace" ? 1 : 0,
+    bytes: Buffer.byteLength(next, "utf8"),
+    sha256: sha256Hex(next),
+  };
 }
 
 // Fixed, non-parameterised, read-only command. Not an arbitrary exec surface.

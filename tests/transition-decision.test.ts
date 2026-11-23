@@ -127,3 +127,18 @@ test("delegated core keeps accept path identical to acceptVerifiedTransition", (
     assert.deepEqual(result.decision, direct);
   }
 });
+
+test("fail-closed: core rejection after passing guards yields EVALUATION_ERROR", () => {
+  const result = decideVerifiedTransition(
+    transition,
+    verification,
+    binding,
+    authority,
+    () => null,
+  );
+  assert.equal(result.accepted, false);
+  assert.ok(!result.accepted && result.reason === "EVALUATION_ERROR");
+  if (!result.accepted) {
+    assert.match(result.detail, /fail-closed/);
+  }
+});
