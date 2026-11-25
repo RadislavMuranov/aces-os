@@ -72,10 +72,18 @@ const GIT_SUBCOMMANDS = new Set([
   "init", "log", "merge", "mv", "pull", "push", "range-diff", "rebase",
   "reflog", "remote", "reset", "restore", "rm", "shortlog", "show", "stash",
   "status", "submodule", "switch", "tag", "worktree", "cat-file", "diff-tree",
-  "merge-base", "rev-parse", "show-branch",
+  "merge-base", "rev-parse", "show-branch", "clean", "restore", "reflog",
 ]);
 
-/** Git controls (Z-2 stash, Z-3 reset --hard). Returns decision or null (no match). */
+/**
+ * Git controls — loss-prevention family.
+ * Z-2 (stash), Z-3 (reset --hard): proven from surviving evidence.
+ * Z-4…Z-7: REDEFINED 2026-11-25 via ACES METHOD (RULE-METHOD-SELECTION-001)
+ * after the original definitions were lost with the worktree; they close the
+ * same loss class that destroyed it (destruction of uncommitted/untracked/
+ * unpushed work and of recovery paths). Pending owner ratification.
+ * Returns decision or null (no match).
+ */
 export function evaluateGitArgs(args) {
   const sub = args[0];
   if (!sub) return null;
@@ -84,8 +92,88 @@ export function evaluateGitArgs(args) {
     const rest = args.slice(1).join(" ");
     if (/--hard/.test(rest)) return { decision: "deny", rule: "Z-3", reason: "git reset --hard is protected by Z-3" };
   }
+  // Z-4 (redefined): git clean -f* destroys untracked work → DENY
+  if (sub === "clean") {
+    const rest = args.slice(1).join(" ");
+    if (/(^|\s)-{1,2}[a-zA-Z]*f/.test(rest)) {
+      return { decision: "deny", rule: "Z-4", reason: "git clean -f destroys untracked work (protected by Z-4)" };
+    }
+  }
+  // Z-5 (redefined): whole-tree discard of uncommitted changes → DENY
+  if (sub === "checkout" || sub === "restore") {
+    const rest = args.slice(1).join(" ");
+    const wholeTree = /(^|\s)(--\s+)?\.(\/|$)/.test(rest) && !/--staged/.test(rest);
+    if (wholeTree) {
+      return { decision: "deny", rule: "Z-5", reason: `git ${sub} . discards uncommitted work tree-wide (protected by Z-5)` };
+    }
+  }
+  // Z-6 (redefined): branch deletion / force push destroy committed work → ASK
+  if (sub === "branch") {
+    const rest = args.slice(1).join(" ");
+    if (/(^|\s)-{1,2}[dD]\b/.test(rest)) {
+      return { decision: "ask", rule: "Z-6", reason: "branch deletion destroys committed work; owner confirmation required (Z-6)" };
+    }
+  }
+  if (sub === "push") {
+    const rest = args.slice(1).join(" ");
+    if (/(^|\s)(--force|-f\b|--delete|-d\b)/.test(rest)) {
+      return { decision: "ask", rule: "Z-6", reason: "force push / remote branch deletion; owner confirmation required (Z-6)" };
+    }
+  }
+  // Z-7 (redefined): history rewrite / reflog expiry destroy recovery paths → DENY
+  if (sub === "filter-branch") {
+    return { decision: "deny", rule: "Z-7", reason: "git filter-branch rewrites history (protected by Z-7)" };
+  }
+  if (sub === "reflog") {
+    const rest = args.slice(1).join(" ");
+    if (/expire/.test(rest)) {
+      return { decision: "deny", rule: "Z-7", reason: "git reflog expire destroys recovery paths (protected by Z-7)" };
+    }
+  }
   if (!GIT_SUBCOMMANDS.has(sub)) {
     return { decision: "ask", rule: "GIT-UNKNOWN-SUBCOMMAND", reason: `unknown git subcommand "${sub}" may be an alias; cannot resolve safely` };
+  }
+  return null;
+}
+
+/**
+ * Z-1 (redefined 2026-11-25 via ACES METHOD): deletion of protected roots → DENY.
+ * Protected: the repository root itself, .git, .claude, and the Obsidian Vault.
+ * This is the control whose absence allowed the aces-os worktree to be lost.
+ */
+const PROTECTED_PATH_PATTERNS = [
+  /^\.git(\/|$)/,
+  /^\.claude(\/|$)/,
+  /^Obsidian Vault(\/|$)/,
+];
+const REPO_DIR_NAME = "aces-os";
+
+function isProtectedDeletionTarget(target) {
+  const t = String(target).replace(/\\/g, "/").replace(/["']/g, "").replace(/\/+$/, "");
+  if (t === "" || t === "." || t === "./" || t === REPO_DIR_NAME || t === "./" + REPO_DIR_NAME) return true;
+  if (/(^|\/)Obsidian Vault(\/|$)/.test(t)) return true;
+  if (/(^|\/)\.git(\/|$)/.test(t)) return true;
+  if (/(^|\/)\.claude(\/|$)/.test(t)) return true;
+  return false;
+}
+
+function evaluateDeletionProtection(command) {
+  // Bash rm/rmdir targeting protected paths
+  const rmMatch = command.match(/(?:^|\s|;|&&|\|\|)(rm|rmdir)\s+([^;&|\n]+)/);
+  if (rmMatch) {
+    const targets = tokenize(rmMatch[2]);
+    for (const tok of targets) {
+      if (isProtectedDeletionTarget(tok)) {
+        return { decision: "deny", rule: "Z-1", reason: `deletion of protected path "${tok}" is prohibited (Z-1 data-loss protection)` };
+      }
+    }
+  }
+  // PowerShell Remove-Item targeting protected paths
+  if (/\b(remove-item|ri)\b/i.test(command) && /(^|\s)-{1,2}recurse/i.test(command)) {
+    const pm = command.match(/\b(?:Remove-Item|ri)\b\s+(?:-Path\s+|-Recurse\s+|-Force\s+)*([^\s;|]+)/i);
+    if (pm && isProtectedDeletionTarget(pm[1])) {
+      return { decision: "deny", rule: "Z-1", reason: `deletion of protected path "${pm[1]}" is prohibited (Z-1 data-loss protection)` };
+    }
   }
   return null;
 }
@@ -226,8 +314,10 @@ export function evaluatePowerShell(command) {
   return null;
 }
 
-/** Evaluate a Bash command for Z-8 (.env read) and research deletion. */
+/** Evaluate a Bash command for Z-8 (.env read), Z-1 (deletion) and research deletion. */
 function evaluateBashPathRules(command) {
+  const z1 = evaluateDeletionProtection(command);
+  if (z1) return z1;
   // .env read via cat/type/less/more/head/tail, but not .env.example / .env.* etc.
   const envMatch = command.match(/\b(?:cat|type|less|more|head|tail)\s+([^;&|\n]+)/i);
   if (envMatch) {
@@ -300,6 +390,8 @@ export function evaluatePreToolUse(payload) {
     if (toolName === "PowerShell") {
       const psDecision = evaluatePowerShell(String(input.command || ""));
       if (psDecision) return psDecision;
+      const z1 = evaluateDeletionProtection(String(input.command || ""));
+      if (z1) return z1;
       const bashDecision = evaluateBashCommand(String(input.command || ""));
       if (bashDecision) return bashDecision;
       return null;

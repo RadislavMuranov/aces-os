@@ -227,6 +227,114 @@ test("journal records decisions without command text", () => {
   }
 });
 
+// ─── Z-1 (redefined): deletion of protected roots ──────────────────────────
+
+test("Z-1: rm -rf .git is denied", () => {
+  const out = bash("rm -rf .git");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-1/);
+});
+
+test("Z-1: rm -rf .claude is denied", () => {
+  const out = bash("rm -rf .claude");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-1/);
+});
+
+test("Z-1: rm -rf aces-os (repo root) is denied", () => {
+  const out = bash("rm -rf aces-os");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-1/);
+});
+
+test("Z-1: rm -rf Obsidian Vault is denied", () => {
+  const out = bash('rm -rf "/c/Users/Радислав Муранов/Documents/Obsidian Vault"');
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-1/);
+});
+
+test("Z-1: PowerShell Remove-Item -Recurse on .git is denied", () => {
+  const out = ps("Remove-Item -Recurse -Force .git");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-1/);
+});
+
+test("Z-1: rm of an ordinary file is allowed", () => {
+  assert.equal(decisionOf(bash("rm notes.txt")), "allow");
+});
+
+// ─── Z-4 (redefined): git clean -f ──────────────────────────────────────────
+
+test("Z-4: git clean -fd is denied", () => {
+  const out = bash("git clean -fd");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-4/);
+});
+
+test("Z-4: git clean -xdf is denied", () => {
+  const out = bash("git clean -xdf");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-4/);
+});
+
+test("Z-4: git clean -n (dry run) is allowed", () => {
+  assert.equal(decisionOf(bash("git clean -n")), "allow");
+});
+
+// ─── Z-5 (redefined): whole-tree discard ───────────────────────────────────
+
+test("Z-5: git checkout -- . is denied", () => {
+  const out = bash("git checkout -- .");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-5/);
+});
+
+test("Z-5: git restore . is denied", () => {
+  const out = bash("git restore .");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-5/);
+});
+
+test("Z-5: git restore --staged is allowed", () => {
+  assert.equal(decisionOf(bash("git restore --staged file.txt")), "allow");
+});
+
+// ─── Z-6 (redefined): branch deletion / force push ──────────────────────────
+
+test("Z-6: git branch -D requires ask", () => {
+  const out = bash("git branch -D feature-x");
+  assert.equal(decisionOf(out), "ask");
+  assert.match(out.reason, /Z-6/);
+});
+
+test("Z-6: git push --force requires ask", () => {
+  const out = bash("git push --force origin main");
+  assert.equal(decisionOf(out), "ask");
+  assert.match(out.reason, /Z-6/);
+});
+
+test("Z-6: plain git push is allowed", () => {
+  assert.equal(decisionOf(bash("git push origin main")), "allow");
+});
+
+// ─── Z-7 (redefined): history rewrite / reflog expiry ───────────────────────
+
+test("Z-7: git filter-branch is denied", () => {
+  const out = bash("git filter-branch --env-filter 'x' HEAD");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-7/);
+});
+
+test("Z-7: git reflog expire is denied", () => {
+  const out = bash("git reflog expire --expire=now --all");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /Z-7/);
+});
+
+test("Z-7: git reflog (read) is allowed", () => {
+  assert.equal(decisionOf(bash("git reflog")), "allow");
+});
+
 // ─── Malformed input fails safe ─────────────────────────────────────────────
 
 test("malformed JSON payload does not crash the engine", () => {
