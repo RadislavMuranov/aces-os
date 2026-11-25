@@ -76,58 +76,103 @@ const GIT_SUBCOMMANDS = new Set([
 ]);
 
 /**
- * Git controls — loss-prevention family.
- * Z-2 (stash), Z-3 (reset --hard): proven from surviving evidence.
- * Z-4…Z-7: REDEFINED 2026-11-25 via ACES METHOD (RULE-METHOD-SELECTION-001)
- * after the original definitions were lost with the worktree; they close the
- * same loss class that destroyed it (destruction of uncommitted/untracked/
- * unpushed work and of recovery paths). Pending owner ratification.
+ * Git controls — two families.
+ *
+ * Z-1…Z-8: the user-approved registry, RECOVERED 2026-11-25 verbatim from the
+ * original engine (found alive at C:\ACES\aces-os, `aces-hook-engine.mjs`):
+ *   Z-1 core.hooksPath change / --no-verify bypass → DENY
+ *   Z-2 git stash (all operations) → DENY
+ *   Z-3 git reset --hard → DENY
+ *   Z-4 git rebase → DENY
+ *   Z-5 force push (--force/-f/--force-with-lease/'+' refspec) → DENY
+ *   Z-6 broad git add (-A/--all/-u/./) → DENY
+ *   Z-7 git commit -a / commit without explicit paths after '--' → DENY
+ *   Z-8 reading .env / .env.* (except .env.example) → DENY
+ *
+ * DLPM-*: data-loss prevention additions (DLPM-001 method, 2026-11-25),
+ * closing the loss vector of the worktree incident.
  * Returns decision or null (no match).
  */
 export function evaluateGitArgs(args) {
   const sub = args[0];
   if (!sub) return null;
-  if (sub === "stash") return { decision: "deny", rule: "Z-2", reason: "git stash is protected by Z-2" };
-  if (sub === "reset") {
-    const rest = args.slice(1).join(" ");
-    if (/--hard/.test(rest)) return { decision: "deny", rule: "Z-3", reason: "git reset --hard is protected by Z-3" };
+  // Z-1: core.hooksPath override (inline -c / --config-env)
+  for (let i = 0; i < args.length; i++) {
+    const x = args[i], v = args[i + 1];
+    if ((x === "-c" || x === "--config-env") && v && /^core\.hookspath=/i.test(v)) {
+      return { rule: "Z-1", decision: "deny", reason: "Changing core.hooksPath is prohibited." };
+    }
+    if (typeof x === "string" && x.startsWith("-c") && /core\.hookspath=/i.test(x)) {
+      return { rule: "Z-1", decision: "deny", reason: "Overriding core.hooksPath is prohibited." };
+    }
   }
-  // Z-4 (redefined): git clean -f* destroys untracked work → DENY
+  if (sub === "stash") return { rule: "Z-2", decision: "deny", reason: "All git stash operations are prohibited." };
+  if (sub === "reset" && args.slice(1).includes("--hard")) return { rule: "Z-3", decision: "deny", reason: "git reset --hard is prohibited." };
+  if (sub === "rebase") return { rule: "Z-4", decision: "deny", reason: "git rebase is prohibited." };
+  if (sub === "push") {
+    const rest = args.slice(1);
+    if (rest.some(x => ["--force", "-f", "--force-with-lease"].includes(x)) || rest.some(x => x.startsWith("--force-with-lease=")) || rest.some(x => x.startsWith("+"))) {
+      return { rule: "Z-5", decision: "deny", reason: "Force push and '+' refspecs are prohibited." };
+    }
+  }
+  if (sub === "add" && args.slice(1).some(x => ["-A", "--all", "-u", "--update", ".", "./"].includes(x))) {
+    return { rule: "Z-6", decision: "deny", reason: "Broad git add operations are prohibited." };
+  }
+  if (sub === "commit") {
+    const rest = args.slice(1);
+    if (rest.includes("--no-verify") || rest.includes("-n")) {
+      return { rule: "Z-1", decision: "deny", reason: "Bypassing commit hooks is prohibited." };
+    }
+    if (rest.some(x => x === "-a" || x === "--all" || /^-a[^-]/.test(x))) {
+      return { rule: "Z-7", decision: "deny", reason: "git commit -a is prohibited." };
+    }
+    const k = rest.indexOf("--");
+    if (k < 0 || !rest.slice(k + 1).some(x => String(x).trim())) {
+      return { rule: "Z-7", decision: "deny", reason: "git commit requires explicit paths after '--'." };
+    }
+  }
+  if (sub === "config") {
+    const rest = args.slice(1);
+    const k = rest.indexOf("--");
+    const read = rest.includes("--get") || rest.includes("--list") || rest.includes("-l") || rest.includes("--get-all");
+    if (k >= 0 && !read && (rest.includes("--unset") || rest.includes("--unset-all") || rest.length > k + 1)) {
+      return { rule: "Z-1", decision: "deny", reason: "Changing core.hooksPath is prohibited; reading it is allowed." };
+    }
+    if (rest.includes("--edit")) {
+      return { rule: "Z-1", decision: "ask", reason: "git config --edit may change core.hooksPath; confirm first." };
+    }
+  }
+  // ─── DLPM-*: data-loss prevention (DLPM-001) ─────────────────────────────
+  // DLPM-4: git clean -f* destroys untracked work → DENY
   if (sub === "clean") {
     const rest = args.slice(1).join(" ");
     if (/(^|\s)-{1,2}[a-zA-Z]*f/.test(rest)) {
-      return { decision: "deny", rule: "Z-4", reason: "git clean -f destroys untracked work (protected by Z-4)" };
+      return { rule: "DLPM-4", decision: "deny", reason: "git clean -f destroys untracked work (DLPM-001)" };
     }
   }
-  // Z-5 (redefined): whole-tree discard of uncommitted changes → DENY
+  // DLPM-5: whole-tree discard of uncommitted changes → DENY
   if (sub === "checkout" || sub === "restore") {
     const rest = args.slice(1).join(" ");
     const wholeTree = /(^|\s)(--\s+)?\.(\/|$)/.test(rest) && !/--staged/.test(rest);
     if (wholeTree) {
-      return { decision: "deny", rule: "Z-5", reason: `git ${sub} . discards uncommitted work tree-wide (protected by Z-5)` };
+      return { rule: "DLPM-5", decision: "deny", reason: `git ${sub} . discards uncommitted work tree-wide (DLPM-001)` };
     }
   }
-  // Z-6 (redefined): branch deletion / force push destroy committed work → ASK
+  // DLPM-6: branch deletion destroys committed work → ASK
   if (sub === "branch") {
     const rest = args.slice(1).join(" ");
     if (/(^|\s)-{1,2}[dD]\b/.test(rest)) {
-      return { decision: "ask", rule: "Z-6", reason: "branch deletion destroys committed work; owner confirmation required (Z-6)" };
+      return { rule: "DLPM-6", decision: "ask", reason: "branch deletion destroys committed work; owner confirmation required (DLPM-001)" };
     }
   }
-  if (sub === "push") {
-    const rest = args.slice(1).join(" ");
-    if (/(^|\s)(--force|-f\b|--delete|-d\b)/.test(rest)) {
-      return { decision: "ask", rule: "Z-6", reason: "force push / remote branch deletion; owner confirmation required (Z-6)" };
-    }
-  }
-  // Z-7 (redefined): history rewrite / reflog expiry destroy recovery paths → DENY
+  // DLPM-7: history rewrite / reflog expiry destroy recovery paths → DENY
   if (sub === "filter-branch") {
-    return { decision: "deny", rule: "Z-7", reason: "git filter-branch rewrites history (protected by Z-7)" };
+    return { rule: "DLPM-7", decision: "deny", reason: "git filter-branch rewrites history (DLPM-001)" };
   }
   if (sub === "reflog") {
     const rest = args.slice(1).join(" ");
     if (/expire/.test(rest)) {
-      return { decision: "deny", rule: "Z-7", reason: "git reflog expire destroys recovery paths (protected by Z-7)" };
+      return { rule: "DLPM-7", decision: "deny", reason: "git reflog expire destroys recovery paths (DLPM-001)" };
     }
   }
   if (!GIT_SUBCOMMANDS.has(sub)) {
@@ -137,15 +182,10 @@ export function evaluateGitArgs(args) {
 }
 
 /**
- * Z-1 (redefined 2026-11-25 via ACES METHOD): deletion of protected roots → DENY.
+ * DLPM-1 (DLPM-001 method, 2026-11-25): deletion of protected roots → DENY.
  * Protected: the repository root itself, .git, .claude, and the Obsidian Vault.
- * This is the control whose absence allowed the aces-os worktree to be lost.
+ * This is the control whose absence allowed the aces-os worktree incident.
  */
-const PROTECTED_PATH_PATTERNS = [
-  /^\.git(\/|$)/,
-  /^\.claude(\/|$)/,
-  /^Obsidian Vault(\/|$)/,
-];
 const REPO_DIR_NAME = "aces-os";
 
 function isProtectedDeletionTarget(target) {
@@ -164,7 +204,7 @@ function evaluateDeletionProtection(command) {
     const targets = tokenize(rmMatch[2]);
     for (const tok of targets) {
       if (isProtectedDeletionTarget(tok)) {
-        return { decision: "deny", rule: "Z-1", reason: `deletion of protected path "${tok}" is prohibited (Z-1 data-loss protection)` };
+        return { decision: "deny", rule: "DLPM-1", reason: `deletion of protected path "${tok}" is prohibited (DLPM-001 data-loss protection)` };
       }
     }
   }
@@ -172,7 +212,7 @@ function evaluateDeletionProtection(command) {
   if (/\b(remove-item|ri)\b/i.test(command) && /(^|\s)-{1,2}recurse/i.test(command)) {
     const pm = command.match(/\b(?:Remove-Item|ri)\b\s+(?:-Path\s+|-Recurse\s+|-Force\s+)*([^\s;|]+)/i);
     if (pm && isProtectedDeletionTarget(pm[1])) {
-      return { decision: "deny", rule: "Z-1", reason: `deletion of protected path "${pm[1]}" is prohibited (Z-1 data-loss protection)` };
+      return { decision: "deny", rule: "DLPM-1", reason: `deletion of protected path "${pm[1]}" is prohibited (DLPM-001 data-loss protection)` };
     }
   }
   return null;
@@ -232,6 +272,10 @@ function evaluateGitWithInlineConfig(args) {
     const a = args[i];
     if (a === "-c" && i + 1 < args.length) {
       const cfg = args[i + 1];
+      // Z-1: core.hooksPath override via inline config
+      if (/^core\.hookspath=/i.test(cfg)) {
+        return { rule: "Z-1", decision: "deny", reason: "Changing core.hooksPath is prohibited." };
+      }
       const am = cfg.match(/^alias\.([A-Za-z0-9_.-]+)=(.*)$/);
       if (am) alias = { name: am[1], value: am[2] };
       i += 2;

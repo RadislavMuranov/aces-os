@@ -62,24 +62,33 @@ each stage (manual step — no API access from this machine).
 Rule: **work is not "done" until it exists in all three stores.**
 Uncommitted/unpushed work may not be reported as complete.
 
-## 4. Hard delete guard (Z-controls, hook-enforced)
+## 4. Hard delete guard (Z-registry canonical + DLPM additions, hook-enforced)
 
-The ACES hook engine enforces the Z-registry at the PreToolUse boundary:
+The ACES hook engine enforces the user-approved Z-registry — **recovered
+2026-11-25 verbatim from the original engine found alive at
+`C:\ACES\aces-os`** — plus the DLPM data-loss additions:
 
 | ID | Rule | Decision | Origin |
 |---|---|---|---|
-| Z-1 | deletion of protected roots (repo root, `.git`, `.claude`, Obsidian Vault) via `rm`/`Remove-Item -Recurse` | **DENY** | redefined 2026-11-25 |
-| Z-2 | `git stash` | **DENY** | original (surviving) |
-| Z-3 | `git reset --hard` | **DENY** | original (surviving) |
-| Z-4 | `git clean -f*` | **DENY** | redefined 2026-11-25 |
-| Z-5 | whole-tree discard (`git checkout -- .`, `git restore .`) | **DENY** | redefined 2026-11-25 |
-| Z-6 | `git branch -D`, `git push --force/--delete` | **ASK** | redefined 2026-11-25 |
-| Z-7 | `git filter-branch`, `git reflog expire` | **DENY** | redefined 2026-11-25 |
-| Z-8 | reading `.env` | **DENY** | original (surviving) |
+| Z-1 | `core.hooksPath` change / override; `git commit --no-verify` | **DENY** | canonical (recovered) |
+| Z-2 | `git stash` (all operations) | **DENY** | canonical (recovered) |
+| Z-3 | `git reset --hard` | **DENY** | canonical (recovered) |
+| Z-4 | `git rebase` | **DENY** | canonical (recovered) |
+| Z-5 | force push (`--force`/`-f`/`--force-with-lease`/`+`refspec) | **DENY** | canonical (recovered) |
+| Z-6 | broad `git add` (`-A`/`--all`/`-u`/`.`) | **DENY** | canonical (recovered) |
+| Z-7 | `git commit -a`; commit without explicit paths after `--` | **DENY** | canonical (recovered) |
+| Z-8 | reading `.env` / `.env.*` (`.env.example` allowed) | **DENY** | canonical (recovered) |
+| DLPM-1 | deletion of protected roots (repo root, `.git`, `.claude`, Obsidian Vault) | **DENY** | DLPM-001 addition |
+| DLPM-4 | `git clean -f*` | **DENY** | DLPM-001 addition |
+| DLPM-5 | whole-tree discard (`git checkout -- .`, `git restore .`) | **DENY** | DLPM-001 addition |
+| DLPM-6 | `git branch -D` | **ASK** | DLPM-001 addition |
+| DLPM-7 | `git filter-branch`, `git reflog expire` | **DENY** | DLPM-001 addition |
 
-Redefined IDs follow the loss-prevention class of the surviving members
-(Z-2/Z-3/Z-8) and close the exact loss vector that destroyed the worktree.
-They require owner ratification (see RAD-80).
+The earlier "redefined Z-1, Z-4…Z-7" of this document are **superseded**: the
+original user-approved definitions were recovered from the live worktree at
+`C:\ACES\aces-os` (which also restored the original 420-test suite, the
+defect-enforcement map with 23 defects and 155 policy sections, and the
+AutoClaw bridge). The redefinitions live on only as the DLPM-* family.
 
 ## 5. Verification
 
