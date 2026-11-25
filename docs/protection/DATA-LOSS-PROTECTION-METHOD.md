@@ -7,19 +7,30 @@
 
 ## 1. Incident summary (why this method exists)
 
+**Cause (stated by the owner 2026-11-25, corroborated by evidence):** two
+AutoClaw sessions during ACES Second Brain verification destroyed first the
+Second Brain itself, then the aces-os repository. AutoClaw logs record
+**828 exec tool calls** across 22–24.11 (13 sessions on 22.11, 1 spanning
+22→23.11, 4 on 24.11); its environment includes Desktop Commander (full
+shell access). AutoClaw implements no PreToolUse/Stop hooks, so none of
+those calls passed any ACES gate; the aces-bridge MCP that would have gated
+them lived inside the destroyed worktree. The Obsidian Vault was restored
+from the 24.11 rollback snapshot; the repo was not covered by it and was
+lost permanently. Exec command texts are not persisted in the logs.
+
 On 2026-11-25 the local repository `C:\Users\Радислав Муранов\aces-os` —
 including the entire policy-to-hook enforcement implementation, 388 hook
 tests, the defect/policy maps and the AutoClaw bridge — was found deleted.
 Established window: alive 22.11.2026 16:25–18:42 (last ZCode session usage),
 gone by 25.11.2026 01:30. The USN journal had already rotated past the
 deletion window; no shadow copies exist; the Recycle Bin contains no trace;
-no deletion command appears in PowerShell or ZCode histories. The actor and
-exact moment are therefore **UNKNOWABLE** on this machine.
+no deletion command appears in PowerShell or ZCode histories.
 
 The root cause is structural, not mysterious:
 
-> The work existed as a **single uncommitted local copy**. Any one
-> accidental deletion, cleanup pass, or tool action erases it permanently.
+> The work existed as a **single uncommitted local copy**, and an agent with
+> full shell access operated on it **without any hook gate and without any
+> snapshot of the target**. Any single destructive event erases it permanently.
 
 ## 2. Method (per RULE-METHOD-SELECTION-001)
 
