@@ -9,6 +9,8 @@ This document freezes the minimal v0 logical data model. It does not implement c
 
 **ASA-003.2:** Incorporates resolved Authority Decisions OPEN-1…OPEN-7. Those decisions are normative; silent reinterpretation is forbidden. Change requires a new Authority Decision Gate.
 
+**ASA-003.3 (2026-11-27, owner-authorized):** narrow unfreeze for the enforcement-binding profile in §11. §0–§10 remain unchanged: no entity field, enum value, invariant, selector rule, policy rule, evaluation-order step, or failure-matrix row is added, removed, or reinterpreted. Implementation is not asserted by §11.
+
 ---
 
 ## 0. Layer Separation (Non-Negotiable)
@@ -479,4 +481,156 @@ Former §9 OPEN list is **closed**. New changes require a new Authority Decision
 | Implementation | NOT authorized by this specification alone |
 | Next gate | ASA-004 Authorization Core (**separate** authorization; not automatic) |
 
-**End of ASA v0 Data Model (ASA-003.2).**
+---
+
+## 11. ASA-003.3 — Enforcement Binding Profile (WA-1)
+
+**Decision ID:** ASA-003.3
+**Decision class:** Authority Decision (owner-issued)
+**Decision date:** 2026-11-27
+**Artifact under decision:** `spec/asa/v0/data-model.md` (ASA-003.2)
+**Operational record:** `docs/protection/DATA-LOSS-PROTECTION-METHOD.md` → DLPM-002
+
+### 11.1 Owner authorization (verbatim)
+
+> «Требую разморозить модели ASA v0 (spec/asa/v0/data-model.md) к реальной файловой границе.»
+
+**Recorded interpretation:** ASA v0 is unfrozen for one purpose — binding its existing entities
+to the real filesystem / document boundary so that `I1` becomes enforceable for agents that
+carry no hooks. The interpretation is recorded, not inferred; a different reading requires a
+new owner decision.
+
+### 11.2 Scope of the unfreeze
+
+- **Permitted:** the enforcement-binding profile in §11.3–§11.11.
+- **Permitted:** the `resource_kind` values in §11.4, used only by this profile.
+- **Forbidden:** modifying, removing, or reinterpreting any field, enum, invariant (I1–I8),
+  selector rule, policy rule, evaluation-order step, or failure-matrix row of §0–§10.
+- **Forbidden:** treating this profile as implementation, deployment integrity, or AcceptedState.
+
+Any further change still requires a new Authority Decision Gate (ASA-004 or later).
+
+### 11.3 Binding principle
+
+`I1` is unchanged. This profile fixes **where** the Decision is taken: not inside an agent or
+harness, but at a single write authority outside it.
+
+> A harness, agent, bot, model, or connector is never the enforcement boundary.
+> The boundary is the single point through which a mutation of a durable resource must pass.
+
+This is required because advisory hooks are insufficient as an authority boundary
+(H-CENSUS-003 §8) and because the observed loss incident executed 828 ungated calls from a
+harness with no hooks (DLPM-001 §1).
+
+### 11.4 Protected resources and resource kinds
+
+| `resource_kind` | Durable boundary |
+|---|---|
+| `repository_document` | tracked files of an ACES repository tree (excluding `.git` internals) |
+| `vault_document` | the Obsidian Vault — durable evidence and records |
+| `corpus_artifact` | corpus, provenance, manifest, and audit artifacts |
+| `external_document` | documents in an external store reached through a connector |
+
+`Resource.resource_id` is the canonical repo-relative path or a store-qualified document id.
+Pattern/gLOB/prefix-range selectors remain prohibited for grants (OPEN-3); a capability
+selector is an exact path or an exact document id.
+
+### 11.5 Operation mapping
+
+| ASA operation | Filesystem / document event |
+|---|---|
+| `CREATE` | new file, directory, document, attachment, import |
+| `UPDATE` | overwrite, in-place edit, append, metadata change |
+| `DELETE` | unlink, trash, purge, retention expiry, branch or document deletion |
+| `EXECUTE` | any command whose durable-resource effect cannot be enumerated in the manifest |
+| `RENAME` / `MOVE` | **composite**: `DELETE`(source) + `CREATE`(target) in one `correlation_id` |
+
+A composite mutation is ALLOW only if **both** component Decisions are ALLOW; one ALLOW plus
+one DENY is DENY (§6, partial multi-resource failure).
+
+`EXECUTE` is **not** authorized by static command inspection. Static inspection is a policy
+input, not a security boundary: aliases, `Start-Process`, `Invoke-Expression`, script
+interpreters, and MCP filesystem tools all defeat it. An `EXECUTE` request against a protected
+resource is admissible only when the executing identity has no write authority over that
+resource (§11.7, class E3); otherwise it resolves to DENY.
+
+### 11.6 Request manifest (mandatory)
+
+| Field | Rule |
+|---|---|
+| `correlation_id` | non-empty; groups composite operations |
+| `operation` | value from §11.5 |
+| `resource_id` | exact path or document id |
+| `resource_kind` | value from §11.4 |
+| `principal_id` | resolved Principal; client assertion is non-authoritative |
+| `purpose` | why the mutation is required |
+| `extends_component` | CREATE of a new durable document: the existing component it extends. `NONE` is inadmissible |
+| `restore_source` | DELETE: path/hash/ref from which the resource is recoverable. Absent → DENY |
+| `expected_sha256` | pre-image hash for UPDATE/DELETE |
+| `content_sha256` | post-image hash for CREATE/UPDATE |
+
+A request lacking a mandatory field is malformed → DENY (§6).
+
+`extends_component` makes B-134 preventive rule structural rather than advisory: a new durable
+document cannot be authorized without naming the existing owner it extends or replaces.
+
+### 11.7 Execution classes and coverage rule
+
+| Class | Where the check happens | Authority |
+|---|---|---|
+| E1 | harness hook — existing `aces-hook-engine.mjs` | advisory / structural |
+| E2 | command or tool proxy in front of the harness | advisory / structural |
+| E3 | executing identity has no write authority on the resource (ACL / separate account / container) | **authoritative** |
+| E4 | the gate is the sole writer / sole committer of the store | **authoritative** |
+
+**Coverage rule (normative):** an ALLOW is credible for a protected resource only if the
+operation is constrained by **E3 or E4**. E1/E2 may block or flag, but MUST NOT be reported as
+enforcement. A deployment with only E1/E2 is `ADVISORY`, not `ENFORCED`, and MUST NOT be
+described as a prohibition.
+
+### 11.8 Decision point and evidence
+
+- One gate evaluates requests and is the only writer for protected resources (E4).
+- Agents hold a **staging lease**: a staging path prefix, operations `CREATE|UPDATE`,
+  `not_after`, revocable per capability. A durable-write capability is never issued to an
+  agent principal.
+- `AuthorizationEvent` appends to the existing ACES journal, extended with `correlation_id`,
+  `operation`, `resource_id`, `capability_id`, `decision`. No second ledger is permitted —
+  a parallel ledger is a competing enforcement path (B-134).
+- Audit append failure → DENY (§6). Audit never grants authority (I7).
+- A protected resource present with no matching AuthorizationEvent is an **integrity
+  violation**, detected by reconciliation; it is not retroactively authorized.
+
+### 11.9 Failure matrix additions
+
+| Failure | Result |
+|---|---|
+| CREATE of a new durable document without `extends_component` | DENY |
+| DELETE without `restore_source` | DENY |
+| Composite mutation with split Decisions | DENY |
+| `EXECUTE` on a protected resource by an identity holding write authority | DENY |
+| Protected-resource mutation with only E1/E2 coverage | ADVISORY-DENY (not ENFORCED) |
+| Reconciliation finds an unrecorded protected file | INTEGRITY-VIOLATION (fail-closed) |
+
+### 11.10 Non-goals
+
+Cryptographic capability signatures; global revocation epoch; delegation; egress/DLP;
+protection against a compromised gate identity, an OS administrator, or the owner acting
+outside the gate. These remain outside v0.
+
+### 11.11 Implementation status
+
+**NOT IMPLEMENTED.** This section is a specification binding only. Engine, identity boundary,
+staging gate, and regression evidence are staged in DLPM-002 (W0–W6). The existing hook engine
+is the E1 adapter; it is not, and must not be presented as, the authority boundary.
+
+| Item | Value |
+|---|---|
+| Gate | ASA-003.3 — owner-authorized narrow unfreeze |
+| Supersedes | nothing; §0–§10 unchanged |
+| Implementation | NOT authorized by this section alone |
+| Next gate | ASA-004 Authorization Core + DLPM-002 W6 ratification |
+
+---
+
+**End of ASA v0 Data Model (ASA-003.2 + ASA-003.3).**
