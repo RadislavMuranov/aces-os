@@ -11,7 +11,8 @@
  *   - new file creation under spec/governance/ → ASK (BUG-014 minimality)
  *   - KMA-11 audit record protected from Write/Edit
  *   - unknown git subcommands / unresolved aliases / dynamic PS execution → ASK
- *   - Stop without an ACES iteration record → BLOCK
+ *   - Stop without a complete canonical ACES iteration record → BLOCK
+ *     (validated from last_assistant_message; structure only, not evidence truth)
  *   - journal «РУБИЛЬНИК»: timestamp + rule + decision only (no command text)
  *
  * Z-1, Z-4…Z-7: definitions lost with the original worktree; registered as
@@ -410,11 +411,126 @@ function evaluateWrite(toolInput, toolName) {
   return null;
 }
 
+const ITERATION_RECORD_FIELDS = [
+  "ITERATION_ID",
+  "OBJECTIVE",
+  "REPOSITORY_BEFORE",
+  "ACTION",
+  "REPOSITORY_AFTER",
+  "REAL_WORLD_FAILURE",
+  "EVIDENCE",
+  "MINIMALITY_LEVEL_TESTED",
+  "VERIFICATION",
+  "KNOWN_BUGS",
+  "NEW_BUGS",
+  "RECURRING_BUGS",
+  "CHATGPT_BUG_AUDIT",
+  "CONTRADICTIONS",
+  "REMAINING_UNKNOWN",
+  "REFACTORING",
+  "DELETIONS_CONSIDERED",
+  "FILTER_UPDATED",
+  "REGRESSION_CHECK",
+  "ARCHITECTURE_ESCALATION",
+  "FINAL_VERDICT",
+  "NEXT_ACTION",
+];
+
+const ITERATION_FINAL_VERDICTS = new Set([
+  "PASS",
+  "BLOCKED",
+  "FAIL",
+  "STOP ACQUISITION",
+]);
+
+function validateIterationRecord(message) {
+  if (typeof message !== "string" || !/^ACES-ITERATION-RECORD v1\s*$/im.test(message)) {
+    return { pass: false, reason: "Missing exact ACES-ITERATION-RECORD v1 header in last_assistant_message." };
+  }
+
+  const fields = new Map();
+  const duplicates = new Set();
+  for (const line of message.split(/\r?\n/)) {
+    const match = line.match(/^\s*([A-Z][A-Z0-9_]*)\s*:\s*(.*?)\s*$/);
+    if (!match) continue;
+    if (fields.has(match[1])) duplicates.add(match[1]);
+    else fields.set(match[1], match[2]);
+  }
+
+  const missing = [];
+  const empty = [];
+  for (const key of ITERATION_RECORD_FIELDS) {
+    if (!fields.has(key)) missing.push(key);
+    else if (!fields.get(key).trim() || /^(?:-|TBD|TODO|NOT PROVIDED)$/i.test(fields.get(key).trim())) empty.push(key);
+  }
+
+  if (missing.length || empty.length || duplicates.size) {
+    return {
+      pass: false,
+      reason: [
+        missing.length ? "missing fields: " + missing.join(", ") : "",
+        empty.length ? "empty/placeholders: " + empty.join(", ") : "",
+        duplicates.size ? "duplicate fields: " + [...duplicates].join(", ") : "",
+      ].filter(Boolean).join("; "),
+    };
+  }
+
+  const verdictLine = fields.get("FINAL_VERDICT").trim().toUpperCase();
+  const verdict = [...ITERATION_FINAL_VERDICTS].find((value) =>
+    verdictLine === value || verdictLine.startsWith(value + " —") || verdictLine.startsWith(value + " -") || verdictLine.startsWith(value + ":")
+  );
+  if (!verdict) {
+    return { pass: false, reason: "FINAL_VERDICT must be PASS, CONDITIONAL, BLOCKED, FAIL, or STOP ACQUISITION." };
+  }
+
+  if (!/^(?:OBSERVED|NONE|UNKNOWN|N\/A)\b/i.test(fields.get("REAL_WORLD_FAILURE").trim())) {
+    return { pass: false, reason: "REAL_WORLD_FAILURE must begin with OBSERVED, NONE, UNKNOWN, or N/A." };
+  }
+
+  if (!/\bL[0-5]\b/i.test(fields.get("MINIMALITY_LEVEL_TESTED"))) {
+    return { pass: false, reason: "MINIMALITY_LEVEL_TESTED must identify at least one tested level from L0 through L5." };
+  }
+
+  if (!/^(?:ALLOWED|BLOCKED)\b/i.test(fields.get("ARCHITECTURE_ESCALATION").trim())) {
+    return { pass: false, reason: "ARCHITECTURE_ESCALATION must be ALLOWED or BLOCKED." };
+  }
+
+  if (verdict === "PASS") {
+    const incompleteGates = [
+      "VERIFICATION",
+      "CHATGPT_BUG_AUDIT",
+      "REFACTORING",
+      "DELETIONS_CONSIDERED",
+      "FILTER_UPDATED",
+      "REGRESSION_CHECK",
+    ].filter((key) => !/^PASS\b/i.test(fields.get(key).trim()));
+
+    if (incompleteGates.length) {
+      return {
+        pass: false,
+        reason: "FINAL_VERDICT PASS requires PASS for: " + incompleteGates.join(", ") + ".",
+      };
+    }
+    if (/\b(?:UNKNOWN|NOT VERIFIED|N\/A)\b/i.test(fields.get("REPOSITORY_BEFORE"))
+      || /\b(?:UNKNOWN|NOT VERIFIED|N\/A)\b/i.test(fields.get("REPOSITORY_AFTER"))) {
+      return { pass: false, reason: "FINAL_VERDICT PASS requires established repository before/after state, not UNKNOWN, NOT VERIFIED, or N/A." };
+    }
+  }
+
+  return { pass: true, finalVerdict: verdict };
+}
+
 function evaluateStop(payload) {
-  const text = JSON.stringify(payload);
-  const hasIterationRecord = /ACES[-_ ]?ITERATION[-_ ]?RECORD/i.test(text) || /iteration_record/i.test(text);
-  if (!hasIterationRecord) {
-    return { decision: "block", rule: "STOP-GATE", reason: "Stop denied: no ACES iteration record in transcript" };
+  const result = validateIterationRecord(payload?.last_assistant_message);
+  if (!result.pass) {
+    const retry = payload?.stop_hook_active === true
+      ? " Stop hook has already continued this turn; resolve the reported fields rather than repeating the same response."
+      : "";
+    return {
+      decision: "block",
+      rule: "STOP-GATE",
+      reason: "Stop denied: " + result.reason + retry,
+    };
   }
   return null;
 }

@@ -433,24 +433,15 @@ A PASS means only that the iteration satisfied its control conditions. It does *
 
 ## 17. Required Output for Every Iteration
 
-Every substantive ACES iteration MUST end with a compact record containing:
+Every substantive ACES iteration MUST end with the canonical machine-readable record defined in `spec/MASTER-PROTOCOL.md` §9.7. That schema is the single source for field names and closure semantics; this rule MUST NOT maintain a competing format.
 
-```text
-ITERATION: <id>
-TASK: <real task>
-REPOSITORY STATE: <observed state>
-CHANGE: <actual change>
-REAL-WORLD FAILURE: <observed / none / unknown>
-EVIDENCE: <classification + source>
-MINIMALITY LEVEL TESTED: L0/L1/L2/L3/L4/L5
-CHATGPT BUG AUDIT: <result>
-NEW BUGS: <list or NONE>
-CONTRADICTIONS: <list or NONE>
-UNKNOWNS: <list>
-ARCHITECTURE ESCALATION: ALLOWED / BLOCKED
-DISPOSITION: PASS / FAIL / BLOCKED / STOP ACQUISITION
-NEXT ACTION: <only if justified>
-```
+Required header: `ACES-ITERATION-RECORD v1`.
+
+The record MUST include all §9.7 fields exactly once. It MUST preserve repository-before/after state, action, evidence, minimality level, verification, known/new/recurring bugs, full ChatGPT bug audit, contradictions, remaining unknowns, refactoring, deletion analysis, failure-filter update, regression check, architecture escalation, final verdict, and next legitimate action.
+
+`FINAL_VERDICT: PASS` is prohibited unless the mandatory verification, bug audit, refactoring, deletion analysis, filter update, and regression fields explicitly begin with `PASS`, and repository before/after states are established. Missing, duplicate, placeholder, or unsupported fields block closure.
+
+The existing `.claude/hooks/aces-hook-engine.mjs` is the sole registered structural Stop gate. It validates `last_assistant_message` only. Its result does not establish evidence truth, authorization, Canon acceptance, or AcceptedState. No parallel hook, adapter, record contract, or registry may be introduced.
 
 ## 18. Relationship to the Existing Failure Filter
 

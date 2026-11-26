@@ -289,7 +289,9 @@ The following previously observed ChatGPT failure classes are permanently treate
 - **research-layer erasure during zero audit** — treating zeroing as permission to discard comparative studies, falsification attempts, experiments, negative results, or boundary findings;
 - **premature evidence compression** — reducing a multi-line research history to a small set of observed failures before checking whether discarded research contains decision-relevant evidence;
 - **external-research blindness** — omitting relevant external research or comparative ecosystem findings (for example agent-native/harness research) from a revalidation because they do not fit the current zero-state narrative.
-- **executable-contract constraint gap** — implementing a fixed contract or schema incompletely, especially by enforcing structural/reference equality while omitting explicit runtime admissibility constraints such as non-empty values.
+- **executable-contract constraint gap** — implementing a fixed contract or schema incompletely, especially by enforcing structural/reference equality while omitting explicit runtime admissibility constraints such as non-empty values;
+- **owner-decision without engineering brief** — requesting an owner choice before explaining the decision context, evidence, options, consequences, risks, and reasoned recommendation.
+- **existing-component bypass / competing enforcement path** — creating a parallel component before discovering and testing the existing registered owner that already covers the same responsibility.
 
 
 ### B-130 — Executable Contract Constraint Gap
@@ -421,3 +423,45 @@ This filter is a process-control artifact, not evidence that ACES OS is necessar
 **Prevention rule:** Never report a repair as applied merely because its design has been formulated. Applied repair requires an observable authoritative artifact; verification of that artifact remains a separate gate.
 
 **Residual boundary:** Materialization does not imply that the new control has already passed its subsequent refactor/re-verification gates.
+
+
+### B-133 / BUG-024 — Owner Decision Without Engineering Brief
+
+**Classification:** NEW / OBSERVED — current conversation incident.
+
+**Failure:** ChatGPT asked the owner to choose between D-A2 execution modes and other D2 decisions without first explaining the project-specific meaning, objective, technical differences, consequences, and recommendation. When the owner asked what D-A2 meant, the response then lost the ACES context and supplied unrelated interpretations (including NVIDIA A2 and wiring harnesses).
+
+**Expected transition:**
+`OWNER DECISION REQUIRED → PROJECT CONTEXT → EVIDENCE → OPTIONS / CONSEQUENCES → RECOMMENDATION → UNKNOWNS → OWNER DECISION`.
+
+**Observed incorrect transition:**
+`OPTIONS LISTED → OWNER ASKED TO CHOOSE → CONTEXT LOST / IRRELEVANT INTERPRETATION`.
+
+**Root cause (behavioral):** Premature delegation of the decision-analysis work, combined with failure to resolve project-specific terminology against the active ACES Retrieval D2 context before answering.
+
+**Impact:** The owner was forced to reconstruct the engineering meaning and decision implications; trust in the decision-support process was degraded, and an unrelated explanation further amplified the context failure.
+
+**Correction:** The canonical Master Protocol now requires a Decision Brief before any owner decision request. The active Bug Control Specification adds a corresponding preventive and detection control.
+
+**Prevention:** Explain the decision subject, confirmed evidence, admissible options, consequences, architecture/ratification impact, reasoned recommendation, unknowns, and exact owner decision. Decode project-specific terms in context. Never treat recommendation as authorization or ratification.
+
+**Residual boundary:** This record establishes the observed conversational failure and the materialized process control. It does not establish an internal model-weight cause or prove runtime-wide prevention. Independent regression checks remain required.
+
+
+### B-134 / BUG-025 — Existing Component Bypass and Competing Enforcement Path
+
+**Classification:** NEW / OBSERVED — current repository repair.
+
+**Previous claim:** The existing Hook Engine did not provide the required iteration-closure enforcement boundary, so a separate harness adapter and contract were introduced.
+
+**Contradiction:** The repository already contained `.claude/hooks/aces-hook-engine.mjs`, its `evaluateStop()` / `STOP-GATE`, the registered `Stop` event in `.claude/settings.json`, and an existing test suite. The new DSH adapter and contract duplicated the same responsibility without first extending or proving the insufficiency of the existing owner.
+
+**Failure:** ChatGPT created a competing hook component and standalone contract before completing repository discovery and existing-system minimality testing.
+
+**Impact:** Duplicate ownership, split enforcement semantics, additional maintenance/test surface, and a false architectural premise. The new component's unit/smoke tests did not establish architectural legitimacy or production integration.
+
+**Correction:** Move only the specification-aligned structural closure checks into the existing Hook Engine's Stop gate; retain its existing registration; remove the parallel adapter/contract/test artifacts after migration and regression verification.
+
+**Prevention:** Before creating or expanding any component, inspect the project index, search exact symbols and related terms, trace current registrations/callers/tests, and test the smallest intervention in the existing owner. `EXISTING_COMPONENT_FOUND ⇒ EXTEND_EXISTING_COMPONENT`. New parallel ownership is prohibited unless the existing owner is independently demonstrated insufficient and the owner authorizes escalation.
+
+**Residual boundary:** Structural Stop-gate tests do not prove live runtime invocation, evidence truth, authorization, or AcceptedState. Those remain separate verification boundaries.

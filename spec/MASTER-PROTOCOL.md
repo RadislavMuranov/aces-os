@@ -228,13 +228,45 @@ The iteration MUST stop if:
 - a confirmed generalizable bug cannot be recorded in the failure base;
 - the proposed change depends on an unverified ACES architectural premise.
 
-### 9.7 Iteration record
+### 9.7 Canonical iteration record and enforcement
 
-Each completed iteration MUST preserve, at minimum:
+Every completed iteration MUST preserve one machine-readable record. The same field names are used by the ChatGPT Iteration Self-Audit Rule and the existing Hook Engine; no parallel record format or enforcement component is permitted.
 
-`ITERATION_ID / OBJECTIVE / REPOSITORY_BEFORE / ACTION / REPOSITORY_AFTER / VERIFICATION / KNOWN_BUGS / NEW_BUGS / RECURRING_BUGS / REFACTORING / DELETIONS_CONSIDERED / REMAINING_UNKNOWN / FILTER_UPDATED / REGRESSION_CHECK / FINAL_VERDICT`
+```text
+ACES-ITERATION-RECORD v1
+ITERATION_ID: <stable iteration identifier>
+OBJECTIVE: <actual objective>
+REPOSITORY_BEFORE: <observed repository state before change>
+ACTION: <actual action/change>
+REPOSITORY_AFTER: <observed repository state after change>
+REAL_WORLD_FAILURE: <OBSERVED / NONE / UNKNOWN + concise detail>
+EVIDENCE: <evidence classification and source/provenance>
+MINIMALITY_LEVEL_TESTED: <tested L0-L5 levels and result>
+VERIFICATION: <result and evidence>
+KNOWN_BUGS: <known applicable bugs or NONE>
+NEW_BUGS: <new bugs or NONE>
+RECURRING_BUGS: <recurring bugs or NONE>
+CHATGPT_BUG_AUDIT: <result and material findings>
+CONTRADICTIONS: <contradictions or NONE>
+REMAINING_UNKNOWN: <remaining unknowns or NONE>
+REFACTORING: <result>
+DELETIONS_CONSIDERED: <what was deleted, rejected, or retained and why>
+FILTER_UPDATED: <result; identify updated filter entry or state no update required>
+REGRESSION_CHECK: <result and evidence>
+ARCHITECTURE_ESCALATION: <ALLOWED / BLOCKED + reason>
+FINAL_VERDICT: <PASS / BLOCKED / FAIL / STOP ACQUISITION + reason>
+NEXT_ACTION: <one legitimate next action or explicit STOP condition>
+```
 
-If a field is not applicable, record `N/A`; if it cannot be established, record `UNKNOWN` or `NOT VERIFIED`.
+If a field is not applicable, record `N/A`; if it cannot be established, record `UNKNOWN` or `NOT VERIFIED`. A field MUST NOT be omitted or left blank. A record with missing, duplicate, or placeholder fields is incomplete.
+
+`FINAL_VERDICT: PASS` is admissible only when `VERIFICATION`, `CHATGPT_BUG_AUDIT`, `REFACTORING`, `DELETIONS_CONSIDERED`, `FILTER_UPDATED`, and `REGRESSION_CHECK` each explicitly begin with `PASS`, and repository before/after states are established. A complete `BLOCKED`, `FAIL`, or `STOP ACQUISITION` record may close the current response without being promoted to PASS.
+
+**Single enforcement owner:** the existing `.claude/hooks/aces-hook-engine.mjs`, already registered for `Stop` in `.claude/settings.json`. Its Stop gate validates the structure and declared gate consistency of `last_assistant_message`. It MUST NOT treat a marker elsewhere in the hook payload as a record.
+
+**Enforcement boundary:** a structurally valid record is not proof that its evidence is true, that an action was authorized, or that an AcceptedState transition occurred. Those remain independent verification and authority decisions.
+
+No DSH adapter, second hook, duplicate contract, or parallel closure registry may be introduced for this control. Extend the existing Hook Engine and its tests.
 
 ---
 
@@ -470,6 +502,30 @@ Human judgment remains authoritative wherever the decision is genuinely human.
 Automation may prepare, connect, recommend, route, execute authorized actions, and verify results.
 
 Automation must not silently convert recommendation into intention, technical permission into decision authority, or inferred context into human commitment.
+
+### 20.1 Owner Decision Brief Requirement
+
+Before requesting an owner decision, ChatGPT MUST provide a concise, evidence-grounded Decision Brief containing:
+
+1. the decision subject and objective;
+2. confirmed inputs and their provenance;
+3. the technically admissible options;
+4. consequences, trade-offs, and risks of each option;
+5. effects on architecture, existing ratifications, and downstream work;
+6. a reasoned technical recommendation, or an explicit statement why no recommendation is currently justified;
+7. material unknowns and their decision impact;
+8. the exact owner decision required.
+
+Project-specific terms and abbreviations MUST be explained in their current project context before the owner is asked to decide. The assistant MUST NOT transfer technical analysis to the owner by merely listing options. If evidence is insufficient, it MUST identify the missing evidence and bound the recommendation rather than force a choice.
+
+**Authority invariants:**
+- Owner retains Decision Authority.
+- Recommendation ≠ Authorization.
+- Recommendation ≠ Ratification.
+- The assistant prepares and explains the decision; the owner decides.
+- No decision request is complete until its Decision Brief is provided.
+
+This is a process-control requirement. It does not establish architectural necessity or authorize execution.
 
 ---
 

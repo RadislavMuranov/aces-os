@@ -49,6 +49,8 @@ Failure at a mandatory control produces BLOCKED, UNKNOWN, PARTIALLY VERIFIED, or
 | BUG-017 | Contradiction preservation | Compare source contradictions with final text | Restore contradictions/uncertainty |
 | BUG-018 | Intent lock | Compare requested objective with delivered objective | Correct objective; surface interpretation change |
 | BUG-019 | Correction ledger | Compare old/new artifacts and rationale | Record explicit epistemic correction |
+| BUG-024 | Owner Decision Brief gate | Check that every owner decision request includes context, evidence, options, consequences, recommendation, unknowns, and exact decision | Do not ask the owner to choose; prepare the missing brief and preserve owner authority |
+| BUG-025 | Existing-component reuse gate | Search the repository for current owners, registrations, callers, and tests before proposing a new component | Extend the existing owner; remove competing artifacts after migration and regression verification |
 
 ## 4. Mandatory Materialization Record
 

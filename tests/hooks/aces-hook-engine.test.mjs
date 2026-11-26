@@ -38,6 +38,38 @@ function ps(command) {
   return runHook({ event: "PreToolUse", hook_event_name: "PreToolUse", tool_name: "PowerShell", tool_input: { command } });
 }
 
+function iterationRecord(overrides = {}) {
+  const fields = {
+    ITERATION_ID: "REPAIR-STOP-GATE-001",
+    OBJECTIVE: "Enforce the canonical ACES iteration closure record",
+    REPOSITORY_BEFORE: "Observed working tree and exact baseline captured before mutation",
+    ACTION: "Extended the existing ACES Hook Engine STOP-GATE",
+    REPOSITORY_AFTER: "Existing engine and tests updated; duplicate adapter removed",
+    REAL_WORLD_FAILURE: "OBSERVED — incomplete iteration was previously treated as closed",
+    EVIDENCE: "Repository files, Stop hook input contract, and executed regression tests",
+    MINIMALITY_LEVEL_TESTED: "L0 and L1 — reuse the existing registered Hook Engine",
+    VERIFICATION: "PASS — structural closure checks and actual Stop payload tests executed",
+    KNOWN_BUGS: "Existing STOP-GATE checked only marker presence",
+    NEW_BUGS: "NONE — no new defect found in this test fixture",
+    RECURRING_BUGS: "Architecture duplication recurrence recorded as B-134 / BUG-025",
+    CHATGPT_BUG_AUDIT: "PASS — existing-component bypass and premature architecture checked",
+    CONTRADICTIONS: "NONE — current engine ownership and hook registration agree",
+    REMAINING_UNKNOWN: "Live Claude Code runtime invocation remains unverified",
+    REFACTORING: "PASS — duplicate DSH adapter and standalone contract removed",
+    DELETIONS_CONSIDERED: "PASS — all three duplicate artifacts removed after migration",
+    FILTER_UPDATED: "PASS — B-134 / BUG-025 added to existing failure filter",
+    REGRESSION_CHECK: "PASS — existing Hook Engine suite and Stop-GATE negative cases pass",
+    ARCHITECTURE_ESCALATION: "BLOCKED — no new architecture introduced",
+    FINAL_VERDICT: "PASS — local structural enforcement verified",
+    NEXT_ACTION: "Verify live Stop event in the intended runtime before claiming runtime integration",
+    ...overrides,
+  };
+  return [
+    "ACES-ITERATION-RECORD v1",
+    ...Object.entries(fields).map(([key, value]) => key + ": " + value),
+  ].join("\n");
+}
+
 // ─── Z-2: git stash ─────────────────────────────────────────────────────────
 
 test("Z-2: literal git stash is denied", () => {
@@ -203,15 +235,119 @@ test("cat README.md is allowed", () => {
 
 // ─── Stop gate ───────────────────────────────────────────────────────────────
 
-test("Stop without ACES iteration record is blocked", () => {
-  const out = runHook({ event: "Stop", hook_event_name: "Stop", transcript_path: "x.jsonl" });
+test("Stop without last_assistant_message is blocked even if another payload field contains a marker", () => {
+  const out = runHook({
+    event: "Stop",
+    hook_event_name: "Stop",
+    transcript_path: "x.jsonl",
+    iteration_record: "ACES-ITERATION-RECORD v1",
+  });
   assert.equal(out.decision, "block");
   assert.match(out.reason, /STOP-GATE/);
+  assert.match(out.reason, /last_assistant_message/);
 });
 
-test("Stop with ACES iteration record is allowed", () => {
-  const out = runHook({ event: "Stop", hook_event_name: "Stop", iteration_record: "ACES-ITERATION-RECORD-2026-11-25" });
+test("Stop accepts a complete canonical iteration record from last_assistant_message", () => {
+  const out = runHook({
+    event: "Stop",
+    hook_event_name: "Stop",
+    last_assistant_message: iterationRecord(),
+  });
   assert.equal(decisionOf(out), "allow");
+});
+
+test("Stop blocks an iteration record with missing required fields", () => {
+  const message = iterationRecord().replace(/^EVIDENCE:.*\n/m, "");
+  const out = runHook({ event: "Stop", last_assistant_message: message });
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /missing fields: EVIDENCE/);
+});
+
+test("Stop blocks duplicate iteration record fields", () => {
+  const out = runHook({
+    event: "Stop",
+    last_assistant_message: iterationRecord() + "\nFINAL_VERDICT: FAIL",
+  });
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /duplicate fields: FINAL_VERDICT/);
+});
+
+test("Stop does not accept PASS when mandatory verification gates are not PASS", () => {
+  const out = runHook({
+    event: "Stop",
+    last_assistant_message: iterationRecord({ REGRESSION_CHECK: "UNKNOWN — not run" }),
+  });
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /FINAL_VERDICT PASS requires PASS for: REGRESSION_CHECK/);
+});
+
+test("Stop blocks unsupported final verdicts", () => {
+  const out = runHook({
+    event: "Stop",
+    last_assistant_message: iterationRecord({ FINAL_VERDICT: "DONE" }),
+  });
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /FINAL_VERDICT must be/);
+});
+
+test("Stop rejects a verdict not defined by the canonical self-audit specification", () => {
+  const out = runHook({
+    event: "Stop",
+    last_assistant_message: iterationRecord({ FINAL_VERDICT: "CONDITIONAL — not a canonical disposition" }),
+  });
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /FINAL_VERDICT must be/);
+});
+
+test("Stop rejects PASS when repository before-state is N/A", () => {
+  const out = runHook({
+    event: "Stop",
+    last_assistant_message: iterationRecord({ REPOSITORY_BEFORE: "N/A" }),
+  });
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /requires established repository before\/after state/);
+});
+
+test("Stop accepts a structurally complete BLOCKED disposition without promoting it to PASS", () => {
+  const out = runHook({
+    event: "Stop",
+    last_assistant_message: iterationRecord({
+      FINAL_VERDICT: "BLOCKED — required runtime evidence unavailable",
+      VERIFICATION: "BLOCKED — live runtime evidence unavailable",
+      CHATGPT_BUG_AUDIT: "BLOCKED — runtime audit cannot be completed",
+      REFACTORING: "PASS — no further local reduction identified",
+      FILTER_UPDATED: "PASS — applicable defect already recorded",
+      REGRESSION_CHECK: "BLOCKED — live runtime check unavailable",
+    }),
+  });
+  assert.equal(decisionOf(out), "allow");
+});
+
+test("Stop re-entry identifies the unresolved closure condition", () => {
+  const out = runHook({
+    event: "Stop",
+    stop_hook_active: true,
+    last_assistant_message: "Incomplete response",
+  });
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /already continued this turn/);
+});
+
+test("Stop rejects an invalid REAL_WORLD_FAILURE classification", () => {
+  const out = runHook({
+    event: "Stop",
+    last_assistant_message: iterationRecord({ REAL_WORLD_FAILURE: "MAYBE — not classified" }),
+  });
+  assert.equal(out.decision, "block");
+  assert.match(out.reason, /REAL_WORLD_FAILURE must begin with/);
+});
+
+test("project settings register exactly one Stop owner: the existing ACES Hook Engine", () => {
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+  const settings = JSON.parse(readFileSync(join(root, ".claude", "settings.json"), "utf-8"));
+  const stopHooks = settings.hooks?.Stop ?? [];
+  const commands = stopHooks.flatMap((group) => group.hooks ?? []).map((hook) => hook.command);
+  assert.deepEqual(commands, ["node .claude/hooks/aces-hook-engine.mjs"]);
 });
 
 // ─── Journal privacy ────────────────────────────────────────────────────────

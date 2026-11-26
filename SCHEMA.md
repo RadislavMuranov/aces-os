@@ -196,6 +196,10 @@ The audit MUST check the known failure catalogue and search for new failures, in
 - environment/connector equivalence assumptions;
 - local or conditional PASS inflation;
 - incomplete evidence presented as complete;
+- owner decision requested without the Decision Brief required by `spec/MASTER-PROTOCOL.md` §20.1;
+- project-specific terminology left unexplained or detached from the active project context;
+- options presented without consequences, trade-offs, and a reasoned recommendation;
+- recommendation, authorization, and ratification conflated;
 - research replacing implementation;
 - human value assumed rather than measured;
 - sunk-cost continuation;
@@ -338,3 +342,14 @@ Do not apply this rule outside Codex.
 SCHEMA v1.1 supersedes v1.0. The iteration self-audit, refactoring, bug-learning, regression, and fail-closed controls are now mandatory operating behavior for repository-dependent ACES OS work.
 
 No unverified repository-native RAG, Exa integration, `/context`, `/status`, `/compact`, STATUS, ROADMAP, or STATUS LOG implementation is asserted by this schema; those remain behavioral contracts unless separately implemented and verified.
+
+
+## 25. Existing Hook Engine — Iteration Closure Boundary
+
+The canonical iteration record and its required fields are defined only by `spec/MASTER-PROTOCOL.md` §9.7. The ChatGPT Iteration Self-Audit Rule references that schema; it MUST NOT define a competing record format.
+
+The existing `.claude/hooks/aces-hook-engine.mjs`, registered in `.claude/settings.json`, is the sole structural Stop-gate owner. Extend this component and its existing tests. Do not create a parallel hook, adapter, contract module, or closure registry.
+
+The Stop gate validates the exact `ACES-ITERATION-RECORD v1` in the hook's `last_assistant_message` field. A marker in another payload field is not evidence of a valid record. Missing, malformed, incomplete, duplicate, or placeholder fields block Stop. A declared `FINAL_VERDICT: PASS` also requires PASS in the mandatory verification, bug-audit, refactoring, deletion-analysis, filter-update, and regression fields.
+
+The hook's PASS is structural only. It does not establish evidence truth, authorization, Canon acceptance, or AcceptedState. Those remain independent controls. The hook MUST NOT read or infer a final message from `transcript_path` when `last_assistant_message` is the authoritative event field.
