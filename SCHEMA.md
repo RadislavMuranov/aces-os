@@ -353,19 +353,3 @@ The existing `.claude/hooks/aces-hook-engine.mjs`, registered in `.claude/settin
 The Stop gate validates the exact `ACES-ITERATION-RECORD v1` in the hook's `last_assistant_message` field. A marker in another payload field is not evidence of a valid record. Missing, malformed, incomplete, duplicate, or placeholder fields block Stop. A declared `FINAL_VERDICT: PASS` also requires PASS in the mandatory verification, bug-audit, refactoring, deletion-analysis, filter-update, and regression fields.
 
 The hook's PASS is structural only. It does not establish evidence truth, authorization, Canon acceptance, or AcceptedState. Those remain independent controls. The hook MUST NOT read or infer a final message from `transcript_path` when `last_assistant_message` is the authoritative event field.
-
-## 26. Write Authority Boundary (WA-1)
-
-**Status:** ACTIVE — specification binding; enforcement pending DLPM-002 W4/W5.
-**Authorization:** ASA-003.3 (owner, 2026-11-27), narrow unfreeze of `spec/asa/v0/data-model.md` §11.
-
-`CREATE`, `UPDATE`, `DELETE`, `RENAME`/`MOVE`, and non-enumerable `EXECUTE` against a protected durable resource are governed by ASA-003.3 §11 and recorded in `docs/protection/DATA-LOSS-PROTECTION-METHOD.md` (DLPM-002).
-
-Normative consequences:
-
-1. A harness, agent, bot, model, or connector is not the enforcement boundary. The boundary is the single write authority outside it.
-2. Hooks and tool proxies — including `.claude/hooks/aces-hook-engine.mjs` as registered in `.claude/settings.json` — are the **advisory** class (E1/E2). They MAY block and MUST journal. They MUST NOT be reported as enforcement.
-3. An `ALLOW` for a protected resource is credible only under class E3 (executing identity has no write authority on the resource) or E4 (the gate is the sole writer/committer).
-4. A new durable document requires a manifest field `extends_component` naming the existing owner it extends; a deletion requires `restore_source`. Absent either → DENY.
-5. No second decision engine, ledger, registry, hook, or closure component may be introduced. Extend the existing engine and its tests (B-134, §25).
-6. The `ACES-ITERATION-RECORD` remains governed by §25 and `spec/MASTER-PROTOCOL.md` §9.7. WA-1 adds no record format and no competing closure contract.
