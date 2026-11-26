@@ -564,14 +564,14 @@ resource (§11.7, class E3); otherwise it resolves to DENY.
 | `resource_kind` | value from §11.4 |
 | `principal_id` | resolved Principal; client assertion is non-authoritative |
 | `purpose` | why the mutation is required |
-| `extends_component` | CREATE of a new durable document: the existing component it extends. `NONE` is inadmissible |
-| `restore_source` | DELETE: path/hash/ref from which the resource is recoverable. Absent → DENY |
+| `EXTENDS` | CREATE of a new durable document: the existing component it extends. `NONE` is inadmissible |
+| `RESTORE` | DELETE: path/hash/ref from which the resource is recoverable. Absent → DENY |
 | `expected_sha256` | pre-image hash for UPDATE/DELETE |
 | `content_sha256` | post-image hash for CREATE/UPDATE |
 
 A request lacking a mandatory field is malformed → DENY (§6).
 
-`extends_component` makes B-134 preventive rule structural rather than advisory: a new durable
+`EXTENDS` makes B-134 preventive rule structural rather than advisory: a new durable
 document cannot be authorized without naming the existing owner it extends or replaces.
 
 ### 11.7 Execution classes and coverage rule
@@ -594,9 +594,11 @@ described as a prohibition.
 - Agents hold a **staging lease**: a staging path prefix, operations `CREATE|UPDATE`,
   `not_after`, revocable per capability. A durable-write capability is never issued to an
   agent principal.
-- `AuthorizationEvent` appends to the existing ACES journal, extended with `correlation_id`,
-  `operation`, `resource_id`, `capability_id`, `decision`. No second ledger is permitted —
-  a parallel ledger is a competing enforcement path (B-134).
+- Hook-class (E1/E2) decisions journal `timestamp + rule + decision` only; no path or command
+  text is written (journal privacy rule, DLPM-001 §4). The full `AuthorizationEvent` —
+  `correlation_id`, `operation`, `resource_id`, `capability_id`, `decision` — is produced by
+  the gate (E4) in W5. No second ledger is permitted, and a parallel ledger is a competing
+  enforcement path (B-134).
 - Audit append failure → DENY (§6). Audit never grants authority (I7).
 - A protected resource present with no matching AuthorizationEvent is an **integrity
   violation**, detected by reconciliation; it is not retroactively authorized.
@@ -605,8 +607,8 @@ described as a prohibition.
 
 | Failure | Result |
 |---|---|
-| CREATE of a new durable document without `extends_component` | DENY |
-| DELETE without `restore_source` | DENY |
+| CREATE of a new durable document without `EXTENDS` | DENY |
+| DELETE without `RESTORE` | DENY |
 | Composite mutation with split Decisions | DENY |
 | `EXECUTE` on a protected resource by an identity holding write authority | DENY |
 | Protected-resource mutation with only E1/E2 coverage | ADVISORY-DENY (not ENFORCED) |
@@ -620,16 +622,32 @@ outside the gate. These remain outside v0.
 
 ### 11.11 Implementation status
 
-**NOT IMPLEMENTED.** This section is a specification binding only. Engine, identity boundary,
-staging gate, and regression evidence are staged in DLPM-002 (W0–W6). The existing hook engine
-is the E1 adapter; it is not, and must not be presented as, the authority boundary.
+**PARTIALLY IMPLEMENTED (W1–W3).** The policy body and `evaluateFileIntent()` live in the
+existing `.claude/hooks/aces-hook-engine.mjs`; `--evaluate` is the E2 adapter. Default mode is
+`observe` (journal `would-deny`, never block). `ACES_WA_MODE=enforce` blocks **tool-level**
+writes — `Write`, `Edit`, `MultiEdit`, `NotebookEdit`, and write-capable MCP tools — only.
+
+**NOT IMPLEMENTED:** E3 identity boundary, E4 store gate, staging lease, quarantine and
+retention, reconciliation, and the gate-produced AuthorizationEvent fields. Until E4 lands the
+boundary is `ADVISORY`, and no ALLOW for a protected resource may be represented as enforced.
 
 | Item | Value |
 |---|---|
 | Gate | ASA-003.3 — owner-authorized narrow unfreeze |
 | Supersedes | nothing; §0–§10 unchanged |
-| Implementation | NOT authorized by this section alone |
+| Implementation | W1–W3 in `observe`; E3/E4 not implemented |
 | Next gate | ASA-004 Authorization Core + DLPM-002 W6 ratification |
+
+### 11.12 Implementation authorization (2026-11-27)
+
+Owner instruction (verbatim):
+
+> «Начать реализацию WA-1 — требуется отдельная авторизация → АВТОРИЗАЦИЯ РАЗРЕШЕНА.»
+
+Recorded interpretation: implementation is authorized **inside the existing components**. It
+does not authorize a new subsystem, a second hook, a new registry, a write-guard service, or a
+change to §0–§10. Implementation remains staged by DLPM-002 W0–W6; an `enforced` claim requires
+E3 or E4 evidence.
 
 ---
 

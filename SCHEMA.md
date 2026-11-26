@@ -353,3 +353,21 @@ The existing `.claude/hooks/aces-hook-engine.mjs`, registered in `.claude/settin
 The Stop gate validates the exact `ACES-ITERATION-RECORD v1` in the hook's `last_assistant_message` field. A marker in another payload field is not evidence of a valid record. Missing, malformed, incomplete, duplicate, or placeholder fields block Stop. A declared `FINAL_VERDICT: PASS` also requires PASS in the mandatory verification, bug-audit, refactoring, deletion-analysis, filter-update, and regression fields.
 
 The hook's PASS is structural only. It does not establish evidence truth, authorization, Canon acceptance, or AcceptedState. Those remain independent controls. The hook MUST NOT read or infer a final message from `transcript_path` when `last_assistant_message` is the authoritative event field.
+
+## 26. Write Authority Boundary (WA-1)
+
+**Status:** ACTIVE — Canon change authorized by the owner on 2026-11-27. Policy body and file-intent evaluation implemented in the existing engine (W1–W3), default mode `observe`. Identity boundary (E3) and store gate (E4) are NOT implemented.
+**Model:** `spec/asa/v0/data-model.md` §11 (ASA-003.3). **Record:** DLPM-002.
+
+`CREATE`, `UPDATE`, `DELETE`, `RENAME`/`MOVE`, and non-enumerable `EXECUTE` against a protected durable resource are governed by ASA-003.3 §11.
+
+Normative consequences:
+
+1. A harness, agent, bot, model, or connector is not the enforcement boundary. The boundary is the single write authority outside it.
+2. The existing `.claude/hooks/aces-hook-engine.mjs` and its proxies are the **advisory** class (E1/E2). They MAY block tool-level writes, MUST journal, and MUST NOT be reported as enforcement.
+3. An `ALLOW` for a protected resource is credible only under class E3 (the executing identity has no write authority) or E4 (the gate is the sole writer/committer). Until E3/E4 exist, the boundary is `ADVISORY` and must be described as such.
+4. A durable `CREATE` requires a manifest field `EXTENDS` naming the existing component it extends; a durable `DELETE` requires `RESTORE` naming a provable recovery source. Absent, unprovable, or malformed → DENY.
+5. Unknown operation, unavailable policy body, or failed audit append → DENY (fail-closed).
+6. Shell commands are never authorized or denied by static parsing; an `EXECUTE` against a durable resource is constrained only by the executing identity.
+7. No second decision engine, ledger, registry, hook, or write-guard subsystem may be introduced. Extend the existing engine and its tests (B-134, §25).
+8. The `ACES-ITERATION-RECORD` remains governed by §25 and `spec/MASTER-PROTOCOL.md` §9.7. WA-1 adds no record format and no competing closure contract.

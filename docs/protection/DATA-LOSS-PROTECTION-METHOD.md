@@ -103,8 +103,8 @@ AutoClaw bridge). The redefinitions live on only as the DLPM-* family.
 # DLPM-002 — WRITE AUTHORITY (WA-1)
 
 **Record:** DLPM-002
-**Status:** AUTHORIZED / SPECIFICATION RECORDED / NOT IMPLEMENTED
-**Authorized:** 2026-11-27 by the owner (explicit instruction, this session)
+**Status:** AUTHORIZED / W1–W3 IMPLEMENTED IN `observe` MODE / E3–E5 NOT IMPLEMENTED
+**Authorized:** 2026-11-27 by the owner (two explicit instructions, this session)
 **Binding specification:** `spec/asa/v0/data-model.md` §11 (ASA-003.3)
 **Parent:** DLPM-001
 **R0 exception:** explicitly recorded in §0 of this record, per
@@ -126,6 +126,18 @@ permits extension of `spec/asa/v0/data-model.md` (§11), `.claude/hooks/aces-hoo
 this DLPM record, `tools/protection/aces-snapshot.ps1`, and git-based staging. It permits no
 other architectural change.
 
+### 0.1 Canon and implementation authorization (2026-11-27)
+
+Owner instruction (verbatim):
+
+> «Изменить Canon — не авторизовано- авторизовать»
+> «Начать реализацию WA-1 — требуется отдельная авторизация → АВТОРИЗАЦИЯ РАЗРЕШЕНА.»
+
+Recorded interpretation: the Canon change is authorized exactly as `SCHEMA.md` §26 plus the
+ASA-003.3 §11 binding profile; implementation is authorized inside the existing components.
+Neither authorizes a new subsystem, a second hook, a new registry, a write-guard service, or a
+change to ASA §0–§10.
+
 ## 1. Mission
 
 No harness, agent, bot, connector, or model can create or delete a durable ACES document without
@@ -138,7 +150,7 @@ prohibition must remain effective for agents that have no hooks at all.
 2. the same operation in the staging zone succeeds;
 3. every durable mutation has a matching AuthorizationEvent;
 4. every deletion is recoverable for the retention window;
-5. the existing 81-test suite remains green and the Stop owner remains exactly one.
+5. the existing suite (113 tests) remains green and the Stop owner remains exactly one.
 
 ## 2. Plan
 
@@ -146,7 +158,7 @@ prohibition must remain effective for agents that have no hooks at all.
 |---|---|---|---|
 | **W0** | Record + durability of the completed Stop-gate repair | commit `f1e40a7` on origin (0/0), snapshot bundle verified, this record | n/a |
 | **W1** | Extend the **existing** policy body with WA-CREATE / WA-DELETE rules | rule table in the engine header + DLPM-002 table; no new file | observe |
-| **W2** | Add `evaluateFileIntent({operation, resource, manifest})` to the existing engine; extend the journal to AuthorizationEvent fields | unit tests for every §11.5 operation; journal rows carry `correlation_id`/`operation`/`resource_id`/`decision` | observe |
+| **W2** | Add `evaluateFileIntent({operation, resource, manifest})` to the existing engine; keep the journal at `rule + decision` | unit tests for every §11.5 operation; no path or command text journaled | observe |
 | **W3** | Non-hook adapter: CLI mode of the **same** engine for harnesses without hooks | bypass tests (alias, `Start-Process`, `iex`, interpreter, MCP filesystem) | advisory |
 | **W4** | Identity boundary (E3): agent identity with no write ACE on the durable zone; gate under a separate identity; MCP servers inherit the agent identity | probe from a no-hook harness: durable write denied, staging write allowed | enforced |
 | **W5** | Store gate (E4): staging → gate apply; quarantine + retention for DELETE; reconciliation in the snapshot tool | V3/V4 evidence; unrecorded file detected as integrity violation | enforced |
@@ -202,14 +214,38 @@ as advisory (ASA-003.3 §11.7 coverage rule).
 | MC-2 | Local snapshot exists and verifies | bundle verified, `worktree.zip`, `manifest.sha256` (2026-11-27-014856) | **DONE** |
 | MC-3 | Obsidian evidence record appended | snapshot log line written by `aces-snapshot.ps1` | **DONE** |
 | MC-4 | ASA-003.3 recorded, §0–§10 unchanged | `spec/asa/v0/data-model.md` §11 | **DONE** |
-| MC-5 | WA-CREATE / WA-DELETE added to the existing policy body | rule table + engine header; no new file | **NOT STARTED** |
-| MC-6 | `evaluateFileIntent` in the existing engine, `observe` mode | named unit tests; journal fields | **NOT STARTED** |
+| MC-5 | WA-CREATE / WA-DELETE added to the existing policy body | engine header rule table + §5.1; no new file | **DONE** |
+| MC-6 | `evaluateFileIntent` in the existing engine, `observe` mode | 32 named tests; journal `rule + decision` | **DONE** |
 | MC-7 | E3 identity boundary (no write ACE for agents) | OS probe from a no-hook harness | **NOT STARTED** |
 | MC-8 | E4 gate: staging, quarantine, retention, reconcile | V3/V4 evidence | **NOT STARTED** |
-| MC-9 | Non-hook adapter (CLI, same engine) | bypass matrix tests | **NOT STARTED** |
-| MC-10 | Exactly one Stop owner; no second hook/ledger/registry | settings assertion test + tree check | **PASS (so far)** |
-| MC-11 | Regression | `node --test tests/*.test.ts tests/hooks/*.test.mjs` → 81/81 | **PASS** |
+| MC-9 | Non-hook adapter (CLI, same engine) | `--evaluate` tests incl. malformed input | **DONE (E2)** |
+| MC-10 | Exactly one Stop owner; no second hook/ledger/registry | settings assertion test + tree check | **PASS** |
+| MC-11 | Regression | `node --test tests/*.test.ts tests/hooks/*.test.mjs` → 113/113 | **PASS** |
 | MC-12 | Owner ratification of `enforced` mode | explicit owner decision recorded | **NOT STARTED** |
+
+### 5.1 Implemented rules (W1 policy body)
+
+| Rule | Condition | Decision |
+|---|---|---|
+| WA-UNKNOWN-1 | operation outside CREATE/UPDATE/DELETE/RENAME/MOVE/EXECUTE | DENY (both modes) |
+| WA-MALFORMED-1 | missing/unresolvable path; composite without target | DENY |
+| WA-MALFORMED-2 | invalid manifest JSON | DENY |
+| WA-POLICY-1 | `ACES_WA_POLICY_FILE` set but unreadable | DENY |
+| WA-AUDIT-1 | journal append failed for a policy decision | DENY at the hook boundary |
+| WA-CREATE-1 | durable CREATE without `EXTENDS` | DENY (enforce) / would-deny (observe) |
+| WA-CREATE-2 | `EXTENDS` path does not exist | DENY (enforce) / would-deny |
+| WA-CREATE-3 | CREATE over an existing path → reclassified as UPDATE | ALLOW |
+| WA-DELETE-1 | durable DELETE without `RESTORE` | DENY (enforce) / would-deny |
+| WA-DELETE-2 | `RESTORE` is not an existing path, sha256, or git ref | DENY (enforce) / would-deny |
+| WA-UPDATE-1 | UPDATE of a missing path / of an existing path | DENY / ALLOW |
+| WA-COMPOSITE-1 | RENAME/MOVE = DELETE+CREATE; both must pass | DENY if either fails |
+| WA-EXECUTE-1 | EXECUTE against a durable resource | advisory only (E3 constrains) |
+| WA-STAGING-1 | path inside `.aces/staging/` | ALLOW |
+| WA-UNPROTECTED-1 | path outside the durable zone | ALLOW |
+
+Mode control: `ACES_WA_MODE=observe` (default) or `enforce`. Enforce applies to tool-level
+writes only — `Write`, `Edit`, `MultiEdit`, `NotebookEdit`, and write-capable MCP tools. Shell
+commands stay advisory in both modes, because static parsing is not a boundary.
 
 ## 6. Rules that would repeat the original defect
 
@@ -229,3 +265,24 @@ as advisory (ASA-003.3 §11.7 coverage rule).
 - **Repository after:** `f1e40a7` pushed to `origin/implementation/aces-node-baseline`; snapshot
   `E:\ACES-Backups\aces-os\snapshots\2026-11-27-014856` verified; WA-1 specified, not implemented.
 - **Verification:** `node --test tests/*.test.ts tests/hooks/*.test.mjs` → **81 passed, 0 failed**.
+
+## 8. W1–W3 implementation record (2026-11-27)
+
+- **Repository before:** `f2dbda6` clean; WA-1 recorded as a direction only; no policy body.
+- **Action:** extended the existing engine with the WA-* policy body, `evaluateFileIntent()`,
+  tool and command adapters, the `--evaluate` CLI, and fail-closed audit; extended the existing
+  suite; restored `SCHEMA.md` §26 under the new authorization and aligned ASA §11 to
+  `EXTENDS` / `RESTORE`.
+- **Repository after:** policy implemented in `observe` mode; `enforce` blocks tool-level writes
+  only; E3/E4 absent.
+- **Verification:** 113 tests passed, 0 failed; settings still register exactly one Stop owner.
+- **Not claimed:** durable-zone protection. Until E3/E4 exist, a shell-capable agent can still
+  create or delete a durable file. The boundary remains `ADVISORY`.
+
+## 9. Boundary of the current implementation
+
+`observe` journals a pending denial for every durable CREATE/DELETE request and blocks nothing.
+`enforce` blocks only through tool calls that the hook sees. A harness that ignores hooks, a
+direct shell, a script interpreter, and a differently mounted MCP server remain outside the
+hook's reach; those are closed by E3 (identity) and E4 (store gate), which are not implemented.
+No statement in this record may be read as "write to the durable zone is impossible".
