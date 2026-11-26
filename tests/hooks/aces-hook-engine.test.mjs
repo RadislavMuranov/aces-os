@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 
 const ENGINE = join(dirname(fileURLToPath(import.meta.url)), "..", "..", ".claude", "hooks", "aces-hook-engine.mjs");
@@ -553,4 +553,234 @@ test("DLPM-7: git reflog (read) is allowed", () => {
 test("malformed JSON payload does not crash the engine", () => {
   const res = spawnSync(process.execPath, [ENGINE], { input: "not json", encoding: "utf-8", env: { ...process.env, ACES_HOOK_ENGINE_TEST: "1" } });
   assert.equal(res.status, 0);
+});
+
+// ─── WA-1: Single Write Authority policy (ASA-003.3 §11, DLPM-002) ───────────
+// The hook is the advisory class E1. `observe` is the default mode: a durable
+// CREATE/DELETE without a manifest is journaled as would-deny, never blocked.
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const ENGINE_API = await import(pathToFileURL(ENGINE).href);
+const intent = (request) => ENGINE_API.evaluateFileIntent(request);
+
+function runHookEnv(payload, env) {
+  const res = spawnSync(process.execPath, [ENGINE], {
+    input: JSON.stringify(payload),
+    encoding: "utf-8",
+    env: { ...process.env, ACES_HOOK_ENGINE_TEST: "1", ...env },
+  });
+  assert.equal(res.status, 0, `engine exited non-zero: ${res.stderr}`);
+  return JSON.parse(res.stdout || "{}");
+}
+
+function runCli(request, env) {
+  const res = spawnSync(process.execPath, [ENGINE, "--evaluate"], {
+    input: JSON.stringify(request),
+    encoding: "utf-8",
+    env: { ...process.env, ACES_HOOK_ENGINE_TEST: "1", ...env },
+  });
+  assert.equal(res.status, 0, `cli exited non-zero: ${res.stderr}`);
+  return JSON.parse(res.stdout || "{}");
+}
+
+const RESTORE_BUG_024 = "docs/audit/2026-11-25-DATA-LOSS-INCIDENT-BUG-024.md";
+const EXTENDS_DLPM = "docs/protection/DATA-LOSS-PROTECTION-METHOD.md";
+
+test("WA: default mode is observe and a durable CREATE without manifest is advisory", () => {
+  const d = intent({ operation: "CREATE", resource_id: "docs/new-record.md" });
+  assert.equal(d.decision, "advisory");
+  assert.equal(d.rule, "WA-CREATE-1");
+  assert.equal(d.mode, "observe");
+});
+
+test("WA: enforce mode denies a durable CREATE without manifest", () => {
+  const d = intent({ operation: "CREATE", resource_id: "docs/new-record.md", mode: "enforce" });
+  assert.equal(d.decision, "deny");
+  assert.equal(d.rule, "WA-CREATE-1");
+});
+
+test("WA: CREATE with EXTENDS naming an existing component is accepted", () => {
+  const d = intent({ operation: "CREATE", resource_id: "docs/new-record.md", mode: "enforce", manifest: { EXTENDS: EXTENDS_DLPM } });
+  assert.equal(d.decision, "allow");
+  assert.equal(d.rule, "WA-CREATE-3");
+  assert.match(d.reason, /path/);
+});
+
+test("WA: legacy extends_component field remains accepted", () => {
+  const d = intent({ operation: "CREATE", resource_id: "docs/new-record.md", mode: "enforce", manifest: { extends_component: EXTENDS_DLPM } });
+  assert.equal(d.decision, "allow");
+});
+
+test("WA: CREATE with a non-existent EXTENDS path is denied", () => {
+  const d = intent({ operation: "CREATE", resource_id: "docs/new-record.md", mode: "enforce", manifest: { EXTENDS: "docs/no-such-component.md" } });
+  assert.equal(d.decision, "deny");
+  assert.equal(d.rule, "WA-CREATE-2");
+});
+
+test("WA: a bare component name defers EXTENDS verification to the gate", () => {
+  const d = intent({ operation: "CREATE", resource_id: "docs/new-record.md", mode: "enforce", manifest: { EXTENDS: "ACES Hook Engine" } });
+  assert.equal(d.decision, "allow");
+  assert.match(d.reason, /deferred/);
+});
+
+test("WA: CREATE over an existing path is reclassified as UPDATE, not creation", () => {
+  const d = intent({ operation: "CREATE", resource_id: "README.md", mode: "enforce" });
+  assert.equal(d.decision, "allow");
+  assert.equal(d.rule, "WA-CREATE-3");
+  assert.match(d.reason, /in-place update/);
+});
+
+test("WA: durable DELETE without RESTORE is denied in enforce mode", () => {
+  const d = intent({ operation: "DELETE", resource_id: RESTORE_BUG_024, mode: "enforce" });
+  assert.equal(d.decision, "deny");
+  assert.equal(d.rule, "WA-DELETE-1");
+});
+
+test("WA: DELETE with RESTORE pointing at an existing copy is accepted", () => {
+  const d = intent({ operation: "DELETE", resource_id: "docs/scratch.md", mode: "enforce", manifest: { RESTORE: RESTORE_BUG_024 } });
+  assert.equal(d.decision, "allow");
+  assert.equal(d.rule, "WA-DELETE-3");
+});
+
+test("WA: DELETE with RESTORE expressed as a sha256 content hash is accepted", () => {
+  const hash = "sha256:" + "a".repeat(64);
+  const d = intent({ operation: "DELETE", resource_id: "docs/scratch.md", mode: "enforce", manifest: { RESTORE: hash } });
+  assert.equal(d.decision, "allow");
+});
+
+test("WA: DELETE with an unprovable RESTORE is denied", () => {
+  const d = intent({ operation: "DELETE", resource_id: "docs/scratch.md", mode: "enforce", manifest: { RESTORE: "trust me" } });
+  assert.equal(d.decision, "deny");
+  assert.equal(d.rule, "WA-DELETE-2");
+});
+
+test("WA: UPDATE of a missing resource is denied", () => {
+  const d = intent({ operation: "UPDATE", resource_id: "docs/definitely-missing-xyz.md", mode: "enforce" });
+  assert.equal(d.decision, "deny");
+  assert.equal(d.rule, "WA-UPDATE-1");
+});
+
+test("WA: UPDATE of an existing resource is allowed and journaled", () => {
+  const d = intent({ operation: "UPDATE", resource_id: "README.md", mode: "enforce" });
+  assert.equal(d.decision, "allow");
+  assert.equal(d.rule, "WA-UPDATE-1");
+});
+
+test("WA: unknown operation is denied in both modes", () => {
+  assert.equal(intent({ operation: "PURGE", resource_id: "docs/x.md" }).decision, "deny");
+  assert.equal(intent({ operation: "PURGE", resource_id: "docs/x.md", mode: "enforce" }).rule, "WA-UNKNOWN-1");
+});
+
+test("WA: malformed manifest is denied", () => {
+  const d = intent({ operation: "CREATE", resource_id: "docs/x.md", manifest: { __error: "bad json" }, mode: "enforce" });
+  assert.equal(d.decision, "deny");
+  assert.equal(d.rule, "WA-MALFORMED-2");
+});
+
+test("WA: unavailable policy body is denied (fail-closed)", () => {
+  const viaEnv = runCli({ operation: "UPDATE", resource_id: "README.md", mode: "enforce" }, { ACES_WA_POLICY_FILE: join(ROOT, "no-such-policy.json") });
+  assert.equal(viaEnv.decision, "deny");
+  assert.equal(viaEnv.rule, "WA-POLICY-1");
+});
+
+test("WA: RENAME without target_id is malformed", () => {
+  const d = intent({ operation: "RENAME", resource_id: "docs/a.md", mode: "enforce" });
+  assert.equal(d.decision, "deny");
+  assert.equal(d.rule, "WA-MALFORMED-1");
+});
+
+test("WA: RENAME is a DELETE+CREATE composite and requires both decisions", () => {
+  const manifest = { EXTENDS: EXTENDS_DLPM, RESTORE: RESTORE_BUG_024 };
+  const d = intent({ operation: "MOVE", resource_id: "docs/a.md", target_id: "docs/b.md", mode: "enforce", manifest });
+  assert.equal(d.decision, "allow");
+  assert.equal(d.rule, "WA-COMPOSITE-1");
+});
+
+test("WA: traversal out of a safe subpath still resolves into the durable zone", () => {
+  const d = intent({ operation: "CREATE", resource_id: "docs/../.git/NEWFILE", mode: "enforce" });
+  assert.equal(d.decision, "deny");
+});
+
+test("WA: staging zone is always writable", () => {
+  const d = intent({ operation: "CREATE", resource_id: ".aces/staging/draft.md", mode: "enforce" });
+  assert.equal(d.decision, "allow");
+  assert.equal(d.rule, "WA-STAGING-1");
+});
+
+test("WA: resource outside the durable zone is not protected", () => {
+  const d = intent({ operation: "DELETE", resource_id: "/tmp/notes.txt", mode: "enforce" });
+  assert.equal(d.decision, "allow");
+  assert.equal(d.rule, "WA-UNPROTECTED-1");
+});
+
+test("WA: EXECUTE is never authorized or denied by static inspection", () => {
+  const d = intent({ operation: "EXECUTE", resource_id: "docs/x.md", mode: "enforce" });
+  assert.equal(d.decision, "advisory");
+  assert.equal(d.rule, "WA-EXECUTE-1");
+});
+
+test("WA hook: observe mode lets a durable Write through and journals would-deny", () => {
+  const out = runHook({ event: "PreToolUse", tool_name: "Write", tool_input: { file_path: "docs/agent-made.md", content: "x" } });
+  assert.equal(decisionOf(out), "allow");
+  const journal = readFileSync(join(ROOT, ".claude", "hooks", "journal.tsv"), "utf-8").trim().split("\n");
+  assert.match(journal[journal.length - 1], /\tWA-CREATE-1\twould-deny$/);
+});
+
+test("WA hook: enforce mode denies a durable Write without manifest", () => {
+  const out = runHookEnv({ event: "PreToolUse", tool_name: "Write", tool_input: { file_path: "docs/agent-made.md", content: "x" } }, { ACES_WA_MODE: "enforce" });
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /WA-CREATE-1/);
+});
+
+test("WA hook: enforce mode allows an in-place update of an existing file", () => {
+  const out = runHookEnv({ event: "PreToolUse", tool_name: "Write", tool_input: { file_path: "README.md", content: "x" } }, { ACES_WA_MODE: "enforce" });
+  assert.equal(decisionOf(out), "allow");
+});
+
+test("WA hook: write-capable MCP tool is covered by the same policy", () => {
+  const out = runHookEnv({ event: "PreToolUse", tool_name: "mcp__filesystem__write_file", tool_input: { path: "docs/mcp-made.md", content: "x" } }, { ACES_WA_MODE: "enforce" });
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /WA-CREATE-1/);
+});
+
+test("WA hook: shell deletion of a durable file is advisory only, never a false deny", () => {
+  const out = runHook({ event: "PreToolUse", tool_name: "Bash", tool_input: { command: "rm docs/agent-made.md" } });
+  assert.equal(decisionOf(out), "allow");
+});
+
+test("WA hook: PowerShell durable creation is advisory only", () => {
+  const out = runHook({ event: "PreToolUse", tool_name: "PowerShell", tool_input: { command: 'New-Item -ItemType File -Path "docs/ps-made.md"' } });
+  assert.equal(decisionOf(out), "allow");
+});
+
+test("WA: DLPM-1 still wins over WA-1 (protected root deletion)", () => {
+  const out = bash("rm -rf .git");
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /DLPM-1/);
+});
+
+test("WA: failed audit append denies a policy decision (fail-closed)", () => {
+  const out = runHookEnv(
+    { event: "PreToolUse", tool_name: "Write", tool_input: { file_path: "docs/agent-made.md", content: "x" } },
+    { ACES_WA_MODE: "enforce", ACES_HOOK_JOURNAL: join(ROOT, "README.md", "journal.tsv") },
+  );
+  assert.equal(decisionOf(out), "deny");
+  assert.match(out.reason, /WA-AUDIT-1/);
+});
+
+test("WA CLI adapter: same engine, same policy, decision printed as JSON", () => {
+  const denied = runCli({ operation: "CREATE", resource_id: "docs/cli-made.md" }, { ACES_WA_MODE: "enforce" });
+  assert.equal(denied.decision, "deny");
+  assert.equal(denied.rule, "WA-CREATE-1");
+
+  const allowed = runCli({ operation: "CREATE", resource_id: "docs/cli-made.md", manifest: { EXTENDS: EXTENDS_DLPM } }, { ACES_WA_MODE: "enforce" });
+  assert.equal(allowed.decision, "allow");
+});
+
+test("WA CLI adapter: malformed request JSON is denied, not crashed", () => {
+  const res = spawnSync(process.execPath, [ENGINE, "--evaluate"], { input: "not json", encoding: "utf-8", env: { ...process.env, ACES_HOOK_ENGINE_TEST: "1" } });
+  assert.equal(res.status, 0);
+  const out = JSON.parse(res.stdout);
+  assert.equal(out.decision, "deny");
+  assert.equal(out.rule, "WA-MALFORMED-2");
 });

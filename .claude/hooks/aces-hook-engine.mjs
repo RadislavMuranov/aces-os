@@ -15,17 +15,31 @@
  *     (validated from last_assistant_message; structure only, not evidence truth)
  *   - journal «РУБИЛЬНИК»: timestamp + rule + decision only (no command text)
  *
- * Z-1, Z-4…Z-7: definitions lost with the original worktree; registered as
- * UNKNOWN in the rule registry and not enforced until re-defined by the owner.
+ * WA-1 write-authority policy body (ASA-003.3 §11, DLPM-002). The hook is the
+ * advisory class (E1): it can block tool-level writes and must journal, but it
+ * is not the authority boundary. Default mode is `observe` — durable CREATE and
+ * DELETE are journaled as `would-deny`, never blocked. `ACES_WA_MODE=enforce`
+ * blocks tool-level writes only; shell commands stay advisory because static
+ * command parsing is not a boundary.
+ *   - durable CREATE requires a manifest with EXTENDS: → WA-CREATE-1/2
+ *   - durable DELETE requires a provable RESTORE: → WA-DELETE-1/2
+ *   - RENAME/MOVE = DELETE + CREATE composite → WA-COMPOSITE-1
+ *   - EXECUTE against a durable resource is constrained only by the executing
+ *     identity (E3), never by static parsing → WA-EXECUTE-1 (advisory)
+ *   - unknown operation / unavailable policy / failed audit append → DENY
+ *     (WA-UNKNOWN-1, WA-POLICY-1, WA-AUDIT-1)
+ *
+ * Z-1…Z-8 registry: recovered 2026-11-25 from the original engine found alive
+ * at C:\ACES\aces-os (see DLPM-001 §4; superseded redefinitions are DLPM-*).
  */
 
-import { appendFileSync } from "node:fs";
+import { appendFileSync, existsSync } from "node:fs";
 import { mkdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const JOURNAL = join(ROOT, ".claude", "hooks", "journal.tsv");
+const JOURNAL = process.env.ACES_HOOK_JOURNAL || join(ROOT, ".claude", "hooks", "journal.tsv");
 
 const KMA11_AUDIT_PATH = "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md";
 
@@ -402,13 +416,256 @@ function evaluateRead(toolInput) {
 
 function evaluateWrite(toolInput, toolName) {
   const p = (toolInput.file_path || toolInput.path || "").replaceAll("\\", "/");
-  if (/^spec\/governance\//.test(p) && !toolInput._exists) {
+  if (/^spec\/governance\//.test(p) && !existsSync(resolve(ROOT, p))) {
     return { decision: "ask", rule: "GOVERNANCE-CREATION", reason: "creating new governance sources requires observed failure and minimality justification (BUG-014)" };
   }
   if (p === KMA11_AUDIT_PATH) {
     return { decision: "deny", rule: "KMA11-PROTECT", reason: "KMA-11 audit record is protected from modification" };
   }
   return null;
+}
+
+// ─── WA-1: Single Write Authority binding (ASA-003.3 §11, DLPM-002) ─────────
+// Durable zone = the repository tree + the Obsidian Vault. Agents may write
+// freely to the staging zone. Everything else is a protected resource and its
+// CREATE/DELETE requires a manifest decision.
+
+const STAGING_ROOT = join(ROOT, ".aces", "staging");
+const WA_OPERATIONS = new Set(["CREATE", "UPDATE", "DELETE", "RENAME", "MOVE", "EXECUTE"]);
+const WRITE_TOOL_NAMES = new Set(["Write", "Edit", "MultiEdit", "NotebookEdit"]);
+const MCP_WRITE_TOOL = /^mcp__.*(write|edit|create|append|delete|remove|move|rename|unlink)/i;
+const OBSIDIAN_VAULT = /(^|\/)(Obsidian Vault)(\/|$)/i;
+
+function waMode(request) {
+  if (request && (request.mode === "enforce" || request.mode === "observe")) return request.mode;
+  return process.env.ACES_WA_MODE === "enforce" ? "enforce" : "observe";
+}
+
+function toAbs(p) {
+  const raw = String(p ?? "").replaceAll("\\", "/").replace(/^["']|["']$/g, "").trim();
+  if (!raw) return null;
+  return resolve(/^[a-zA-Z]:\//.test(raw) || raw.startsWith("/") ? raw : join(ROOT, raw));
+}
+
+function isInsidePath(child, parent) {
+  const a = resolve(child).replaceAll("\\", "/").toLowerCase();
+  const b = resolve(parent).replaceAll("\\", "/").toLowerCase().replace(/\/+$/, "");
+  return a === b || a.startsWith(b + "/");
+}
+
+function classifyTarget(p) {
+  const abs = toAbs(p);
+  if (!abs) return null;
+  if (isInsidePath(abs, STAGING_ROOT)) return { abs, zone: "staging" };
+  if (OBSIDIAN_VAULT.test(abs.replaceAll("\\", "/"))) return { abs, zone: "durable", kind: "vault_document" };
+  if (isInsidePath(abs, ROOT)) return { abs, zone: "durable", kind: "repository_document" };
+  return { abs, zone: "unprotected" };
+}
+
+function readManifestFromEnv() {
+  const raw = process.env.ACES_WA_MANIFEST;
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { __error: "ACES_WA_MANIFEST is not valid JSON" };
+  }
+}
+
+const MANIFEST_ALIASES = {
+  EXTENDS: ["EXTENDS", "extends", "extends_component"],
+  RESTORE: ["RESTORE", "restore", "restore_source"],
+};
+
+function manifestValue(manifest, field) {
+  if (!manifest || typeof manifest !== "object") return null;
+  for (const key of MANIFEST_ALIASES[field] || [field]) {
+    const value = manifest[key];
+    if (typeof value === "string" && value.trim() && !/^(?:NONE|TBD|TODO|UNKNOWN|N\/A)$/i.test(value.trim())) {
+      return value.trim();
+    }
+    if (Array.isArray(value) && value.some((v) => typeof v === "string" && v.trim())) {
+      return value.filter((v) => typeof v === "string" && v.trim()).join(", ");
+    }
+  }
+  return null;
+}
+
+function verifyExtends(value) {
+  // A path-shaped EXTENDS must resolve to an existing component. A bare
+  // component name is accepted with verification deferred to the write gate.
+  if (!value.includes("/") && !value.includes("\\")) return { ok: true, verified: "deferred" };
+  return existsSync(toAbs(value))
+    ? { ok: true, verified: "path" }
+    : { ok: false, reason: `EXTENDS target "${value}" does not exist in the repository` };
+}
+
+function verifyRestore(value) {
+  if (existsSync(toAbs(value))) return { ok: true, verified: "path" };
+  if (/^sha256:[0-9a-f]{64}$/i.test(value) || /^[0-9a-f]{7,40}$/i.test(value)) return { ok: true, verified: "hash-or-commit" };
+  if (/^(HEAD(~\d+)?|origin\/[A-Za-z0-9._/-]+|refs\/[A-Za-z0-9._/-]+|[A-Za-z0-9._-]+~\d+)$/.test(value)) {
+    return { ok: true, verified: "ref" };
+  }
+  return { ok: false, reason: `RESTORE source "${value}" is not an existing path, content hash, or git ref` };
+}
+
+function waDecision(mode, rule, reason) {
+  return mode === "enforce"
+    ? { decision: "deny", rule, reason: `${reason} (WA-1 enforce)`, mode }
+    : { decision: "advisory", rule, reason: `${reason} (WA-1 observe: would-deny)`, mode };
+}
+
+/**
+ * Evaluate one write-authority request against the durable zone.
+ * Request: { operation, resource_id, target_id?, manifest?, mode? }
+ * Never throws: malformed input resolves to DENY.
+ */
+export function evaluateFileIntent(request = {}) {
+  try {
+    const mode = waMode(request);
+    const operation = String(request.operation || "").toUpperCase();
+    if (!WA_OPERATIONS.has(operation)) {
+      return { decision: "deny", rule: "WA-UNKNOWN-1", reason: `unknown write operation "${request.operation}"`, mode };
+    }
+
+    const policyFile = process.env.ACES_WA_POLICY_FILE;
+    if (policyFile && !existsSync(policyFile)) {
+      return { decision: "deny", rule: "WA-POLICY-1", reason: `policy body "${policyFile}" is unavailable`, mode };
+    }
+
+    const manifest = request.manifest === undefined ? readManifestFromEnv() : request.manifest;
+    if (manifest && manifest.__error) {
+      return { decision: "deny", rule: "WA-MALFORMED-2", reason: manifest.__error, mode };
+    }
+
+    if (operation === "RENAME" || operation === "MOVE") {
+      if (!request.resource_id || !request.target_id) {
+        return { decision: "deny", rule: "WA-MALFORMED-1", reason: `${operation} requires resource_id and target_id`, mode };
+      }
+      const source = evaluateFileIntent({ operation: "DELETE", resource_id: request.resource_id, manifest, mode });
+      const target = evaluateFileIntent({ operation: "CREATE", resource_id: request.target_id, manifest, mode });
+      if (source.decision === "deny" || target.decision === "deny") {
+        return { decision: "deny", rule: "WA-COMPOSITE-1", reason: `composite ${operation} requires both DELETE and CREATE to pass: ${source.rule}/${target.rule}`, mode };
+      }
+      if (source.decision === "advisory" || target.decision === "advisory") {
+        return { decision: "advisory", rule: "WA-COMPOSITE-1", reason: `composite ${operation} would-deny: ${source.rule}/${target.rule}`, mode };
+      }
+      return { decision: "allow", rule: "WA-COMPOSITE-1", reason: `composite ${operation} authorized`, mode };
+    }
+
+    const target = classifyTarget(request.resource_id);
+    if (!target) {
+      return { decision: "deny", rule: "WA-MALFORMED-1", reason: "missing or unresolvable resource path", mode };
+    }
+    if (target.zone === "staging") {
+      return { decision: "allow", rule: "WA-STAGING-1", reason: "staging zone; no durable resource is mutated", mode, zone: target.zone };
+    }
+    if (target.zone !== "durable") {
+      return { decision: "allow", rule: "WA-UNPROTECTED-1", reason: "resource is outside the durable zone", mode, zone: target.zone };
+    }
+
+    if (operation === "EXECUTE") {
+      // Static inspection cannot authorize execution against a durable resource.
+      return { decision: "advisory", rule: "WA-EXECUTE-1", reason: "EXECUTE against a durable resource is constrained only by the executing identity (E3)", mode, zone: target.zone };
+    }
+
+    if (operation === "UPDATE") {
+      if (!existsSync(target.abs)) {
+        return waDecision(mode, "WA-UPDATE-1", "UPDATE target does not exist; creating it requires the CREATE path");
+      }
+      return { decision: "allow", rule: "WA-UPDATE-1", reason: "in-place update of an existing durable resource", mode, zone: target.zone };
+    }
+
+    if (operation === "CREATE" && existsSync(target.abs)) {
+      const updated = evaluateFileIntent({ operation: "UPDATE", resource_id: request.resource_id, manifest, mode });
+      return { ...updated, rule: "WA-CREATE-3" };
+    }
+
+    const field = operation === "CREATE" ? "EXTENDS" : "RESTORE";
+    const absent = operation === "CREATE"
+      ? "durable CREATE requires a manifest with EXTENDS: naming the existing component it extends"
+      : "durable DELETE requires a manifest with RESTORE: naming a provable recovery source";
+    if (!manifest) return waDecision(mode, `WA-${operation}-1`, `${absent} (no manifest)`);
+    const value = manifestValue(manifest, field);
+    if (!value) return waDecision(mode, `WA-${operation}-1`, `${absent} (manifest lacks ${field})`);
+
+    const check = field === "EXTENDS" ? verifyExtends(value) : verifyRestore(value);
+    if (!check.ok) return waDecision(mode, `WA-${operation}-2`, check.reason);
+
+    return {
+      decision: "allow",
+      rule: `WA-${operation}-3`,
+      reason: `${field} accepted (${check.verified}); authority verification belongs to the write gate`,
+      mode,
+      zone: target.zone,
+      kind: target.kind,
+    };
+  } catch (err) {
+    return { decision: "deny", rule: "WA-MALFORMED-3", reason: `write-intent evaluation failed: ${err && err.message ? err.message : "unknown"}`, mode: waMode(request) };
+  }
+}
+
+/** Map a write-capable tool call to a write-authority request. */
+function evaluateWriteToolIntent(toolName, input) {
+  const name = String(toolName || "");
+  const path = input.file_path || input.path || input.filePath;
+  if (!path) return null;
+  if (!WRITE_TOOL_NAMES.has(name) && !MCP_WRITE_TOOL.test(name)) return null;
+  const abs = toAbs(path);
+  if (!abs) return null;
+  let operation = "UPDATE";
+  if (/delete|remove|unlink/i.test(name)) operation = "DELETE";
+  else if (!existsSync(abs)) operation = "CREATE";
+  return evaluateFileIntent({ operation, resource_id: path, tool_name: name });
+}
+
+/**
+ * Derive write intents from a shell command. Static parsing is advisory only:
+ * the result is always observe-class and can never block, because aliases,
+ * interpreters and connectors defeat parsing (AutoClaw bypass class).
+ */
+function evaluateCommandIntent(command) {
+  const text = String(command || "");
+  if (!text) return null;
+  const intents = [];
+  const add = (operation, resource_id, target_id) => {
+    if (resource_id) intents.push({ operation, resource_id, target_id });
+  };
+
+  for (const segment of text.split(/;|\|\||&&|\n/g)) {
+    const tokens = tokenize(segment.trim());
+    if (!tokens.length) continue;
+    const head = tokens[0].toLowerCase();
+    const args = tokens.slice(1).filter((t) => t !== ";" && !t.startsWith("-"));
+    if (!args.length) continue;
+    if (["rm", "rmdir", "del", "erase", "remove-item", "ri"].includes(head)) {
+      for (const arg of args) add("DELETE", arg);
+    } else if (["mv", "move", "move-item", "rename-item"].includes(head)) {
+      if (args.length >= 2) add("RENAME", args[0], args[1]);
+    } else if (["cp", "copy", "copy-item"].includes(head)) {
+      if (args.length >= 2) add("CREATE", args[1]);
+    } else if (["touch", "mkdir", "new-item"].includes(head)) {
+      const pathIndex = args.findIndex((a) => a.toLowerCase() === "directory" || a.toLowerCase() === "file");
+      const candidates = pathIndex >= 0 ? args.slice(pathIndex + 1) : args;
+      for (const arg of candidates) add("CREATE", arg);
+    } else if (["set-content", "add-content", "out-file", "tee"].includes(head)) {
+      const abs = toAbs(args[0]);
+      add(abs && existsSync(abs) ? "UPDATE" : "CREATE", args[0]);
+    }
+  }
+
+  for (const match of text.match(/(?:^|[^0-9])>{1,2}\s*([^\s;&|]+)/g) || []) {
+    const path = match.replace(/^[^>]*>+\s*/, "");
+    const abs = toAbs(path);
+    add(abs && existsSync(abs) ? "UPDATE" : "CREATE", path);
+  }
+
+  let first = null;
+  for (const intent of intents) {
+    const decision = evaluateFileIntent({ ...intent, mode: "observe" });
+    if (decision.decision === "advisory" && !first) first = decision;
+  }
+  return first;
 }
 
 const ITERATION_RECORD_FIELDS = [
@@ -538,9 +795,12 @@ function evaluateStop(payload) {
 function journal(rule, decision) {
   try {
     mkdirSync(dirname(JOURNAL), { recursive: true });
-  } catch {}
-  const ts = new Date().toISOString();
-  appendFileSync(JOURNAL, `${ts}\t${rule}\t${decision}\n`);
+    appendFileSync(JOURNAL, `${new Date().toISOString()}\t${rule}\t${decision}\n`);
+    return true;
+  } catch (err) {
+    process.stderr.write(`[aces-hook-engine] journal append failed: ${err && err.message ? err.message : "unknown"}\n`);
+    return false;
+  }
 }
 
 export function evaluatePreToolUse(payload) {
@@ -548,19 +808,25 @@ export function evaluatePreToolUse(payload) {
   const input = payload.tool_input || {};
   try {
     if (toolName === "PowerShell") {
-      const psDecision = evaluatePowerShell(String(input.command || ""));
+      const command = String(input.command || "");
+      const psDecision = evaluatePowerShell(command);
       if (psDecision) return psDecision;
-      const z1 = evaluateDeletionProtection(String(input.command || ""));
+      const z1 = evaluateDeletionProtection(command);
       if (z1) return z1;
-      const bashDecision = evaluateBashCommand(String(input.command || ""));
+      const bashDecision = evaluateBashCommand(command);
       if (bashDecision) return bashDecision;
-      return null;
+      return evaluateCommandIntent(command);
     }
     if (toolName === "Bash") {
-      return evaluateBash(String(input.command || ""));
+      const command = String(input.command || "");
+      return evaluateBash(command) || evaluateCommandIntent(command);
     }
     if (toolName === "Read") return evaluateRead(input);
-    if (toolName === "Write" || toolName === "Edit") return evaluateWrite(input, toolName);
+    if (toolName === "Write" || toolName === "Edit") {
+      return evaluateWrite(input, toolName) || evaluateWriteToolIntent(toolName, input);
+    }
+    // Write-capable MCP tools and NotebookEdit/MultiEdit land here.
+    return evaluateWriteToolIntent(toolName, input);
   } catch (err) {
     process.stderr.write(`[aces-hook-engine] ${err && err.stack ? err.stack.split("\n")[0] : "unknown"}\n`);
     // fail-safe: ambiguous input → ask
@@ -601,8 +867,17 @@ function main() {
     }
     const rule = result ? result.rule : "NO_MATCH";
     const decision = result ? result.decision : "allow";
-    journal(rule, decision);
-    if (!result) {
+    const journalDecision = decision === "advisory" ? "would-deny" : decision;
+    if (!journal(rule, journalDecision) && result) {
+      // Fail-closed: a policy decision that cannot be audited is not authorized.
+      const out = { decision: "block", reason: "WA-AUDIT-1: audit append failed; the decision cannot be authorized" };
+      if (event === "PreToolUse" || toolName) {
+        out.hookSpecificOutput = { hookEventName: "PreToolUse", permissionDecision: "deny" };
+      }
+      process.stdout.write(JSON.stringify(out));
+      return;
+    }
+    if (!result || result.decision === "allow" || result.decision === "advisory") {
       process.stdout.write("{}");
       return;
     }
@@ -621,6 +896,28 @@ function main() {
   });
 }
 
+/**
+ * Non-hook adapter (E2): `--evaluate` reads one write-authority request as JSON
+ * on stdin and prints the Decision. Same engine, same policy body — no second
+ * decision path. Exit code stays 0; the caller must obey the `decision` field.
+ */
+function evaluateCliRequest() {
+  let raw = "";
+  process.stdin.setEncoding("utf-8");
+  process.stdin.on("data", (c) => (raw += c));
+  process.stdin.on("end", () => {
+    let request;
+    try {
+      request = JSON.parse(raw || "{}");
+    } catch {
+      process.stdout.write(JSON.stringify({ decision: "deny", rule: "WA-MALFORMED-2", reason: "request is not valid JSON" }) + "\n");
+      return;
+    }
+    process.stdout.write(JSON.stringify(evaluateFileIntent(request)) + "\n");
+  });
+}
+
 if (process.argv[1] && process.argv[1].endsWith("aces-hook-engine.mjs")) {
-  main();
+  if (process.argv.includes("--evaluate")) evaluateCliRequest();
+  else main();
 }
