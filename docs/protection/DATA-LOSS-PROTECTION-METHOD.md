@@ -242,7 +242,49 @@ as advisory (ASA-003.3 §11.7 coverage rule).
 | MC-13 | Staging zone outside the durable zone, no Allow exception | `C:\ACES-Staging`, contract §2.1 | **DONE (path created)** |
 | MC-14 | Audit spool fallback with `SPOOL` marker; both unwritable → DENY | 2 named tests + engine `journal()` | **DONE** |
 | MC-15 | Snapshot archives the spool | `staging-spool.zip` in the manifest after the fallback probe wrote 1 row | **DONE** |
-| MC-16 | E3 deny ACE applied to repo and Vault | `icacls` output + agent-identity probe | **NOT STARTED** |
+| MC-16 | E3 deny ACE applied to repo and Vault | `icacls` output + agent-identity probe | **NOT STARTED (tooling ready)** |
+| MC-17 | W4b tooling is ASCII, parser-clean, and has an owner-token control run | `w4b-identity-boundary.ps1`, `w4b-probe.ps1` | **DONE** |
+| MC-18 | The agent token shows `administrators=ABSENT` and all bypass privileges `ABSENT` | `w4b-probe.txt` from the agent run | **NOT STARTED** |
+
+### 10.1 Privilege bypass — measured 2026-11-28
+
+An elevated owner PowerShell reported `SeBackupPrivilege` and `SeRestorePrivilege` **enabled**.
+With that token:
+
+- a file whose DACL denied `DELETE` to `Everyone` was still removed by `[IO.File]::Delete`;
+- a file whose DACL denied write and delete was renamed successfully;
+- a new file in the same protected directory was denied — creation alone was blocked.
+
+A Deny ACE is therefore not evidence in that token: the owner session can bypass the DACL it
+just wrote. Consequences:
+
+- ACL probes executed in the owner or any administrator session are **INVALID**, regardless of
+  the `DENIED` lines they print;
+- E3 holds only for a standard local principal whose token lacks `SeBackupPrivilege`,
+  `SeRestorePrivilege`, `SeTakeOwnershipPrivilege` and Administrators membership. The probe
+  reports all four; any `PRESENT`/`MEMBER` makes the verdict FAIL even where the writes are
+  denied;
+- if a harness must run elevated, the ACL layer cannot bound it and the boundary has to move to
+  E4 (a store the agent cannot write), not to a stronger ACE.
+
+### 10.2 W4b tooling (not applied)
+
+`tools/protection/w4b-identity-boundary.ps1` (status by default, `-Apply`, `-Rollback`) creates
+or reuses a standard local agent identity, saves the current SDDL of both durable roots under
+`C:\ACES-Staging\acl-backup\`, grants that identity Modify on the staging zone only, and applies
+the Deny mask `(OI)(CI)(WD,AD,WEA,WA,DE,DC,WDAC,WO)` to the repository and the Vault. Rollback
+restores the saved SDDL and deletes the account; the staging zone is kept as evidence.
+
+`tools/protection/w4b-probe.ps1` runs **as the agent** and prints one line per fact: identity,
+the four bypass privileges, Administrators membership, and `ev:read|create|overwrite|delete|rename|staging|engine|spool-delta`.
+The accepted matrix is `administrators=ABSENT`, all `priv:*=ABSENT`, `ev:read=ALLOWED`,
+`ev:create|overwrite|delete|rename=DENIED`, `ev:staging=ALLOWED`, `ev:engine=RAN`,
+`ev:spool-delta=1`.
+
+Both scripts are ASCII and parser-clean (`PS_PARSE_OK`); the probe was executed under the owner
+token as a control and returned the expected all-`ALLOWED` / `spool-delta=0` result. **No ACL
+was applied and no account was created.** MC-16/18 remain open until the owner runs `-Apply` and
+the probe under the agent identity; an owner-session probe is not acceptance evidence.
 
 ### 5.1 Implemented rules (W1 policy body)
 

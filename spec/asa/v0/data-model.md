@@ -588,6 +588,15 @@ operation is constrained by **E3 or E4**. E1/E2 may block or flag, but MUST NOT 
 enforcement. A deployment with only E1/E2 is `ADVISORY`, not `ENFORCED`, and MUST NOT be
 described as a prohibition.
 
+**E3 identity constraint (measured 2026-11-28):** an identity that is a member of
+Administrators or Backup Operators, or whose token holds `SeRestorePrivilege`,
+`SeBackupPrivilege`, or `SeTakeOwnershipPrivilege`, cannot satisfy E3 for itself. Under an
+elevated owner token with `SeRestorePrivilege` enabled, a file DACL that denied `DELETE` to
+`Everyone` still did not prevent `[IO.File]::Delete`; the same token renamed a file whose DACL
+denied write and delete. E3 therefore requires a standard local agent principal, launched as
+that principal, and a probe that reports `administrators=ABSENT` and all four bypass
+privileges `ABSENT` before any `DENIED` result is accepted as enforcement.
+
 ### 11.8 Decision point and evidence
 
 - One gate evaluates requests and is the only writer for protected resources (E4).
