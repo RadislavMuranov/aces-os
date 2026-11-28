@@ -1,6 +1,6 @@
 # MOC — индекс атомов знаний
 
-**Обновлено:** 2026-11-28 · **Всего атомов:** 10 · **Правила:** `../README.md` · **Шаблон:** `../atoms/_ATOM-TEMPLATE.md`
+**Обновлено:** 2026-11-28 · **Всего атомов:** 11 · **Правила:** `../README.md` · **Шаблон:** `../atoms/_ATOM-TEMPLATE.md`
 
 ## Восстановление и состояние second-brain-mcp
 
@@ -20,11 +20,12 @@
 - [[ATOM-20261128-008]] — bootstrap wiki-слоя выполнен, петля запущена (OBSERVED)
 - [[ATOM-20261128-009]] — Deny-ACL обходится SeRestorePrivilege; проба под owner невалидна (OBSERVED)
 - [[ATOM-20261128-010]] — CodexSandboxUsers лишён Allow Modify на Vault, наложен Deny (REVIEW)
+- [[ATOM-20261128-011]] — W4b не принят: вывод был от owner-токена; починка и 16/16 SelfCheck (OBSERVED)
 
 ## Статусы
 
 | Статус | Кол-во |
 |---|---|
-| OBSERVED | 7 |
+| OBSERVED | 8 |
 | REVIEW | 3 |
 | UNKNOWN | 0 |

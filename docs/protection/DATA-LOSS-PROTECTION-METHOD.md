@@ -103,7 +103,7 @@ AutoClaw bridge). The redefinitions live on only as the DLPM-* family.
 # DLPM-002 — WRITE AUTHORITY (WA-1)
 
 **Record:** DLPM-002
-**Status:** AUTHORIZED / W1–W4a IMPLEMENTED IN `observe` MODE / E3–E5 NOT IMPLEMENTED
+**Status:** AUTHORIZED / W1–W3 IMPLEMENTED IN `observe`; W4a DONE; W4b TOOLING SELF-CHECKED, NOT APPLIED / E3–E5 NOT IMPLEMENTED
 **Authorized:** 2026-11-27 by the owner (two explicit instructions, this session)
 **Binding specification:** `spec/asa/v0/data-model.md` §11 (ASA-003.3)
 **Parent:** DLPM-001
@@ -247,68 +247,8 @@ as advisory (ASA-003.3 §11.7 coverage rule).
 | MC-18 | The agent token shows `administrators=ABSENT` and all bypass privileges `ABSENT` | `w4b-probe.txt` from the agent run | **NOT STARTED** |
 | MC-19 | Vault DACL is protected and denies the Codex group write/delete, with no allow exception | `Get-Acl` dump, `vault-pre-codex.sddl` | **DONE** |
 | MC-20 | The denial is proven inside the Codex sandbox token | probe launched as the Codex identity | **NOT STARTED (no credential)** |
-
-### 10.1 Privilege bypass — measured 2026-11-28
-
-An elevated owner PowerShell reported `SeBackupPrivilege` and `SeRestorePrivilege` **enabled**.
-With that token:
-
-- a file whose DACL denied `DELETE` to `Everyone` was still removed by `[IO.File]::Delete`;
-- a file whose DACL denied write and delete was renamed successfully;
-- a new file in the same protected directory was denied — creation alone was blocked.
-
-A Deny ACE is therefore not evidence in that token: the owner session can bypass the DACL it
-just wrote. Consequences:
-
-- ACL probes executed in the owner or any administrator session are **INVALID**, regardless of
-  the `DENIED` lines they print;
-- E3 holds only for a standard local principal whose token lacks `SeBackupPrivilege`,
-  `SeRestorePrivilege`, `SeTakeOwnershipPrivilege` and Administrators membership. The probe
-  reports all four; any `PRESENT`/`MEMBER` makes the verdict FAIL even where the writes are
-  denied;
-- if a harness must run elevated, the ACL layer cannot bound it and the boundary has to move to
-  E4 (a store the agent cannot write), not to a stronger ACE.
-
-### 10.2 W4b tooling (not applied)
-
-`tools/protection/w4b-identity-boundary.ps1` (status by default, `-Apply`, `-Rollback`) creates
-or reuses a standard local agent identity, saves the current SDDL of both durable roots under
-`C:\ACES-Staging\acl-backup\`, grants that identity Modify on the staging zone only, and applies
-the Deny mask `(OI)(CI)(WD,AD,WEA,WA,DE,DC,WDAC,WO)` to the repository and the Vault. Rollback
-restores the saved SDDL and deletes the account; the staging zone is kept as evidence.
-
-`tools/protection/w4b-probe.ps1` runs **as the agent** and prints one line per fact: identity,
-the four bypass privileges, Administrators membership, and `ev:read|create|overwrite|delete|rename|staging|engine|spool-delta`.
-The accepted matrix is `administrators=ABSENT`, all `priv:*=ABSENT`, `ev:read=ALLOWED`,
-`ev:create|overwrite|delete|rename=DENIED`, `ev:staging=ALLOWED`, `ev:engine=RAN`,
-`ev:spool-delta=1`.
-
-Both scripts are ASCII and parser-clean (`PS_PARSE_OK`); the probe was executed under the owner
-token as a control and returned the expected all-`ALLOWED` / `spool-delta=0` result. **No ACL
-was applied and no account was created.** MC-16/18 remain open until the owner runs `-Apply` and
-the probe under the agent identity; an owner-session probe is not acceptance evidence.
-
-### 10.3 Codex sandbox bounded on the Vault (2026-11-28)
-
-`Get-Acl` on the Vault showed an inherited `Allow Modify` for the local group
-`USER\CodexSandboxUsers` (`S-1-5-21-959256707-1264188439-1517227358-1002`; members
-`CodexSandboxOffline` RID 1003 and `CodexSandboxOnline` RID 1004) and a second inherited
-`Allow Modify` for the foreign SID `S-1-5-21-3297472494-1372551071-3040875019-374093975`.
-The owner (RID 1001) is not a member of the group, and the current token did not contain it.
-
-Action (`w4b-identity-boundary.ps1 -Codex`): saved `vault-pre-codex.sddl`, then replaced the
-Vault DACL with a protected one — `SYSTEM`, `Administrators` and the owner have FullControl,
-and the Codex group has an explicit `Deny` on `WD,AD,WEA,WA,DE,DC,WDAC,WO`. The foreign-SID allow
-was removed as part of stripping inheritance. Owner create/delete was proven before and after
-the deny; four subdirectories report `codexDeny=True`.
-
-Boundary: the Deny mask does not name RD/REA/RA/RC, but stripping inheritance also removed every
-allow ACE for the group, so the effective result is **no access at all, read included** — stronger
-than the WA-1 reader role. To make Codex a reader, an explicit `(OI)(CI)RX` grant must be added;
-that was not done. Runtime effect **inside** the Codex sandbox token was not probed (no
-credential); the evidence is the DACL, not an executed denial. If that token holds
-`SeRestorePrivilege`, the ACE is bypassed exactly as in §10.1.
-Rollback: `-RollbackCodex` restores `vault-pre-codex.sddl`.
+| MC-21 | W4b tooling passes its own preflight | `-SelfCheck` 16/16 PASS, exit 0 | **DONE** |
+| MC-22 | Agent-token `-Verify` returns `W4B=PASS` | owner report with nonce, both SIDs, post-state | **NOT STARTED** |
 
 ### 5.1 Implemented rules (W1 policy body)
 
@@ -374,7 +314,11 @@ direct shell, a script interpreter, and a differently mounted MCP server remain 
 hook's reach; those are closed by E3 (identity) and E4 (store gate), which are not implemented.
 No statement in this record may be read as "write to the durable zone is impossible".
 
-## 10. W4a implementation record (2026-11-28)
+## 10. Write-authority records (W4)
+
+
+
+### 10.1 W4a: staging and audit spool (2026-11-28)
 
 - **Decision:** staging outside the repository at `C:\ACES-Staging\`; audit spool at
   `C:\ACES-Staging\audit\spool\`; repo and Vault stay under Deny with no Allow exception.
@@ -389,3 +333,100 @@ No statement in this record may be read as "write to the durable zone is impossi
   journal then wrote the row `WA-UPDATE-1 allow SPOOL`, and the next snapshot archives it as
   `staging-spool.zip`. That row is **uncommitted** to the canonical journal until W5 drains it —
   it is evidence that the fallback works, not a replacement for the ledger.
+
+### 10.2 Privilege bypass — measured 2026-11-28
+
+An elevated owner PowerShell reported `SeBackupPrivilege` and `SeRestorePrivilege` **enabled**.
+With that token:
+
+- a file whose DACL denied `DELETE` to `Everyone` was still removed by `[IO.File]::Delete`;
+- a file whose DACL denied write and delete was renamed successfully;
+- a new file in the same protected directory was denied — creation alone was blocked.
+
+A Deny ACE is therefore not evidence in that token: the owner session can bypass the DACL it
+just wrote. Consequences:
+
+- ACL probes executed in the owner or any administrator session are **INVALID**, regardless of
+  the `DENIED` lines they print;
+- E3 holds only for a standard local principal whose token lacks `SeBackupPrivilege`,
+  `SeRestorePrivilege`, `SeTakeOwnershipPrivilege` and Administrators membership. The probe
+  reports all five (the four above plus SeDebugPrivilege); any `PRESENT`/`MEMBER` makes the verdict FAIL even where the writes are
+  denied;
+- if a harness must run elevated, the ACL layer cannot bound it and the boundary has to move to
+  E4 (a store the agent cannot write), not to a stronger ACE.
+
+### 10.3 W4b tooling, first pass (superseded)
+
+`tools/protection/w4b-identity-boundary.ps1` (status by default, `-Apply`, `-Rollback`) creates
+or reuses a standard local agent identity, saves the current SDDL of both durable roots under
+`C:\ACES-Staging\acl-backup\`, grants that identity Modify on the staging zone only, and applies
+the Deny mask `(OI)(CI)(WD,AD,WEA,WA,DE,DC,WDAC,WO)` to the repository and the Vault. Rollback
+restores the saved SDDL and deletes the account; the staging zone is kept as evidence.
+
+`tools/protection/w4b-probe.ps1` runs **as the agent** and prints one line per fact: identity,
+the four bypass privileges, Administrators membership, and `ev:read|create|overwrite|delete|rename|staging|engine|spool_delta`.
+The accepted matrix is `administrators=ABSENT`, all `priv:*=ABSENT`, `ev:read=ALLOWED`,
+`ev:create|overwrite|delete|rename=DENIED`, `ev:staging=ALLOWED`, `ev:engine=RAN`,
+`ev:spool_delta=1`.
+
+Both scripts are ASCII and parser-clean (`PS_PARSE_OK`); the probe was executed under the owner
+token as a control and returned the expected all-`ALLOWED` / `spool_delta=0` result. **No agent
+account and no agent ACE were created**; the Vault Codex deny in 10.4 was applied. MC-16/18
+remain open until the owner runs `-Apply` and the probe under the agent identity; an
+owner-session probe is not acceptance evidence.
+
+### 10.4 Codex sandbox bounded on the Vault (2026-11-28)
+
+`Get-Acl` on the Vault showed an inherited `Allow Modify` for the local group
+`USER\CodexSandboxUsers` (`S-1-5-21-959256707-1264188439-1517227358-1002`; members
+`CodexSandboxOffline` RID 1003 and `CodexSandboxOnline` RID 1004) and a second inherited
+`Allow Modify` for the foreign SID `S-1-5-21-3297472494-1372551071-3040875019-374093975`.
+The owner (RID 1001) is not a member of the group, and the current token did not contain it.
+
+Action (`w4b-identity-boundary.ps1 -Codex`): saved `vault-pre-codex.sddl`, then replaced the
+Vault DACL with a protected one — `SYSTEM`, `Administrators` and the owner have FullControl,
+and the Codex group has an explicit `Deny` on `WD,AD,WEA,WA,DE,DC,WDAC,WO`. The foreign-SID allow
+was removed as part of stripping inheritance. Owner create/delete was proven before and after
+the deny; four subdirectories report `codexDeny=True`.
+
+Boundary: the Deny mask does not name RD/REA/RA/RC, but stripping inheritance also removed every
+allow ACE for the group, so the effective result is **no access at all, read included** — stronger
+than the WA-1 reader role. To make Codex a reader, an explicit `(OI)(CI)RX` grant must be added;
+that was not done. Runtime effect **inside** the Codex sandbox token was not probed (no
+credential); the evidence is the DACL, not an executed denial. If that token holds
+`SeRestorePrivilege`, the ACE is bypassed exactly as in §10.1.
+Rollback: `-RollbackCodex` restores `vault-pre-codex.sddl`.
+
+### 10.5 W4b repair, second pass (2026-11-28)
+
+The first W4b hand-off failed acceptance. The causes were in the tooling, not in the policy:
+
+1. Corrupted literals in the handed-out text (`-Applyassi`, `(OI)(CI415)`, `Select-String619`,
+   `%COMPUTERNAME%` and `\"` used as if cmd escapes). The scripts now live in the repository and
+   every change is checked with the PowerShell parser plus a non-ASCII scan. Parameters are
+   `-Apply`, `-Verify`, `-Rollback`, `-RollbackCodex`, `-SelfCheck`.
+2. The probe could not tell "denied" from "not attempted": delete, overwrite and rename targets
+   were optional and their absence produced `N/A`. `-Verify` now creates every target as the
+   owner, records its hash, and requires every premise true. A missing target is FAIL. It also
+   re-reads the targets after the run, so the agent report is corroboration, not proof.
+3. Identity was shown by name only. The probe now records the token SID and the process owner SID
+   from `Win32_Process.GetOwnerSid`, compares both with the expected agent SID, and reports the
+   integrity SID, elevation, Administrators membership and five bypass privileges.
+4. Rollback was incomplete. `-Apply` stores `repo`, `vault` and `stage` SDDL with a canonical hash
+   before any change; `-Rollback` restores all three, verifies the hash, removes every agent ACE
+   from the staging subtree, and refuses to delete the account while any ACE remains.
+5. Staging was writable by Authenticated Users through inheritance. `-Apply` now protects
+   `C:\ACES-Staging` (SYSTEM and Administrators and owner FullControl, agent Modify rev),
+   `acl-backup` (owner only) and `runner` (owner plus agent read-execute), so the agent cannot edit
+   its backups or its own probe.
+
+Owner-side preflight, no agent credential: `-SelfCheck` returns 16/16 PASS, exit 0, and
+removes its scratch tree. It covers SDDL and hash roundtrip on a directory with a child, child
+inheritance of the deny and its removal on restore, owner create/read/delete in staging, and the
+detector run under the owner token: `NON_ISOLATED`, exit 1, identity mismatch, admin member,
+elevated, create allowed. It also proves the engine discriminator: as the owner,
+`canonical_delta=1` and `spool_delta=0`; the agent run must show `0` and `1`, because the agent
+cannot append to the canonical journal.
+
+Not proven: the agent-token run. `-Apply` and `-Verify` each prompt (APPLY / agent password) and
+were not executed here. Until `W4B=PASS` is produced, the boundary stays `ADVISORY`.
