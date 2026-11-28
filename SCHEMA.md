@@ -356,7 +356,7 @@ The hook's PASS is structural only. It does not establish evidence truth, author
 
 ## 26. Write Authority Boundary (WA-1)
 
-**Status:** ACTIVE — Canon change authorized by the owner on 2026-11-27. Policy body and file-intent evaluation implemented in the existing engine (W1–W3), default mode `observe`. Identity boundary (E3) and store gate (E4) are NOT implemented.
+**Status:** ACTIVE — Canon change authorized by the owner on 2026-11-27. Policy body, file-intent evaluation and the audit spool implemented in the existing engine (W1–W4a), default mode `observe`. Identity boundary (E3) and store gate (E4) are NOT implemented.
 **Model:** `spec/asa/v0/data-model.md` §11 (ASA-003.3). **Record:** DLPM-002.
 
 `CREATE`, `UPDATE`, `DELETE`, `RENAME`/`MOVE`, and non-enumerable `EXECUTE` against a protected durable resource are governed by ASA-003.3 §11.
@@ -369,5 +369,7 @@ Normative consequences:
 4. A durable `CREATE` requires a manifest field `EXTENDS` naming the existing component it extends; a durable `DELETE` requires `RESTORE` naming a provable recovery source. Absent, unprovable, or malformed → DENY.
 5. Unknown operation, unavailable policy body, or failed audit append → DENY (fail-closed).
 6. Shell commands are never authorized or denied by static parsing; an `EXECUTE` against a durable resource is constrained only by the executing identity.
-7. No second decision engine, ledger, registry, hook, or write-guard subsystem may be introduced. Extend the existing engine and its tests (B-134, §25).
-8. The `ACES-ITERATION-RECORD` remains governed by §25 and `spec/MASTER-PROTOCOL.md` §9.7. WA-1 adds no record format and no competing closure contract.
+7. Staging lives outside the durable zone at `C:\ACES-Staging` (override `ACES_STAGING_ROOT`). Staging content carries no AcceptedState and is never promoted automatically; transfer to a durable resource requires a gate Decision through the acceptance/verification contour.
+8. The canonical journal is the committed audit segment. When the agent identity cannot write it, the engine appends the same event to `C:\ACES-Staging\audit\spool\journal.tsv` with a trailing `SPOOL` marker, and the gate drains the spool. The spool is an uncommitted segment of the single ledger, not a second ledger. Both segments unwritable → DENY.
+9. No second decision engine, ledger, registry, hook, or write-guard subsystem may be introduced. Extend the existing engine and its tests (B-134, §25).
+10. The `ACES-ITERATION-RECORD` remains governed by §25 and `spec/MASTER-PROTOCOL.md` §9.7. WA-1 adds no record format and no competing closure contract.

@@ -600,6 +600,12 @@ described as a prohibition.
   the gate (E4) in W5. No second ledger is permitted, and a parallel ledger is a competing
   enforcement path (B-134).
 - Audit append failure → DENY (§6). Audit never grants authority (I7).
+- Staging is outside the durable zone (`C:\ACES-Staging`, override `ACES_STAGING_ROOT`).
+  Staging content is not a Decision outcome, carries no AcceptedState, and is never promoted
+  automatically; transfer to a durable resource requires an ALLOW Decision through the gate.
+- When the agent identity cannot write the canonical journal, the same event is appended to the
+  spool segment with an explicit `SPOOL` marker and the gate drains it. The spool is an
+  uncommitted segment of the single ledger, not a second ledger.
 - A protected resource present with no matching AuthorizationEvent is an **integrity
   violation**, detected by reconciliation; it is not retroactively authorized.
 
@@ -622,10 +628,14 @@ outside the gate. These remain outside v0.
 
 ### 11.11 Implementation status
 
-**PARTIALLY IMPLEMENTED (W1–W3).** The policy body and `evaluateFileIntent()` live in the
+**PARTIALLY IMPLEMENTED (W1–W4a).** The policy body and `evaluateFileIntent()` live in the
 existing `.claude/hooks/aces-hook-engine.mjs`; `--evaluate` is the E2 adapter. Default mode is
 `observe` (journal `would-deny`, never block). `ACES_WA_MODE=enforce` blocks **tool-level**
 writes — `Write`, `Edit`, `MultiEdit`, `NotebookEdit`, and write-capable MCP tools — only.
+
+The audit segment is implemented: the canonical journal is written when possible; otherwise the
+event goes to the spool with a trailing `SPOOL` marker, and the gate drains it. If neither segment
+is writable the decision is DENY.
 
 **NOT IMPLEMENTED:** E3 identity boundary, E4 store gate, staging lease, quarantine and
 retention, reconciliation, and the gate-produced AuthorizationEvent fields. Until E4 lands the

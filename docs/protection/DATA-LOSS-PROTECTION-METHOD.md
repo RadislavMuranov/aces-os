@@ -103,7 +103,7 @@ AutoClaw bridge). The redefinitions live on only as the DLPM-* family.
 # DLPM-002 — WRITE AUTHORITY (WA-1)
 
 **Record:** DLPM-002
-**Status:** AUTHORIZED / W1–W3 IMPLEMENTED IN `observe` MODE / E3–E5 NOT IMPLEMENTED
+**Status:** AUTHORIZED / W1–W4a IMPLEMENTED IN `observe` MODE / E3–E5 NOT IMPLEMENTED
 **Authorized:** 2026-11-27 by the owner (two explicit instructions, this session)
 **Binding specification:** `spec/asa/v0/data-model.md` §11 (ASA-003.3)
 **Parent:** DLPM-001
@@ -170,6 +170,23 @@ legitimate writes it has not yet learned to authorize. Enabling enforcement firs
 owner out of their own repository and force the control to be disabled — a control that cannot be
 lived with is bypassed.
 
+### 2.1 Staging contract (owner decision, 2026-11-28)
+
+- **Staging zone:** `C:\ACES-Staging\` — outside the durable zone, so a Deny ACE on the repository
+  and the Vault needs no Allow exception. Override: `ACES_STAGING_ROOT`.
+- **Audit spool:** `C:\ACES-Staging\audit\spool\` — the uncommitted segment of the single journal.
+  The engine appends here only when the canonical journal is not writable; rows carry a trailing
+  `SPOOL` marker. The gate drains the spool into the canonical journal. Both unwritable → DENY.
+- **No AcceptedState:** staging material is not a Decision outcome. It is never promoted
+  automatically; transfer to the durable zone happens only through the established
+  acceptance/verification contour (gate Decision + AuthorizationEvent).
+- **Durability:** `aces-snapshot.ps1` archives the spool as `staging-spool.zip` and records it in
+  the manifest and the Obsidian log line.
+- **Consequence:** W4b can apply a blanket Deny (`W,D,WDAC,WO`) with no holes, and audit
+  *availability* survives enforcement — F3 is closed by construction rather than by exception.
+  The spool is agent-writable, so it is evidence of intent, not tamper-evident proof; tamper
+  evidence requires E4 (the gate writes the canonical journal) or an OS audit policy.
+
 ## 3. Plan control
 
 Checked at every stage boundary; a failed check stops the stage.
@@ -220,8 +237,12 @@ as advisory (ASA-003.3 §11.7 coverage rule).
 | MC-8 | E4 gate: staging, quarantine, retention, reconcile | V3/V4 evidence | **NOT STARTED** |
 | MC-9 | Non-hook adapter (CLI, same engine) | `--evaluate` tests incl. malformed input | **DONE (E2)** |
 | MC-10 | Exactly one Stop owner; no second hook/ledger/registry | settings assertion test + tree check | **PASS** |
-| MC-11 | Regression | `node --test tests/*.test.ts tests/hooks/*.test.mjs` → 113/113 | **PASS** |
+| MC-11 | Regression | `node --test tests/*.test.ts tests/hooks/*.test.mjs` → 115/115 | **PASS** |
 | MC-12 | Owner ratification of `enforced` mode | explicit owner decision recorded | **NOT STARTED** |
+| MC-13 | Staging zone outside the durable zone, no Allow exception | `C:\ACES-Staging`, contract §2.1 | **DONE (path created)** |
+| MC-14 | Audit spool fallback with `SPOOL` marker; both unwritable → DENY | 2 named tests + engine `journal()` | **DONE** |
+| MC-15 | Snapshot archives the spool | `staging-spool.zip` in the manifest | **DONE** |
+| MC-16 | E3 deny ACE applied to repo and Vault | `icacls` output + agent-identity probe | **NOT STARTED** |
 
 ### 5.1 Implemented rules (W1 policy body)
 
@@ -286,3 +307,15 @@ commands stay advisory in both modes, because static parsing is not a boundary.
 direct shell, a script interpreter, and a differently mounted MCP server remain outside the
 hook's reach; those are closed by E3 (identity) and E4 (store gate), which are not implemented.
 No statement in this record may be read as "write to the durable zone is impossible".
+
+## 10. W4a implementation record (2026-11-28)
+
+- **Decision:** staging outside the repository at `C:\ACES-Staging\`; audit spool at
+  `C:\ACES-Staging\audit\spool\`; repo and Vault stay under Deny with no Allow exception.
+- **Action:** the engine now recognises the external staging root; the journal has a two-segment
+  write path (canonical → spool, trailing `SPOOL` marker, DENY only if both fail); the snapshot tool
+  archives the spool as `staging-spool.zip` and extends the manifest to recursive relative paths.
+- **Not actioned:** no Windows account was created or modified; no ACL was changed. W4b remains
+  owner-executed because it needs an interactive password.
+- **Verification:** 115 tests passed, 0 failed (2 new: spool fallback, external staging root);
+  PowerShell parser reports `PS_PARSE_OK`; `C:\ACES-Staging\audit\spool` exists.
