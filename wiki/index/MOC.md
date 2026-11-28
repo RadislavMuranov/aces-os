@@ -1,6 +1,6 @@
 # MOC — индекс атомов знаний
 
-**Обновлено:** 2026-11-28 · **Всего атомов:** 8 · **Правила:** `../README.md` · **Шаблон:** `../atoms/_ATOM-TEMPLATE.md`
+**Обновлено:** 2026-11-28 · **Всего атомов:** 9 · **Правила:** `../README.md` · **Шаблон:** `../atoms/_ATOM-TEMPLATE.md`
 
 ## Восстановление и состояние second-brain-mcp
 
@@ -18,11 +18,12 @@
 - [[ATOM-20261128-006]] — бенчмарк Letta: файлы+grep 74% vs 68.5% (REVIEW)
 - [[ATOM-20261128-007]] — граф сеанса 24.11 верифицирован 1:1; AutoClaw Roaming (OBSERVED)
 - [[ATOM-20261128-008]] — bootstrap wiki-слоя выполнен, петля запущена (OBSERVED)
+- [[ATOM-20261128-009]] — Deny-ACL обходится SeRestorePrivilege; проба под owner невалидна (OBSERVED)
 
 ## Статусы
 
 | Статус | Кол-во |
 |---|---|
-| OBSERVED | 6 |
+| OBSERVED | 7 |
 | REVIEW | 2 |
 | UNKNOWN | 0 |
