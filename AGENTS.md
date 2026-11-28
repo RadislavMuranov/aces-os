@@ -34,6 +34,10 @@ After meaningful state-changing work, update the applicable status, roadmap, and
 
 `/btw` and `/site` are intermediate iterations for clarifying, researching, or refining the current question. They are not final answers and must not unnecessarily pollute or duplicate session context; preserve continuity with the current session.
 
+## Knowledge Capture (Wiki Loop)
+
+New verified knowledge from a session becomes a **new wiki atom** in `wiki/atoms/` (template: `wiki/atoms/_ATOM-TEMPLATE.md`) with `status: OBSERVED|REVIEW|UNKNOWN`, linked from `wiki/index/MOC.md`, and logged in `wiki/journal/`. Never record new knowledge by silently editing the canon (MASTER-PROTOCOL / SCHEMA / K1–K6 / I1–I8). Search the wiki with `rg`/grep; link atoms with `[[wikilinks]]`.
+
 ## Canonical Rules
 
 Follow `SCHEMA.md` for the complete operational contract. If this prompt and the schema appear to conflict, verify the canonical project rules before acting.
