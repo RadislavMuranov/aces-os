@@ -241,7 +241,7 @@ as advisory (ASA-003.3 §11.7 coverage rule).
 | MC-12 | Owner ratification of `enforced` mode | explicit owner decision recorded | **NOT STARTED** |
 | MC-13 | Staging zone outside the durable zone, no Allow exception | `C:\ACES-Staging`, contract §2.1 | **DONE (path created)** |
 | MC-14 | Audit spool fallback with `SPOOL` marker; both unwritable → DENY | 2 named tests + engine `journal()` | **DONE** |
-| MC-15 | Snapshot archives the spool | `staging-spool.zip` in the manifest | **DONE** |
+| MC-15 | Snapshot archives the spool | `staging-spool.zip` in the manifest after the fallback probe wrote 1 row | **DONE** |
 | MC-16 | E3 deny ACE applied to repo and Vault | `icacls` output + agent-identity probe | **NOT STARTED** |
 
 ### 5.1 Implemented rules (W1 policy body)
@@ -318,4 +318,8 @@ No statement in this record may be read as "write to the durable zone is impossi
 - **Not actioned:** no Windows account was created or modified; no ACL was changed. W4b remains
   owner-executed because it needs an interactive password.
 - **Verification:** 115 tests passed, 0 failed (2 new: spool fallback, external staging root);
-  PowerShell parser reports `PS_PARSE_OK`; `C:\ACES-Staging\audit\spool` exists.
+  PowerShell parser reports `PS_PARSE_OK`; `C:\ACES-Staging\audit\spool` exists. The spool was
+  empty at the first W4a snapshot (`spool: empty`); a hook probe with an unwritable canonical
+  journal then wrote the row `WA-UPDATE-1 allow SPOOL`, and the next snapshot archives it as
+  `staging-spool.zip`. That row is **uncommitted** to the canonical journal until W5 drains it —
+  it is evidence that the fallback works, not a replacement for the ledger.
