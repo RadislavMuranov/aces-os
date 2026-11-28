@@ -565,14 +565,13 @@ function Invoke-SelfCheck {
 
     $before = (Get-Acl -LiteralPath $aclDir).Sddl
     $beforeHash = Get-AclHash $aclDir
+    $null = Save-Sddl $aclDir 'selfcheck'
     $ownerSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
     $null = & icacls $aclDir /inheritance:r /grant:r "*${SystemSid}:(OI)(CI)F" `
         "*${AdminsSid}:(OI)(CI)F" "*${ownerSid}:(OI)(CI)F" "*${GuestsSid}:(OI)(CI)RX"
-    $sd = New-Object System.Security.AccessControl.DirectorySecurity
-    $sd.SetSecurityDescriptorSddlForm($before)
-    Set-Acl -LiteralPath $aclDir -AclObject $sd
+    $restored = Restore-Sddl $aclDir 'selfcheck'
     & $chk 'acl.sddl_roundtrip' ((Get-Acl -LiteralPath $aclDir).Sddl -eq $before)
-    & $chk 'acl.hash_roundtrip' ((Get-AclHash $aclDir) -eq $beforeHash)
+    & $chk 'acl.hash_roundtrip' ($restored -and ((Get-AclHash $aclDir) -eq $beforeHash))
 
     $child = Join-Path $aclDir 'child'
     New-Item -ItemType Directory -Force -Path $child | Out-Null
@@ -658,6 +657,8 @@ function Invoke-SelfCheck {
     'SELFCHECK=' + $(if ($fail.Count) { 'FAIL' } else { 'PASS' })
     'BOUNDARY=ADVISORY'
     if ($fail.Count) { 'kept=' + $root } else { Remove-Item -LiteralPath $root -Recurse -Force -ErrorAction SilentlyContinue }
+    Remove-Item -LiteralPath (Join-Path $BackupDir 'selfcheck.pre-w4b.sddl') -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath (Join-Path $BackupDir 'selfcheck.pre-w4b.sha256') -Force -ErrorAction SilentlyContinue
     if ($fail.Count) { exit 1 }
     exit 0
 }
