@@ -302,10 +302,12 @@ and the Codex group has an explicit `Deny` on `WD,AD,WEA,WA,DE,DC,WDAC,WO`. The 
 was removed as part of stripping inheritance. Owner create/delete was proven before and after
 the deny; four subdirectories report `codexDeny=True`.
 
-Boundary: read remains allowed for the Codex identity (RD/REA/RA/RC are not denied), matching
-WA-1 — agents are readers and proposers. Runtime effect **inside** the Codex sandbox token was
-not probed (no credential); the evidence is the DACL, not an executed denial. If that token
-holds `SeRestorePrivilege`, the ACE is bypassed exactly as in §10.1.
+Boundary: the Deny mask does not name RD/REA/RA/RC, but stripping inheritance also removed every
+allow ACE for the group, so the effective result is **no access at all, read included** — stronger
+than the WA-1 reader role. To make Codex a reader, an explicit `(OI)(CI)RX` grant must be added;
+that was not done. Runtime effect **inside** the Codex sandbox token was not probed (no
+credential); the evidence is the DACL, not an executed denial. If that token holds
+`SeRestorePrivilege`, the ACE is bypassed exactly as in §10.1.
 Rollback: `-RollbackCodex` restores `vault-pre-codex.sddl`.
 
 ### 5.1 Implemented rules (W1 policy body)

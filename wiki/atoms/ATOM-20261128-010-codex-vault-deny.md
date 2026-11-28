@@ -10,7 +10,7 @@ sources:
   - C:\ACES-Staging\acl-backup\vault-pre-codex.sddl
 ---
 
-На `Obsidian Vault` у группы `CodexSandboxUsers` (SID `S-1-5-21-...-1002`, члены — `CodexSandboxOffline` RID 1003 и `CodexSandboxOnline` RID 1004) был унаследованный `Allow Modify`; рядом висел такой же Allow у чужого SID `S-1-5-21-3297...-374093975`, а владелец (RID 1001) в группу не входил. Allow снят, DACL переведён в protected: SYSTEM, Администраторы и владелец — FullControl, группа — explicit Deny на `WD,AD,WEA,WA,DE,DC,WDAC,WO`; четыре подкаталога наследуют Deny, чтение группой сохранено.
+На `Obsidian Vault` у группы `CodexSandboxUsers` (SID `S-1-5-21-...-1002`, члены — `CodexSandboxOffline` RID 1003 и `CodexSandboxOnline` RID 1004) был унаследованный `Allow Modify`; рядом висел такой же Allow у чужого SID `S-1-5-21-3297...-374093975`, а владелец (RID 1001) в группу не входил. Allow снят, DACL переведён в protected: SYSTEM, Администраторы и владелец — FullControl, группа — explicit Deny на `WD,AD,WEA,WA,DE,DC,WDAC,WO`; четыре подкаталога и образец `00-ACES-OS\README.md` наследуют Deny. Allow-ACE для группы не осталось, поэтому эффективно закрыт весь доступ, включая чтение — это сильнее роли «читатель» в WA-1; чтобы вернуть чтение, нужен явный `(OI)(CI)RX` грант.
 
 Эффект под токеном Codex не проверен: пароля нет, доказательство — DACL, а не исполненный отказ. Если sandbox-токен несёт `SeRestorePrivilege`, Deny обходится так же, как в [[ATOM-20261128-009]]; откат — `-RollbackCodex`.
 
