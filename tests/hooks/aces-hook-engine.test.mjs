@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, rmSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
+import { tmpdir } from "node:os";
 
 const ENGINE = join(dirname(fileURLToPath(import.meta.url)), "..", "..", ".claude", "hooks", "aces-hook-engine.mjs");
 
@@ -759,13 +760,32 @@ test("WA: DLPM-1 still wins over WA-1 (protected root deletion)", () => {
   assert.match(out.reason, /DLPM-1/);
 });
 
-test("WA: failed audit append denies a policy decision (fail-closed)", () => {
+test("WA: both audit segments unavailable denies a policy decision (fail-closed)", () => {
   const out = runHookEnv(
     { event: "PreToolUse", tool_name: "Write", tool_input: { file_path: "docs/agent-made.md", content: "x" } },
-    { ACES_WA_MODE: "enforce", ACES_HOOK_JOURNAL: join(ROOT, "README.md", "journal.tsv") },
+    { ACES_WA_MODE: "enforce", ACES_HOOK_JOURNAL: join(ROOT, "README.md", "journal.tsv"), ACES_HOOK_SPOOL: join(ROOT, "README.md", "spool.tsv") },
   );
   assert.equal(decisionOf(out), "deny");
   assert.match(out.reason, /WA-AUDIT-1/);
+});
+
+test("WA audit: an unwritable canonical journal falls back to the spool segment", () => {
+  const spool = join(tmpdir(), `aces-spool-${process.pid}-${Date.now()}.tsv`);
+  const out = runHookEnv(
+    { event: "PreToolUse", tool_name: "Write", tool_input: { file_path: "README.md", content: "x" } },
+    { ACES_WA_MODE: "enforce", ACES_HOOK_JOURNAL: join(ROOT, "README.md", "journal.tsv"), ACES_HOOK_SPOOL: spool },
+  );
+  assert.equal(decisionOf(out), "allow");
+  const rows = readFileSync(spool, "utf-8").trim().split("\n");
+  assert.match(rows[rows.length - 1], /\tWA-UPDATE-1\tallow\tSPOOL$/);
+  rmSync(spool, { force: true });
+});
+
+test("WA: the external staging root C:\\ACES-Staging is not durable", () => {
+  if (process.platform !== "win32") return;
+  const d = intent({ operation: "CREATE", resource_id: "C:\\ACES-Staging\\work\\draft.md", mode: "enforce" });
+  assert.equal(d.decision, "allow");
+  assert.equal(d.rule, "WA-STAGING-1");
 });
 
 test("WA CLI adapter: same engine, same policy, decision printed as JSON", () => {

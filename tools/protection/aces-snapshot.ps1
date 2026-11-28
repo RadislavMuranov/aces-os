@@ -8,6 +8,7 @@ $ErrorActionPreference = "Stop"
 # stays pure ASCII and immune to PowerShell 5.1 ANSI/BOM encoding issues.
 $Repo   = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $Backup = "E:\ACES-Backups\aces-os\snapshots"
+$Spool  = "C:\ACES-Staging\audit\spool"
 $ObsLog = Join-Path $env:USERPROFILE "Documents\Obsidian Vault\02-Evidence-and-Verification\records\aces-os-snapshot-log.md"
 $Keep   = 30
 
@@ -32,11 +33,29 @@ try {
   # 2. Working tree archive (includes uncommitted files).
   Compress-Archive -Path (Join-Path $Repo "*") -DestinationPath (Join-Path $Dest "worktree.zip") -Force
 
-  # 3. Manifest with checksums.
-  $files = Get-ChildItem $Dest
+  # 2b. Staging audit spool (WA-1 uncommitted ledger segment). Archived so the
+  #     audit trail survives independently of the staging zone.
+  $spoolNote = "spool: absent"
+  if (Test-Path $Spool) {
+    $spoolFiles = @(Get-ChildItem $Spool -File -Recurse -ErrorAction SilentlyContinue)
+    if ($spoolFiles.Count -eq 0) {
+      $spoolNote = "spool: empty"
+    } else {
+      try {
+        Compress-Archive -Path (Join-Path $Spool "*") -DestinationPath (Join-Path $Dest "staging-spool.zip") -Force
+        $spoolNote = "spool: staging-spool.zip ($($spoolFiles.Count) files)"
+      } catch {
+        $spoolNote = "spool: WARN not archived - $($_.Exception.Message)"
+        Add-Content (Join-Path $Backup "snapshot-errors.log") "$Stamp - spool archive failed: $($_.Exception.Message)"
+      }
+    }
+  }
+
+  # 3. Manifest with checksums (recursive; relative paths).
+  $files = Get-ChildItem $Dest -File -Recurse
   $manifest = foreach ($f in $files) {
     $h = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
-    "$h  $($f.Name)"
+    "$h  $($f.FullName.Substring($Dest.Length + 1).Replace('\', '/'))"
   }
   $manifest | Set-Content (Join-Path $Dest "manifest.sha256")
 
@@ -45,7 +64,7 @@ try {
     Select-Object -Skip $Keep | Remove-Item -Recurse -Force
 
   # 5. Obsidian record.
-  $line = "- $Stamp - snapshot OK: bundle verified, worktree.zip + manifest.sha256 written to $Dest"
+  $line = "- $Stamp - snapshot OK: bundle verified, worktree.zip + manifest.sha256 written to $Dest; $spoolNote"
   if (-not (Test-Path $ObsLog)) {
     "# aces-os snapshot log (DLPM-001)`n$line" | Set-Content $ObsLog
   } else {

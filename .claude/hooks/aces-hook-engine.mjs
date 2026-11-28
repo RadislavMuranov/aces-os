@@ -28,6 +28,12 @@
  *     identity (E3), never by static parsing → WA-EXECUTE-1 (advisory)
  *   - unknown operation / unavailable policy / failed audit append → DENY
  *     (WA-UNKNOWN-1, WA-POLICY-1, WA-AUDIT-1)
+ *   - the canonical journal is the committed audit segment; under E3 the agent
+ *     identity cannot write it, so the engine appends to ACES_HOOK_SPOOL
+ *     (uncommitted segment, trailing SPOOL marker) and the gate drains it. If
+ *     both segments are unwritable → DENY.
+ *   - staging lives outside the durable zone (C:\ACES-Staging). Staging content
+ *     carries no AcceptedState; transfer to durable requires a gate Decision.
  *
  * Z-1…Z-8 registry: recovered 2026-11-25 from the original engine found alive
  * at C:\ACES\aces-os (see DLPM-001 §4; superseded redefinitions are DLPM-*).
@@ -40,6 +46,12 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const JOURNAL = process.env.ACES_HOOK_JOURNAL || join(ROOT, ".claude", "hooks", "journal.tsv");
+// Uncommitted audit segment. Used only when the canonical journal is not
+// writable — i.e. under E3, where the agent identity has no write authority on
+// the repository. Rows carry a SPOOL marker and the gate drains them into
+// the canonical journal. Both segments unwritable → the decision is DENY.
+const JOURNAL_SPOOL = process.env.ACES_HOOK_SPOOL
+  || (process.platform === "win32" ? "C:\\ACES-Staging\\audit\\spool\\journal.tsv" : "");
 
 const KMA11_AUDIT_PATH = "docs/audit/KMA-11-CHATGPT-BUG-SYSTEM.md";
 
@@ -430,7 +442,11 @@ function evaluateWrite(toolInput, toolName) {
 // freely to the staging zone. Everything else is a protected resource and its
 // CREATE/DELETE requires a manifest decision.
 
-const STAGING_ROOT = join(ROOT, ".aces", "staging");
+const STAGING_ROOTS = [
+  join(ROOT, ".aces", "staging"),
+  process.env.ACES_STAGING_ROOT
+    || (process.platform === "win32" ? "C:\\ACES-Staging" : join(ROOT, ".aces", "staging")),
+];
 const WA_OPERATIONS = new Set(["CREATE", "UPDATE", "DELETE", "RENAME", "MOVE", "EXECUTE"]);
 const WRITE_TOOL_NAMES = new Set(["Write", "Edit", "MultiEdit", "NotebookEdit"]);
 const MCP_WRITE_TOOL = /^mcp__.*(write|edit|create|append|delete|remove|move|rename|unlink)/i;
@@ -456,7 +472,7 @@ function isInsidePath(child, parent) {
 function classifyTarget(p) {
   const abs = toAbs(p);
   if (!abs) return null;
-  if (isInsidePath(abs, STAGING_ROOT)) return { abs, zone: "staging" };
+  if (STAGING_ROOTS.some((root) => isInsidePath(abs, root))) return { abs, zone: "staging" };
   if (OBSIDIAN_VAULT.test(abs.replaceAll("\\", "/"))) return { abs, zone: "durable", kind: "vault_document" };
   if (isInsidePath(abs, ROOT)) return { abs, zone: "durable", kind: "repository_document" };
   return { abs, zone: "unprotected" };
@@ -792,15 +808,22 @@ function evaluateStop(payload) {
   return null;
 }
 
-function journal(rule, decision) {
+function appendJournal(target, rule, decision, marker) {
   try {
-    mkdirSync(dirname(JOURNAL), { recursive: true });
-    appendFileSync(JOURNAL, `${new Date().toISOString()}\t${rule}\t${decision}\n`);
+    mkdirSync(dirname(target), { recursive: true });
+    appendFileSync(target, `${new Date().toISOString()}\t${rule}\t${decision}${marker ? "\t" + marker : ""}\n`);
     return true;
   } catch (err) {
-    process.stderr.write(`[aces-hook-engine] journal append failed: ${err && err.message ? err.message : "unknown"}\n`);
+    process.stderr.write(`[aces-hook-engine] journal append failed (${target}): ${err && err.message ? err.message : "unknown"}\n`);
     return false;
   }
+}
+
+/** Canonical segment first; on failure the spool segment. Never fail-open. */
+function journal(rule, decision) {
+  if (appendJournal(JOURNAL, rule, decision)) return true;
+  if (JOURNAL_SPOOL) return appendJournal(JOURNAL_SPOOL, rule, decision, "SPOOL");
+  return false;
 }
 
 export function evaluatePreToolUse(payload) {
