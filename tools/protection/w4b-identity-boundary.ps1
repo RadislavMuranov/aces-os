@@ -25,9 +25,8 @@ if (-not $Repo) { $Repo = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path 
 $Repo = (Resolve-Path -LiteralPath $Repo).Path
 $Vault = (Resolve-Path -LiteralPath $Vault).Path
 $Agent = "$env:COMPUTERNAME\$AgentName"
-$BackupDir = Join-Path $Stage 'acl-backup'
+$BackupDir = Join-Path $Repo 'tools\protection\acl-backup'
 $VerifyRoot = Join-Path $Stage 'verify'
-$RunnerDir = Join-Path $Stage 'runner'
 $Spool = Join-Path $Stage 'audit\spool'
 $WriteMask = 'WD,AD,WEA,WA,DE,DC,WDAC,WO'
 $SystemSid = 'S-1-5-18'
@@ -127,6 +126,13 @@ function Restore-Sddl([string]$Path, [string]$Name) {
     $sd.SetSecurityDescriptorSddlForm($sddl)
     Set-Acl -LiteralPath $Path -AclObject $sd
     ((Get-AclHash $Path) -eq $expected)
+}
+
+function Test-StageRestored {
+    $hashFile = Join-Path $BackupDir 'stage.pre-w4b.sha256'
+    if (-not (Test-Path -LiteralPath $hashFile)) { return $false }
+    $expected = (Get-Content -LiteralPath $hashFile -Raw).Trim()
+    ((Get-AclHash $Stage) -eq $expected)
 }
 
 function Set-ZoneAcl([string]$Path, [string]$AgentSidValue, [string]$AgentRights) {
@@ -268,8 +274,9 @@ function Invoke-Apply {
 
     New-Item -ItemType Directory -Force -Path $BackupDir | Out-Null
     New-Item -ItemType Directory -Force -Path $VerifyRoot | Out-Null
-    New-Item -ItemType Directory -Force -Path $RunnerDir | Out-Null
     New-Item -ItemType Directory -Force -Path $Spool | Out-Null
+    $null = & icacls $VerifyRoot /grant "${Agent}:(OI)(CI)M"
+    $null = & icacls $Spool /grant "${Agent}:(OI)(CI)M"
 
     $bRepo = Save-Sddl $Repo 'repo'
     $bVault = Save-Sddl $Vault 'vault'
@@ -278,17 +285,12 @@ function Invoke-Apply {
     'backup.vault=' + $bVault + ' sha256=' + ((Get-Content -LiteralPath (Join-Path $BackupDir 'vault.pre-w4b.sha256') -Raw).Trim())
     'backup.stage=' + $bStage + ' sha256=' + ((Get-Content -LiteralPath (Join-Path $BackupDir 'stage.pre-w4b.sha256') -Raw).Trim())
 
-    Set-ZoneAcl $Stage $st.sid 'M'
+    # The staging root is not modified: the agent already has inherited write
+    # access there, and the backup store now lives in the repository instead.
     Set-ZoneAcl $Repo $st.sid 'RX'
     Set-AgentDeny $Repo $st.sid
     Set-ZoneAcl $Vault $st.sid 'RX'
     Set-AgentDeny $Vault $st.sid
-
-    $ownerSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-    $null = & icacls $BackupDir /inheritance:r /grant:r "*${SystemSid}:(OI)(CI)F" `
-        "*${AdminsSid}:(OI)(CI)F" "*${ownerSid}:(OI)(CI)F"
-    $null = & icacls $RunnerDir /inheritance:r /grant:r "*${SystemSid}:(OI)(CI)F" `
-        "*${AdminsSid}:(OI)(CI)F" "*${ownerSid}:(OI)(CI)F" "*$($st.sid):(OI)(CI)RX"
 
     $codexSid = $null
     try { $codexSid = Get-SidValue "$env:COMPUTERNAME\$CodexGroup" } catch {}
@@ -315,27 +317,22 @@ function Invoke-Rollback {
     $res = @()
     $res += [pscustomobject]@{ zone = 'repo'; ok = (Restore-Sddl $Repo 'repo') }
     $res += [pscustomobject]@{ zone = 'vault'; ok = (Restore-Sddl $Vault 'vault') }
-    $res += [pscustomobject]@{ zone = 'stage'; ok = (Restore-Sddl $Stage 'stage') }
+    $res += [pscustomobject]@{ zone = 'stage'; ok = (Test-StageRestored) }
     foreach ($r in $res) { $(if ($r.ok) { 'PASS' } else { 'FAIL' }) + ' restore ' + $r.zone }
     $bad = @($res | Where-Object { -not $_.ok })
     if ($bad.Count) { 'ROLLBACK=FAIL'; 'account kept for retry'; exit 1 }
 
     $st = Get-AgentState
     if ($st.present) {
-        foreach ($t in @($BackupDir, $RunnerDir, $VerifyRoot, (Join-Path $Stage 'audit'))) {
-            if (Test-Path -LiteralPath $t) {
-                $null = & icacls $t /remove:d $Agent /T /C /Q 2>$null
-                $null = & icacls $t /remove:g $Agent /T /C /Q 2>$null
-            }
+        $null = & icacls $VerifyRoot /remove:g $Agent /T /C /Q 2>$null
+        $null = & icacls $Spool /remove:g $Agent /T /C /Q 2>$null
+        $left = 0
+        foreach ($t in @($VerifyRoot, $Spool)) {
+            if (Test-Ace $t $st.sid 'Allow') { $left++ }
+            if (Test-Ace $t $st.sid 'Deny') { $left++ }
         }
-        $left = @(Get-ChildItem -LiteralPath $Stage -Recurse -Force -ErrorAction SilentlyContinue |
-            Where-Object { (Test-Ace $_.FullName $st.sid 'Deny') -or (Test-Ace $_.FullName $st.sid 'Allow') })
-        'tool.aces.left=' + $left.Count
-        if ($left.Count) {
-            'ROLLBACK=FAIL'
-            'account kept: stale ACEs under ' + $Stage
-            exit 1
-        }
+        'tool.aces.left=' + $left
+        if ($left) { 'ROLLBACK=FAIL'; 'account kept: stale ACEs in staging'; exit 1 }
         & net.exe user $AgentName /delete
         if ($LASTEXITCODE -ne 0) { 'ROLLBACK=FAIL delete'; exit 1 }
     }
@@ -352,6 +349,7 @@ function Invoke-Rollback {
 function Invoke-RollbackCodex {
     if (-not (Test-Admin)) { throw 'elevated PowerShell required' }
     $file = Join-Path $BackupDir 'vault-pre-codex.sddl'
+    if (-not (Test-Path -LiteralPath $file)) { $file = Join-Path $Stage 'acl-backup\vault-pre-codex.sddl' }
     if (-not (Test-Path -LiteralPath $file)) { throw ('no backup ' + $file) }
     $answer = Read-Host 'Type CODEX to restore the Vault ACL saved before the Codex deny'
     if ($answer -ne 'CODEX') { 'aborted'; return }
@@ -382,10 +380,7 @@ function Invoke-Verify {
     if ($aStage -match 'Deny') { throw ('stage must not deny: ' + $aStage) }
 
     $probeSrc = Join-Path $PSScriptRoot 'w4b-probe.ps1'
-    $runnerDir = Join-Path $Stage 'runner'
-    New-Item -ItemType Directory -Force -Path $runnerDir | Out-Null
-    $runner = Join-Path $runnerDir 'w4b-probe.ps1'
-    Copy-Item -LiteralPath $probeSrc -Destination $runner -Force
+    $runner = $probeSrc
     $runnerHash = (Get-FileHash -LiteralPath $runner -Algorithm SHA256).Hash
 
     $nonce = [guid]::NewGuid().ToString('N')
@@ -447,7 +442,12 @@ function Invoke-Verify {
         'launch=Start-Process'
     } catch {
         'launch=runas-fallback'
-        $cmd = 'powershell -NoProfile -ExecutionPolicy Bypass -File ' + $runner + ' -RequestFile ' + $reqFile + ' -ReportFile ' + $repFile
+        $short = $runner
+        try {
+            $fso = New-Object -ComObject Scripting.FileSystemObject
+            $short = $fso.GetFile($runner).ShortPath
+        } catch {}
+        $cmd = 'powershell -NoProfile -ExecutionPolicy Bypass -File ' + $short + ' -RequestFile ' + $reqFile + ' -ReportFile ' + $repFile
         & cmd.exe /c ('runas /user:' + $Agent + ' "' + $cmd + '"')
     }
 

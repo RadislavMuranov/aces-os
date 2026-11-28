@@ -413,12 +413,14 @@ The first W4b hand-off failed acceptance. The causes were in the tooling, not in
    from `Win32_Process.GetOwnerSid`, compares both with the expected agent SID, and reports the
    integrity SID, elevation, Administrators membership and five bypass privileges.
 4. Rollback was incomplete. `-Apply` stores `repo`, `vault` and `stage` SDDL with a canonical hash
-   before any change; `-Rollback` restores all three, verifies the hash, removes every agent ACE
-   from the staging subtree, and refuses to delete the account while any ACE remains.
-5. Staging was writable by Authenticated Users through inheritance. `-Apply` now protects
-   `C:\ACES-Staging` (SYSTEM and Administrators and owner FullControl, agent Modify rev),
-   `acl-backup` (owner only) and `runner` (owner plus agent read-execute), so the agent cannot edit
-   its backups or its own probe.
+   before any change under `tools/protection/acl-backup/` inside the repository, so the agent can
+   read them but not rewrite them; `-Rollback` restores all three, verifies the hash, removes the
+   agent ACE from `verify` and `audit\spool`, and refuses to delete the account while any ACE remains.
+5. Staging was writable by Authenticated Users through inheritance, and the first draft changed its
+   root, which would have locked every other sandbox identity out of the evidence area. `-Apply` now
+   leaves `C:\ACES-Staging` untouched and grants the agent Modify only on `verify\` and
+   `audit\spool\`; the backups live in the repository, and the probe runs from
+   `tools\protection\w4b-probe.ps1` (agent read-execute), so it cannot edit its trusted source.
 
 Owner-side preflight, no agent credential: `-SelfCheck` returns 16/16 PASS, exit 0, and
 removes its scratch tree. It covers SDDL and hash roundtrip on a directory with a child, child
