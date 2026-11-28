@@ -245,6 +245,8 @@ as advisory (ASA-003.3 §11.7 coverage rule).
 | MC-16 | E3 deny ACE applied to repo and Vault | `icacls` output + agent-identity probe | **NOT STARTED (tooling ready)** |
 | MC-17 | W4b tooling is ASCII, parser-clean, and has an owner-token control run | `w4b-identity-boundary.ps1`, `w4b-probe.ps1` | **DONE** |
 | MC-18 | The agent token shows `administrators=ABSENT` and all bypass privileges `ABSENT` | `w4b-probe.txt` from the agent run | **NOT STARTED** |
+| MC-19 | Vault DACL is protected and denies the Codex group write/delete, with no allow exception | `Get-Acl` dump, `vault-pre-codex.sddl` | **DONE** |
+| MC-20 | The denial is proven inside the Codex sandbox token | probe launched as the Codex identity | **NOT STARTED (no credential)** |
 
 ### 10.1 Privilege bypass — measured 2026-11-28
 
@@ -285,6 +287,26 @@ Both scripts are ASCII and parser-clean (`PS_PARSE_OK`); the probe was executed 
 token as a control and returned the expected all-`ALLOWED` / `spool-delta=0` result. **No ACL
 was applied and no account was created.** MC-16/18 remain open until the owner runs `-Apply` and
 the probe under the agent identity; an owner-session probe is not acceptance evidence.
+
+### 10.3 Codex sandbox bounded on the Vault (2026-11-28)
+
+`Get-Acl` on the Vault showed an inherited `Allow Modify` for the local group
+`USER\CodexSandboxUsers` (`S-1-5-21-959256707-1264188439-1517227358-1002`; members
+`CodexSandboxOffline` RID 1003 and `CodexSandboxOnline` RID 1004) and a second inherited
+`Allow Modify` for the foreign SID `S-1-5-21-3297472494-1372551071-3040875019-374093975`.
+The owner (RID 1001) is not a member of the group, and the current token did not contain it.
+
+Action (`w4b-identity-boundary.ps1 -Codex`): saved `vault-pre-codex.sddl`, then replaced the
+Vault DACL with a protected one — `SYSTEM`, `Administrators` and the owner have FullControl,
+and the Codex group has an explicit `Deny` on `WD,AD,WEA,WA,DE,DC,WDAC,WO`. The foreign-SID allow
+was removed as part of stripping inheritance. Owner create/delete was proven before and after
+the deny; four subdirectories report `codexDeny=True`.
+
+Boundary: read remains allowed for the Codex identity (RD/REA/RA/RC are not denied), matching
+WA-1 — agents are readers and proposers. Runtime effect **inside** the Codex sandbox token was
+not probed (no credential); the evidence is the DACL, not an executed denial. If that token
+holds `SeRestorePrivilege`, the ACE is bypassed exactly as in §10.1.
+Rollback: `-RollbackCodex` restores `vault-pre-codex.sddl`.
 
 ### 5.1 Implemented rules (W1 policy body)
 

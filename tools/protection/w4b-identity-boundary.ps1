@@ -9,7 +9,10 @@ param(
     [string]$Vault = (Join-Path $env:USERPROFILE 'Documents\Obsidian Vault'),
     [string]$Stage = 'C:\ACES-Staging',
     [string]$AgentName = 'aces-agent',
+    [string]$CodexGroup = 'CodexSandboxUsers',
     [switch]$Apply,
+    [switch]$Codex,
+    [switch]$RollbackCodex,
     [switch]$Rollback
 )
 
@@ -98,4 +101,51 @@ if ($Rollback) {
         if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -Force -ErrorAction SilentlyContinue }
     }
     "kept: $Stage"
+}
+
+if ($Codex) {
+    if (-not $IsAdmin) { throw 'elevated PowerShell required' }
+    if ($PSCmdlet.ShouldProcess($Vault, "deny $CodexGroup write and delete")) {
+        $group = Get-LocalGroup -Name $CodexGroup -ErrorAction SilentlyContinue
+        if (-not $group) { throw "Local group $CodexGroup not found" }
+        $groupSid = $group.SID.Value
+        $ownerSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+        $token = @([Security.Principal.WindowsIdentity]::GetCurrent().Groups |
+            ForEach-Object { $_.Value })
+        if ($token -contains $groupSid) {
+            throw "Current token contains $groupSid; denying it would lock the owner out"
+        }
+
+        if (-not (Test-Path -LiteralPath $Backup)) { New-Item -ItemType Directory -Path $Backup -Force | Out-Null }
+        $backupFile = Join-Path $Backup 'vault-pre-codex.sddl'
+        if (-not (Test-Path -LiteralPath $backupFile)) {
+            Set-Content -LiteralPath $backupFile -Value (Get-Acl -LiteralPath $Vault).Sddl
+        }
+        'backup: ' + $backupFile
+
+        $probe = Join-Path $Vault ('_w4b-owner-probe-' + [guid]::NewGuid().ToString('N') + '.tmp')
+        $null = & icacls $Vault /inheritance:r /grant:r "*S-1-5-18:(OI)(CI)F" "*S-1-5-32-544:(OI)(CI)F" "*${ownerSid}:(OI)(CI)F"
+        if ($LASTEXITCODE -ne 0) { throw ('grant failed; restore from ' + $backupFile) }
+        Set-Content -LiteralPath $probe -Value 'x'
+        Remove-Item -LiteralPath $probe -Force
+        'owner-write: PASS'
+
+        $null = & icacls $Vault /deny "*${groupSid}:$Mask"
+        if ($LASTEXITCODE -ne 0) { throw ('deny failed; restore from ' + $backupFile) }
+        Set-Content -LiteralPath $probe -Value 'x'
+        Remove-Item -LiteralPath $probe -Force
+        'owner-write-after-deny: PASS'
+        'vault ACL:'
+        Show-Acl $Vault
+    }
+}
+
+if ($RollbackCodex) {
+    if (-not $IsAdmin) { throw 'elevated PowerShell required' }
+    $file = Join-Path $Backup 'vault-pre-codex.sddl'
+    if (-not (Test-Path -LiteralPath $file)) { throw "No backup at $file" }
+    $sd = New-Object System.Security.AccessControl.DirectorySecurity
+    $sd.SetSecurityDescriptorSddlForm((Get-Content -LiteralPath $file -Raw))
+    Set-Acl -LiteralPath $Vault -AclObject $sd
+    "restored $Vault from $file"
 }
